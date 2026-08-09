@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+cad/output/STL/*
+!cad/output/STL/.gitkeep
