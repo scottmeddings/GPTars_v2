@@ -20,27 +20,29 @@
 9. Main torque targets of 60 N·m continuous and 100 N·m peak are not selections. They require mass, acceleration, impact-factor, lever-arm, and recovery-case calculations.
 10. Design mass class is 12–25 kg. A mass budget has not yet been established.
 11. Battery placeholder is 300×150×120 mm at 24 V, mounted as low and central as joint sweep permits.
-12. Mini-PC placeholder is 220×220×80 mm.
-13. GPU placeholder is 300×130×60 mm, preferably vertical and accessible through a dedicated service panel.
+12. Compute hardware is the MINISFORUM AI X1 Pro-370: 195×195×47.5 mm and 1.5 kg, mounted vertically inside a 225×225×100 mm service/airflow keep-out.
+13. An external NVIDIA GPU is required for local LLM inference and connects through OCuLink PCIe 4.0 x4. Its current 300×130×60 mm envelope is provisional, preferably vertical, and accessible through a dedicated service panel.
 14. Motor commutation and safety interlocks are handled by a deterministic MCU/CAN layer, not the mini PC or LLM.
 15. Bottom-to-top GPU/compute airflow is reserved. Motor-controller cooling should be separated where practical.
-16. Printed shell thickness starts at 3.0 mm, with 2.5–4.0 mm bounds and ribs rather than wholesale thickening.
-17. The earlier `TARS_1m_frame_layout_v1.f3d` is a packaging concept only. It is not approved for walking loads and must not be fabricated.
+16. Exterior bodywork is formed 5052-H32 aluminium sheet, nominally 1.2 mm with a 1.0–1.6 mm range, folded returns, beads, and local doublers.
+17. Load-bearing structure, joint bulkheads, and actuator brackets use 6061-T6 aluminium. Steel remains required for shafts, bearing elements, and selected fasteners.
+18. The earlier `TARS_1m_frame_layout_v1.f3d` is a packaging concept only. It is not approved for walking loads and must not be fabricated.
 
 ## Decisions required before final frame commitment
 
 - Supply and validate `GP_TARS_V2_1000mm_scaled.brep` or approve the measured STEP as the master envelope.
 - Define walking degrees of freedom and reconstruct source motion with collision sweeps.
 - Establish full mass budget and component mass estimates.
+- Reconcile the aluminium panel mass with the 12–25 kg total design target.
 - Calculate static holding, controlled-fall, landing, recovery, and fault load cases.
 - Select actuator topology only after torque-speed-thermal analysis.
 - Size main shafts, bearings, carriers, and brackets from calculated radial/axial/moment loads.
 - Define battery energy and discharge requirements.
-- Confirm exact mini-PC and GPU hardware or retain replaceable trays.
+- Select the exact NVIDIA GPU, OCuLink adapter/dock, independent GPU power supply, and cooling arrangement; retain replaceable trays until all are verified.
+- Select and test the 24 V-to-USB-C-PD power path for the AI X1 Pro, or explicitly accept an inverter solution.
 - Define fall-arrest/test-rig provisions for early walking tests.
 - Establish joint hard-stop angles after shell and equipment sweep studies.
 
 ## Safety assumption
 
 No unrestrained walking test is permitted from placeholder CAD. Initial motion testing requires an overhead restraint or other engineered fall-arrest fixture, independent E-stop power removal, conservative current limits, and a clear exclusion zone.
-
