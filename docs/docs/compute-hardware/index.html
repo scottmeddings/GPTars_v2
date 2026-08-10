@@ -1,20 +1,60 @@
 <!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-DrNNGO8w.css"/><title>Compute hardware — GP-TARS V2</title><meta name="description" content="Model: **MINISFORUM AI X1 Pro-370 barebone**"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
-</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 05 of 09</p><h1>Compute hardware</h1><p class="subtitle">Model: **MINISFORUM AI X1 Pro-370 barebone**</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_hardware.md</b></span><span>SECTIONS <b>6</b></span><span>WORDS <b>658</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#selected-mini-pc">Selected mini PC</a></li><li><a href="#cad-orientation">CAD orientation</a></li><li><a href="#interfaces-to-preserve">Interfaces to preserve</a></li><li><a href="#robot-power-decision">Robot power decision</a></li><li><a href="#required-external-gpu-for-the-llm">Required external GPU for the LLM</a></li><li><a href="#thermal-design">Thermal design</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_hardware.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="doc-prose"><h2 id="selected-mini-pc"><a class="anchor" href="#selected-mini-pc">Selected mini PC</a></h2>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 05 of 09</p><h1>Compute hardware</h1><p class="subtitle">Model: **MINISFORUM AI X1 Pro-370 barebone**</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_hardware.md</b></span><span>SECTIONS <b>13</b></span><span>WORDS <b>1,676</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#selected-mini-pc">Selected mini PC</a></li><li><a href="#compute-configuration-baseline">Compute configuration baseline</a></li><li><a href="#cad-orientation">CAD orientation</a></li><li><a href="#upper-display-face-module">Upper display / face module</a></li><li><a href="#component-vertical-layout-target">Component vertical layout target</a></li><li><a href="#interfaces-to-preserve">Interfaces to preserve</a></li><li><a href="#selected-robot-power-architecture">Selected robot power architecture</a></li><li><a href="#mini-pc-battery-power">Mini PC battery power</a></li><li><a href="#confirmed-external-gpu-for-the-llm">Confirmed external GPU for the LLM</a></li><li><a href="#12-v-accessory-rail">12 V accessory rail</a></li><li><a href="#power-domain-separation">Power-domain separation</a></li><li><a href="#12-v-design-implications">12 V design implications</a></li><li><a href="#thermal-design">Thermal design</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_hardware.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="doc-prose"><h2 id="selected-mini-pc"><a class="anchor" href="#selected-mini-pc">Selected mini PC</a></h2>
 <p>Model: <strong>MINISFORUM AI X1 Pro-370 barebone</strong></p>
-<div class="table-wrap"><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Processor</td><td>AMD Ryzen AI 9 HX370, 12 cores / 24 threads</td></tr><tr><td>Integrated GPU</td><td>AMD Radeon 890M</td></tr><tr><td>NPU / total AI performance</td><td>Up to 80 TOPS total</td></tr><tr><td>Physical size</td><td>195 × 195 × 47.5 mm including feet</td></tr><tr><td>Chassis height without feet</td><td>42.5 mm</td></tr><tr><td>Mass</td><td>1.5 kg</td></tr><tr><td>Internal power supply</td><td>19 V / 7.1 A, 134.9 W internal output rating</td></tr><tr><td>Alternative input</td><td>Rear USB4 PD input, up to 100 W</td></tr><tr><td>Memory</td><td>Two DDR5-5600 SO-DIMM slots, up to 128 GB</td></tr><tr><td>Storage</td><td>Three M.2 2280 NVMe slots</td></tr><tr><td>External GPU link</td><td>OCuLink PCIe 4.0 x4</td></tr><tr><td>Networking</td><td>Two 2.5 GbE ports, Wi-Fi 7, Bluetooth 5.4</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Processor</td><td>AMD Ryzen AI 9 HX370, 12 cores / 24 threads</td></tr><tr><td>Integrated GPU</td><td>AMD Radeon 890M</td></tr><tr><td>NPU / total AI performance</td><td>Up to 80 TOPS total</td></tr><tr><td>Physical size</td><td>195 × 195 × 47.5 mm including feet</td></tr><tr><td>Chassis height without feet</td><td>42.5 mm</td></tr><tr><td>Mass</td><td>1.5 kg</td></tr><tr><td>Internal mains PSU</td><td>approximately 134.9 W internal supply</td></tr><tr><td>Alternative power input</td><td>rear USB4 PD input, 65–100 W</td></tr><tr><td>Memory</td><td>Two DDR5-5600 SO-DIMM slots, up to 128 GB</td></tr><tr><td>Storage</td><td>Three M.2 2280 NVMe slots</td></tr><tr><td>External GPU link</td><td>OCuLink PCIe 4.0 x4</td></tr><tr><td>Networking</td><td>Two 2.5 GbE ports, Wi-Fi 7, Bluetooth 5.4</td></tr></tbody></table></div>
 <p>The Amazon ASIN is <code>B0G32PTF92</code>. The listing is the barebone configuration, so RAM, SSD, and operating system installation must be confirmed separately.</p>
+<h2 id="compute-configuration-baseline"><a class="anchor" href="#compute-configuration-baseline">Compute configuration baseline</a></h2>
+<p>Current preferred configuration for the robot is:</p>
+<ul>
+<li>MINISFORUM AI X1 Pro-370</li>
+<li>32 GB system RAM if the external GPU is installed initially</li>
+<li>NVIDIA RTX 2000 Ada Generation 16 GB through OCuLink</li>
+<li>retain RAM upgrade path to 64 GB or 128 GB later</li>
+</ul>
+<p>The system should also be benchmarked without the discrete GPU because the Ryzen AI 9 HX370 includes Radeon 890M graphics and an XDNA 2 NPU. The RTX 2000 Ada remains the performance baseline for local LLM inference, but CAD and wiring should keep it modular and removable.</p>
 <h2 id="cad-orientation"><a class="anchor" href="#cad-orientation">CAD orientation</a></h2>
-<p>The unit is reserved vertically:</p>
+<p>The mini PC is reserved vertically:</p>
 <ul>
 <li>X / lateral width: 195 mm</li>
 <li>Y / vertical height: 195 mm</li>
 <li>Z / chassis depth: 47.5 mm</li>
-<li>body location in Concept V1: centred on X and Z, Y=180–375 mm</li>
 </ul>
 <p>Service keep-out:</p>
 <pre><code class="language-text">225 × 225 × 100 mm
 </code></pre>
-<p>This provides initial allowance for vibration isolation, side airflow, front controls, rear cable bends, and vertical removal. Port-specific cut-outs require measurement from the physical machine or an official mechanical drawing.</p>
+<p>This provides initial allowance for vibration isolation, airflow, controls, rear cable bends, and vertical removal. Port-specific cut-outs require measurement from the physical machine or an official mechanical drawing.</p>
+<p>The mini PC should be placed in the centre body below the display module and above the battery where packaging allows. It is not to occupy the upper display/face area.</p>
+<h2 id="upper-display-face-module"><a class="anchor" href="#upper-display-face-module">Upper display / face module</a></h2>
+<p>The TV/display is now a <strong>top-of-body component</strong> and forms the primary visible face of GP-TARS.</p>
+<p>Design intent:</p>
+<ul>
+<li>display mounted in the upper body/head area, not the centre or lower chassis</li>
+<li>target display/camera zone approximately 850–950 mm above ground on the 1,000 mm standing robot</li>
+<li>display face may be tilted rearward approximately 5–10 degrees for adult viewing while remaining visible to children</li>
+<li>camera located immediately above, beside, or closely integrated with the display so gaze direction and visual interaction appear natural</li>
+<li>microphone array located in the same upper module where practical</li>
+<li>speakers may be integrated into the upper module or immediately below it</li>
+<li>the complete screen/camera/microphone assembly should be removable as a service cassette</li>
+<li>exact screen cut-out and mounting geometry remain open until the final display model is selected</li>
+</ul>
+<p>The display module must not become a primary structural load path. Walking and impact loads pass through the internal aluminium chassis.</p>
+<h2 id="component-vertical-layout-target"><a class="anchor" href="#component-vertical-layout-target">Component vertical layout target</a></h2>
+<p>Current packaging order from top to bottom:</p>
+<pre><code class="language-text">TOP OF ROBOT
+
+DISPLAY / FACE
+CAMERA + MICROPHONES
+
+MINI PC
+RTX 2000 ADA + OCuLink DOCK
+
+POWER DISTRIBUTION / CONTROLLERS
+
+12.8 V BATTERY
+
+LOWER BODY / WALKING STRUCTURE
+</code></pre>
+<p>The battery remains as low and central as possible to reduce centre-of-gravity height. Compute hardware is placed near the middle of the body. The display and sensors are deliberately high for visibility and interaction.</p>
 <h2 id="interfaces-to-preserve"><a class="anchor" href="#interfaces-to-preserve">Interfaces to preserve</a></h2>
 <p>Front/service access:</p>
 <ul>
@@ -26,13 +66,13 @@
 </ul>
 <p>Rear cable space:</p>
 <ul>
-<li>USB4 PD input</li>
+<li>rear USB4 PD input</li>
 <li>HDMI 2.1</li>
 <li>DisplayPort 2.0</li>
 <li>two 2.5 GbE ports</li>
 <li>OCuLink</li>
 <li>USB 2.0</li>
-<li>AC input if used</li>
+<li>AC mains inlet for bench/shore power</li>
 <li>Kensington slot</li>
 </ul>
 <p>Side/top access:</p>
@@ -40,23 +80,81 @@
 <li>SD card slot</li>
 <li>fingerprint sensor</li>
 </ul>
-<h2 id="robot-power-decision"><a class="anchor" href="#robot-power-decision">Robot power decision</a></h2>
-<p>The computer has an internal AC power supply, while GP-TARS uses a nominal 24 V DC battery bus. Two candidate approaches remain:</p>
-<ol>
-<li>Preferred prototype path: 24 V battery to a regulated 100 W USB-C PD source, feeding the rear USB4 PD input at 20 V / 5 A. Sustained compute performance must be tested under the 100 W input limit.</li>
-<li>Alternative: 24 V battery to a suitably rated inverter feeding the internal AC supply. This adds conversion loss, mass, heat, and EMI and is not preferred.</li>
-</ol>
-<p>Do not connect the 24 V battery directly to any mini-PC input. The selected converter must provide current limiting, input/output protection, appropriate grounding, and sufficient transient margin.</p>
-<h2 id="required-external-gpu-for-the-llm"><a class="anchor" href="#required-external-gpu-for-the-llm">Required external GPU for the LLM</a></h2>
-<p>An external NVIDIA GPU is a required part of the onboard LLM system. It will connect to the AI X1 Pro through OCuLink PCIe 4.0 x4. The current 300 × 130 × 60 mm CAD reservation represents only a provisional graphics-card envelope; it does not yet include a power supply, OCuLink adapter/dock, cable bend volume, fans, ducts, or finger clearance.</p>
-<p>The GPU must have an independent protected power supply because OCuLink carries PCIe data and does not power the card. Final electrical design requires the exact GPU&#39;s sustained and transient power requirements. Do not size the robot battery, DC converter, wiring, fuse, contactor, connectors, or cooling system from the provisional envelope.</p>
-<p>The exact GPU choice should be driven first by usable VRAM for the intended model and quantisation, then by sustained power, physical size, and cooling. The GPU and its supply must be separately removable from the mini PC tray.</p>
+<h2 id="selected-robot-power-architecture"><a class="anchor" href="#selected-robot-power-architecture">Selected robot power architecture</a></h2>
+<p>GP-TARS V2 uses a <strong>12.8 V nominal LiFePO4 main battery bus</strong>.</p>
+<p>The preferred current battery is the WattCycle <strong>12.8 V 100 Ah Mini LiFePO4</strong> pack, giving approximately <strong>1,280 Wh</strong> installed energy. The electrical design intentionally remains compatible with larger 12.8 V WattCycle batteries, provided mass, structure, cabling, fusing and packaging are appropriate for the specific build.</p>
+<p>The robot is therefore designed around a single low-voltage DC bus rather than a 24/25.6 V series battery system.</p>
+<h2 id="mini-pc-battery-power"><a class="anchor" href="#mini-pc-battery-power">Mini PC battery power</a></h2>
+<p>The X1 Pro chassis has an internal AC power supply; there is no exposed 19 V DC barrel input on the rear panel. Therefore the previously proposed direct 12-to-19 V DC converter path is <strong>not used</strong> unless the computer is deliberately modified internally, which is not part of the baseline design.</p>
+<p>Preferred onboard battery path:</p>
+<pre><code class="language-text">12.8 V LiFePO4 MAIN BUS
+        |
+        +-- fused compute branch
+        |
+        +-- automotive DC/DC USB-C PD source
+                |
+                +-- 20 V / 5 A, up to 100 W USB-C PD
+                        |
+                        +-- rear USB4 PD-IN on AI X1 Pro
+</code></pre>
+<p>The rear USB4 port is the intended DC battery-input path and must be verified on the physical unit before final harness fabrication. The internal AC inlet remains available for workshop/shore power.</p>
+<p>Because USB-C PD is limited to 100 W while the internal mains supply has a larger power envelope, sustained CPU/NPU workloads must be benchmarked on 100 W PD. If 100 W is insufficient, the preferred fallback is a properly rated 12 V DC to 230–240 V AC pure-sine inverter feeding the factory mains inlet rather than opening or modifying the mini PC.</p>
+<p>The earlier SZWENGAO WG-12S1920 12-to-19 V converter is no longer specified for the mini PC because the production chassis does not expose a 19 V DC input.</p>
+<h2 id="confirmed-external-gpu-for-the-llm"><a class="anchor" href="#confirmed-external-gpu-for-the-llm">Confirmed external GPU for the LLM</a></h2>
+<p>The onboard discrete accelerator baseline is the <strong>NVIDIA RTX 2000 Ada Generation 16 GB</strong>. It connects to the AI X1 Pro through OCuLink PCIe 4.0 x4.</p>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Confirmed value</th></tr></thead><tbody><tr><td>GPU</td><td>NVIDIA RTX 2000 Ada Generation</td></tr><tr><td>Architecture</td><td>Ada Lovelace</td></tr><tr><td>VRAM</td><td>16 GB GDDR6 with ECC</td></tr><tr><td>Maximum board power</td><td>70 W</td></tr><tr><td>Native graphics bus</td><td>PCIe Gen 4 x8</td></tr><tr><td>OCuLink host link</td><td>PCIe 4.0 x4 through external adapter</td></tr><tr><td>Card form factor</td><td>Low-profile, dual-slot</td></tr><tr><td>Card height</td><td>2.7 in / 68.6 mm</td></tr><tr><td>Card length</td><td>6.6 in / 167.6 mm</td></tr><tr><td>Cooling</td><td>Active</td></tr><tr><td>Display outputs</td><td>4 × mini DisplayPort 1.4a</td></tr></tbody></table></div>
+<p>CAD should reserve the physical card envelope plus the OCuLink adapter, connector bend, airflow and removable service clearance. A preliminary engineering keep-out of <strong>190 × 90 × 70 mm</strong> is acceptable until the actual card and adapter are measured.</p>
+<p>At 70 W maximum board power the RTX 2000 Ada fits the current mobile power and thermal strategy while meeting the 16 GB dedicated VRAM target.</p>
+<p>The GPU uses its own protected regulated power branch from the <strong>12.8 V main bus</strong> through the selected OCuLink dock/adapter. OCuLink carries PCIe data and does not itself power the card. Final converter, fuse and wiring sizing must use measured complete GPU + adapter consumption rather than the 70 W board figure alone.</p>
+<p>The GPU and its supply must remain separately removable from the mini PC tray.</p>
+<h2 id="12-v-accessory-rail"><a class="anchor" href="#12-v-accessory-rail">12 V accessory rail</a></h2>
+<p>The display, audio amplifier, fans, lighting and other nominal 12 V accessories use a <strong>regulated 12 V buck-boost rail</strong> from the 12.8 V LiFePO4 main bus.</p>
+<p>A regulator is still required even though the battery is called a 12 V battery because LiFePO4 terminal voltage varies with state of charge and charging conditions. Sensitive 12 V electronics should not be connected directly to the raw battery unless explicitly rated for the complete battery voltage range.</p>
+<p>Initial accessory converter target:</p>
+<ul>
+<li>regulated 12 V output</li>
+<li>20–30 A rating to provide useful accessory and transient margin</li>
+<li>input range covering the complete 4S LiFePO4 operating voltage</li>
+<li>fused input and fused downstream branches</li>
+<li>over-current, over-temperature and short-circuit protection</li>
+</ul>
+<h2 id="power-domain-separation"><a class="anchor" href="#power-domain-separation">Power-domain separation</a></h2>
+<p>A shared 12.8 V battery does not mean a shared switched domain. The power distribution unit separates motion and compute after the main battery disconnect:</p>
+<pre><code class="language-text">12.8 V LiFePO4 MAIN BUS
+      |
+      +-- MOTION CONTACTOR / E-STOP --&gt; 12 V-class motion system
+      |
+      +-- COMPUTE FUSE --&gt; 12 V to 100 W USB-C PD --&gt; Mini PC rear USB4 PD-IN
+      |
+      +-- GPU FUSE --&gt; regulated GPU/dock supply --&gt; RTX 2000 Ada
+      |
+      +-- AUX FUSE --&gt; regulated 12 V buck-boost --&gt; display/audio/fans/lights
+      |
+      +-- SAFETY SUPPLY --&gt; safety MCU / contactor supervision
+</code></pre>
+<p>The physical emergency stop must remove actuator power immediately while leaving the safety controller and, where practical, the compute system powered so that GP-TARS can log the event, retain perception and report its stopped state.</p>
+<h2 id="12-v-design-implications"><a class="anchor" href="#12-v-design-implications">12 V design implications</a></h2>
+<p>Moving from a 24/25.6 V bus to 12.8 V approximately doubles current for a given power level. This must be reflected in:</p>
+<ul>
+<li>actuator selection</li>
+<li>motor controller ratings</li>
+<li>fuse sizes</li>
+<li>contactor ratings</li>
+<li>cable cross-section</li>
+<li>connectors</li>
+<li>busbar sizing</li>
+<li>voltage-drop calculations</li>
+<li>thermal management</li>
+</ul>
+<p>For example, a 600 W total load is approximately 47 A at 12.8 V before conversion losses. The architecture therefore targets battery packs with substantial BMS current capability and short, low-resistance high-current wiring.</p>
 <h2 id="thermal-design"><a class="anchor" href="#thermal-design">Thermal design</a></h2>
 <ul>
 <li>Do not block the PC&#39;s inlet or exhaust faces.</li>
-<li>Maintain the 225 × 225 × 100 mm keep-out until airflow direction is physically verified.</li>
-<li>Place temperature probes in PC inlet and exhaust air.</li>
-<li>Isolate PC exhaust from motor controllers and the battery.</li>
-<li>Mount with removable vibration isolators without making the unit part of the structural load path.</li>
+<li>Maintain the 225 × 225 × 100 mm mini-PC keep-out until airflow direction is physically verified.</li>
+<li>Preserve clear intake and exhaust paths around the RTX 2000 Ada active cooler.</li>
+<li>Keep display heat isolated from the camera and microphone electronics where practical.</li>
+<li>Place temperature probes in PC inlet/exhaust air and near the GPU exhaust.</li>
+<li>Isolate compute exhaust from motor controllers and the battery.</li>
+<li>Mount compute devices with removable vibration isolation without making them part of the structural load path.</li>
 </ul>
 </div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/aluminium-architecture"><small>← PREVIOUS</small><b>Hybrid mechanical architecture</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/compute-software-stack"><small>NEXT →</small><b>Compute and software stack</b></a></nav></section><footer><span>GP‑TARS V2 · COMPUTE HARDWARE</span><span>RENDERED FROM docs/compute_hardware.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

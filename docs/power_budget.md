@@ -1,6 +1,6 @@
 # Power budget
 
-Status: proposed budget, revision Power V1, 2026-08-10.
+Status: proposed budget, revision Power V2, 2026-08-11.
 
 This document estimates the electrical load of GP-TARS V2 by operating mode,
 sets the reduction measures, and derives runtime from the battery envelope. It
@@ -158,19 +158,35 @@ of its life in.
 
 ## Battery and runtime
 
-The reservation is 200 × 150 × 180 mm, which is 5.4 litres. At a realistic
-pack-level density of roughly 220 Wh/litre that is about **1,200 Wh**, or
-**50 Ah at the 24 V nominal bus**, weighing approximately 6.6 kg. That mass is
-already a quarter of the 12–25 kg target and must appear in the mass budget.
+`docs/design_assumptions.md` sets the main bus at **12.8 V nominal LiFePO4** and
+the baseline pack at a **WattCycle 12.8 V 100 Ah Mini**, approximately
+**1,280 Wh**. Runtimes assume 90% usable, about 1,152 Wh.
 
-Runtimes assume 90% usable capacity, about 1,080 Wh, to protect cell life.
+| Mode | Draw | Current at 12.8 V | Runtime |
+|---|---:|---:|---:|
+| 0 — Deep sleep | 8 W | 0.6 A | **144 h, about 6 days** |
+| 1 — Attentive | 39 W | 3.0 A | 29.5 h |
+| 2 — Conversational | 160 W | 12.5 A | **7.2 h** |
+| 3 — Walking | 300 W | 23.4 A | 3.8 h |
 
-| Mode | Draw | Runtime |
-|---|---:|---:|
-| 0 — Deep sleep | 8 W | **135 h, about 5.6 days** |
-| 1 — Attentive | 39 W | 27.7 h |
-| 2 — Conversational | 160 W | **6.8 h** |
-| 3 — Walking | 300 W | 3.6 h |
+### The consequence of a 12.8 V bus
+
+Halving the bus voltage doubles every current for the same power. The 460 W
+overlap case becomes **36 A** rather than 19 A. That is not fatal, but it
+propagates:
+
+- Main feed, fuse, contactor and disconnect must all be rated near 40 A
+  continuous, and the cable cross-section rises accordingly.
+- Distribution losses scale with the square of current, so the same wiring loses
+  four times as much power. Runs must be short and generously sized.
+- **Actuator choice narrows.** Integrated BLDC robotic actuators are commonly
+  24–48 V; at 12.8 V the same mechanical power needs twice the current, which
+  pushes up controller and winding losses. The specification's 24–48 V actuator
+  envelope is inconsistent with a 12.8 V bus and one of the two must give.
+
+The alternative is a local boost stage feeding the actuators at 24 V or higher
+while the rest of the robot runs at 12.8 V. That adds a conversion stage and its
+losses, but keeps the actuator market open.
 
 Mixed duty is more useful than any single mode. At 70% attentive, 20%
 conversational and 10% walking the average is about 108 W, giving roughly
