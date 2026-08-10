@@ -147,6 +147,15 @@ DISPLAY_ACTIVE_HEIGHT = 345.0
 DISPLAY_ORIGIN_Y = 130.0
 DISPLAY_MARGIN_PER_SIDE = 23.0
 DISPLAY_DEPTH_RESERVATION = 25.0
+# Bare panel module outline for a 15.6 inch class panel, portrait.
+DISPLAY_MODULE_WIDTH = 223.8
+DISPLAY_MODULE_HEIGHT = 359.5
+DISPLAY_MODULE_THICKNESS = 5.5
+DISPLAY_MODULE_CLEARANCE_PER_SIDE = 6.9
+DISPLAY_STACK_DEPTH = 22.9
+DISPLAY_COVER_THICKNESS = 2.0
+DISPLAY_DOUBLER_THICKNESS = 2.0
+DISPLAY_INTERFACE = "HDMI from the mini PC; both sit in the lower chassis"
 DISPLAY_COVER_MATERIAL = "Chemically strengthened glass or bonded polycarbonate"
 DISPLAY_MASS_ESTIMATE_KG = 0.8
 DISPLAY_LINK = "Ethernet and power; no video across an articulating joint"

@@ -254,6 +254,7 @@ The bodywork and leg-arm slabs exist in
 | Sides | Port and starboard, each split at the hip |
 | Lids | Top and bottom |
 | Leg-arms | Port and starboard, each as shin, thigh and upper |
+| Display insert | Aperture doubler, cover lens, panel module, driver board |
 
 Two rules drive that layout. **No panel crosses the hip axis at Y=610.8**, since
 the upper and lower chassis articulate there; a 6 mm break straddles it. And
@@ -264,9 +265,35 @@ Each arm slab is 209.317 mm wide, leaving 4 mm running clearance to the central
 chassis per side. All shells are modelled at the 1.2 mm sheet gauge. The display
 aperture is cut through `PANEL_FRONT_DISPLAY` at 194 × 345 mm.
 
+### The display insert
+
+`15_DISPLAY` models what actually occupies the aperture, not just the hole:
+
+| Body | Size (mm) | Note |
+|---|---|---|
+| `DISPLAY_APERTURE_DOUBLER` | 230 × 381 × 2, holed | Restores the stiffness a 194 × 345 hole removes from 1.2 mm sheet |
+| `DISPLAY_COVER_LENS` | 206 × 357 × 2 | Bonded behind the aperture, overlapping the doubler flange |
+| `DISPLAY_PANEL_MODULE` | 223.8 × 359.5 × 5.5 | Bare 15.6 inch class panel outline, portrait |
+| `DISPLAY_DRIVER_BOARD` | 110 × 65 × 12 | On standoffs behind the panel |
+
+The stack consumes **22.9 mm** of depth against the 25 mm reservation, so it fits.
+
+**Lateral clearance is the problem.** The chassis interior is 237.6 mm and the
+panel module is 223.8 mm wide, leaving **6.9 mm per side**. That is enough for the
+panel to pass but not for a mounting frame, edge retention or a cable exit at the
+sides. Either the module hangs off the doubler alone, or the panel drops a size:
+a 14 inch class module at roughly 323 × 202 mm would give about 17.8 mm per side.
+
+The driver board was initially placed behind the panel and collided with the mini
+PC service envelope by 45 × 38 × 5.5 mm. It now sits above both the PC envelope
+and the GPU, at Y=490–555. Zero display conflicts remain.
+
+Because the display and the mini PC are both in the lower chassis, the panel is
+driven by a **direct HDMI run** from the PC. Nothing crosses a moving joint.
+
 These are form and packaging bodies. They carry no fastener pattern, formed
-returns, beads, doublers, hinges, bearings or joint hardware, the limbs have no
-feet or contact pads, and none of them is releasable.
+returns, beads, hinges, bearings or joint hardware, the limbs have no feet or
+contact pads, and none of them is releasable.
 
 ### Panel and safety consequences
 

@@ -16,6 +16,7 @@ const value = (name: string): string => parameterMap.get(name)?.value ?? "—";
 const MODELS = [
   { name: "panels", label: "Bodywork panels", url: "/models/gptars-panels.stl", color: "#9aa7b0" },
   { name: "arms", label: "Leg-arm slabs", url: "/models/gptars-arms.stl", color: "#6c7a85" },
+  { name: "display", label: "Display insert", url: "/models/gptars-display.stl", color: "#6fb8dd" },
   { name: "frame", label: "Internal frame", url: "/models/gptars-frame.stl", color: "#d97b19", hidden: true },
 ];
 
