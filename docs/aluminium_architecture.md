@@ -62,3 +62,31 @@ The complete robot will exceed the 12–25 kg target unless actuators, battery, 
 - Welding is acceptable for selected chassis modules but requires allowance for 6061 heat-affected-zone strength reduction and distortion.
 - Use structural adhesive only as a secondary load path unless specifically qualified.
 - Use anodising, powder coat, or conversion coating on the chassis and the exterior panels, selecting a finish system compatible with both alloys.
+
+## Decals and markings
+
+Printed vinyl decals carry the identity and, more importantly, the safety markings. Artwork is held at `website/public/images/gptars-decal-sheet.svg`, drawn 1:1 in millimetres on an A2 sheet.
+
+![GP-TARS V2 decal sheet](/images/gptars-decal-sheet.svg)
+
+| Decal | Size (mm) | Purpose |
+|---|---|---|
+| TARS vertical wordmark | 52 × 250, ×2 | Port and starboard identity, two colourways |
+| Data plate | 120 × 72 | Build, height, mass class, bus voltage, alloys, unit number |
+| Hazard triangles | 44 × 40, ×4 | Crush, 24 V live, hot surface, starts without warning |
+| E-stop surround | Ø70 | Centre cut for the mushroom head |
+| Service labels | 130 × 16, ×4 | Compute, GPU and battery access, plus isolate-before-opening |
+| Pinch-point stripes | 344 × 14, ×2 | Limb leading edges and the hip gap |
+| Panel index marks | 26 × 26, ×8 | Return each panel to the opening it came from |
+| Display surround | Scales to the 268 × 476 aperture | Bezel trim |
+
+Application rules:
+
+- Convert the artwork to the printer's CMYK profile; the source is RGB.
+- Use matte or satin vinyl. Gloss reflects badly under exhibition lighting.
+- Laminate everything. The limbs strike the ground every gait cycle.
+- Degrease with isopropyl alcohol. Do not apply over fresh anodising or uncured powder coat.
+- Keep decals 10 mm clear of panel edges and fasteners so they survive removal.
+- The hazard stripes and E-stop surround are function rather than decoration, and must be applied before any powered test.
+
+The hazard pictograms follow ISO 7010 geometry but are not certified labels. Source certified labels wherever compliance is actually required.

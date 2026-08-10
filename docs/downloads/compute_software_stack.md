@@ -160,69 +160,109 @@ nothing may span an articulating axle.
 
 ### Recommended display
 
-Allowing for the panel return, aperture doubler and bezel, the usable active area
-in the Upper Lid is approximately **500 × 85 mm**.
+The Upper Lid therefore admits only a wide bar panel, roughly 500 × 85 mm of
+usable aperture. **The display is not placed there.**
 
-| Class | Active area | Verdict |
+Reference footage of a working replica mounts its screen on the **main front face
+of the lower chassis** instead, and that is the better location. The front face
+below the hip axis is a single rigid section approximately **532 mm wide by 600 mm
+tall**, which is a far larger canvas than the lid.
+
+| Location | Usable aperture | Verdict |
 |---|---|---|
-| Wide bar, ~1920 × 480 | ~217 × 66 mm | Comfortable margin on all sides. Recommended |
-| Wide bar, ~1920 × 550 | ~355 × 102 mm | Fits the width easily but leaves only a few millimetres of height for structure |
-| Conventional 15.6" 16:9 | 345 × 194 mm | **Does not fit.** Nearly twice the available height |
+| Front face, below the hip axis | ~532 × 600 mm | **Selected.** Admits a full portrait panel |
+| Upper Lid, above Y=889.9 | ~500 × 85 mm | Bar panels only |
+| Between the lower axes, Y=611–786 | 532 × 175 mm | Too shallow once structure is allowed for |
 
-**A wide bar display is not merely the preferred aesthetic — it is the only class
-that fits the Upper Lid.** This happens to match the film's readout appearance,
-but the constraint is geometric, not stylistic.
+The modelled aperture is a **21.5 inch portrait panel, 268 × 476 mm active**,
+positioned Y=100 to 576. It clears the hip axis at Y=610.8 by 35 mm, so no panel
+crosses an articulating joint.
 
-If a large conventional display is a firm requirement, it cannot live in the
-Upper Lid. The only other candidate window is the front face between the lower
-main and lower secondary axles, Y=611 to 786, giving 532 × 175 mm. A 14"
-landscape panel would consume 174 mm of that 175 mm, leaving nothing for
-structure, so this is recorded as impractical rather than available. Enlarging
-the display beyond the bar class requires changing the body proportions, which
-the brief forbids.
+Reserve approximately **25 mm of Z depth** behind the aperture. The mini PC and
+GPU reservations sit deeper in the body, so there is no depth conflict, but the
+25 mm still comes out of the 259.9 mm total that `docs/interference_report.md`
+lists as risk 1.
+
+### The cable problem solves itself
+
+An earlier revision of this document placed the display in the Upper Lid and
+concluded, correctly for that position, that no video cable should cross the
+articulating axes.
+
+Moving the display to the lower chassis front face removes the problem entirely:
+the mini PC service envelope sits at Y=165–390 and the display at Y=100–576, so
+**both are inside the same rigid section**. A direct HDMI or DisplayPort run from
+the mini PC to the panel crosses nothing that moves.
+
+This is a significant simplification. It removes the need for an Upper Lid
+display controller, removes power and Ethernet from the joint crossing, and lets
+the panel be driven natively at full resolution.
 
 Reserve approximately **25 mm of Z depth** for panel, driver board, bonding and
 cover. That comes directly out of the 259.9 mm body depth, which
 `docs/interference_report.md` already lists as risk 1.
 
-### Do not run a display cable across the pivot
+### Limb articulation
 
-The mini PC service envelope sits at Y=165–390. The Upper Lid display sits above
-Y≈890. **Any direct panel cable would cross all four articulating axles**, which
-is already risk 5 in the interference report.
+Reference footage of a walking replica shows the gait is a splay-and-close in the
+sagittal plane: the slabs separate into leading and trailing groups, swing apart
+into a wide A-frame, the body translates through, then they close. Every visible
+rotation axis is horizontal and lateral, matching the X-parallel axles in the
+source geometry. No yaw or roll degree of freedom is present.
 
-Do not route eDP, HDMI or DisplayPort across a rotating joint. Instead:
+Each outer slab bends mid-limb, so there are **two rotational degrees of freedom
+per limb**: a hip at the lower main axis, Y=610.8, and a knee. The knee is
+modelled at half the hip height, Y=305.4. That ratio is an engineering choice,
+not a measurement from the source geometry, and it is parameterised as
+`ARM_KNEE_RATIO` so it can move once the gait is reconstructed properly.
 
-1. Place a small display controller or SBC inside the Upper Lid.
-2. Run only **power and Ethernet** across the pivot, with a service loop or
-   rotary routing.
-3. Have that controller run `hmi` as a kiosk client of the robot's own web UI.
+The splay is not a stylistic flourish. Standing, the fore-aft footprint is only
+259.9 mm on a 1,000 mm robot, an aspect ratio of 3.8:1. Splaying converts that
+into roughly an 800 mm base. **The splay is the stability mechanism**, which is
+why the reference robot stands slightly splayed even at rest.
 
-Ethernet and power tolerate flexing, are cheap to loop, and fail gracefully. A
-high-speed differential video pair across a joint that moves every step does not.
-This makes `hmi` a networked client by design, which is also what makes screen
-sharing straightforward.
+### Actuator sizing follows from the landing, not the stance
+
+A static estimate: at 20 kg with the centre of gravity offset 200–300 mm
+horizontally from the loaded hip, holding torque is 39–59 N·m. The 60 N·m
+continuous target covers that.
+
+But every gait cycle ends in a controlled fall and catch. Applying a 2–3 impact
+factor puts the landing case at **80–180 N·m**, which brackets and may exceed the
+100 N·m peak target. The landing also sizes the shafts, bearings and brackets.
+
+These are order-of-magnitude figures from stated assumptions, not a dynamic
+analysis. They are recorded to show that the peak torque target is the number at
+risk, and that it must not be frozen without proper simulation.
 
 ### As modelled
 
-The bodywork and leg-arm slabs now exist in `cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d`
-as 15 bodies across `11_BODY_PANELS` and `14_ARMS`:
+The bodywork and leg-arm slabs exist in
+`cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d` as 20 bodies across
+`11_BODY_PANELS` (14) and `14_ARMS` (6):
 
 ![Fusion view of the GP-TARS V2 aluminium shell, service panels and leg-arm slabs](/images/gptars-shell-iso.png)
 
 | Group | Bodies |
 |---|---|
-| Front service panels | Battery, compute, GPU, upper and lid, split on 1.5 mm seams |
-| Rear panels | Upper and lower |
-| Sides, top, bottom | Port, starboard, top lid, bottom lid |
-| Leg-arm slabs | Port and starboard, each split at the lower main axis into upper and lower shells |
+| Front | Lower, display, upper and lid |
+| Rear | Battery, compute and GPU access, plus upper |
+| Sides | Port and starboard, each split at the hip |
+| Lids | Top and bottom |
+| Leg-arms | Port and starboard, each as shin, thigh and upper |
 
-Each arm slab is 209.317 mm wide, giving 4 mm running clearance to the central
-chassis on each side. The shells are modelled at the 1.2 mm sheet gauge. The
-display aperture is cut through `PANEL_FRONT_LID` at 400 x 70 mm.
+Two rules drive that layout. **No panel crosses the hip axis at Y=610.8**, since
+the upper and lower chassis articulate there; a 6 mm break straddles it. And
+**service access is on the rear**, so the display is never removed to reach the
+GPU or the mini PC.
+
+Each arm slab is 209.317 mm wide, leaving 4 mm running clearance to the central
+chassis per side. All shells are modelled at the 1.2 mm sheet gauge. The display
+aperture is cut through `PANEL_FRONT_DISPLAY` at 268 × 476 mm.
 
 These are form and packaging bodies. They carry no fastener pattern, formed
-returns, beads, doublers or joint hardware, and none of them is releasable.
+returns, beads, doublers, hinges, bearings or joint hardware, the limbs have no
+feet or contact pads, and none of them is releasable.
 
 ### Panel and safety consequences
 

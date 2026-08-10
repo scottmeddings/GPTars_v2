@@ -117,18 +117,29 @@ CENTRAL_CHASSIS_WIDTH = CENTRAL_CHASSIS_WIDTH_SOURCE * REFERENCE_SCALE_MEASURED
 UPPER_LID_FRONT_WIDTH = CENTRAL_CHASSIS_WIDTH
 UPPER_LID_FRONT_HEIGHT = ROBOT_HEIGHT - AXLE_UPPER_SECONDARY_Y
 
-# Onboard display. The source assembly already carries Screen, Screen Protector
-# and Screen support under Chassis / Upper Lid; V2 scales that intent.
-# Only a wide bar panel fits the available Upper Lid height.
+# Limb articulation. The reference gait shows two rotational degrees of freedom
+# per outer slab: a hip at the lower main axis and a knee roughly mid-limb.
+# The knee ratio is a design choice and is not taken from the source geometry.
+ARM_KNEE_RATIO = 0.5
+AXLE_KNEE_Y = AXLE_LOWER_MAIN_Y * ARM_KNEE_RATIO
+ARM_CLEARANCE = 4.0
+ARM_JOINT_GAP = 2.0
+ARM_SLAB_WIDTH = 209.317
+
+# Onboard display, on the main front face of the lower chassis rather than the
+# Upper Lid. The lid offers only 110 mm of height; the front face below the hip
+# axis offers roughly 600 mm, which admits a full portrait panel.
 DISPLAY_PRESENT = True
-DISPLAY_LOCATION = "Chassis / Upper Lid"
-DISPLAY_CLASS = "Wide bar LCD"
-DISPLAY_ACTIVE_WIDTH_MAX = 500.0
-DISPLAY_ACTIVE_HEIGHT_MAX = 85.0
+DISPLAY_LOCATION = "Chassis / front face, below the lower main axis"
+DISPLAY_CLASS = "21.5 inch portrait LCD"
+DISPLAY_ACTIVE_WIDTH = 268.0
+DISPLAY_ACTIVE_HEIGHT = 476.0
+DISPLAY_ORIGIN_Y = 100.0
 DISPLAY_DEPTH_RESERVATION = 25.0
 DISPLAY_COVER_MATERIAL = "Chemically strengthened glass or bonded polycarbonate"
-DISPLAY_MASS_ESTIMATE_KG = 0.5
-DISPLAY_LINK = "Ethernet and power across the axles; no video across a joint"
+DISPLAY_MASS_ESTIMATE_KG = 1.2
+DISPLAY_LINK = "Ethernet and power; no video across an articulating joint"
+PANEL_HIP_BREAK_GAP = 6.0
 
 # Compute stack. Units here are GB and counts, not millimetres.
 HOST_OS = "Ubuntu 24.04 LTS"

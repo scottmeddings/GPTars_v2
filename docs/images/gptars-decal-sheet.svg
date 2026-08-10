@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 594" width="420mm" height="594mm" font-family="Helvetica, Arial, 'Liberation Sans', sans-serif">
+  <title>GP-TARS V2 decal sheet, A2, 1:1 scale</title>
+  <desc>Print-ready vinyl decal artwork for the GP-TARS V2 formed aluminium bodywork. All dimensions are millimetres at 1:1. Dashed rules are cut lines and do not print.</desc>
+
+  <rect width="420" height="594" fill="#ffffff"/>
+
+  <!-- sheet furniture -->
+  <g fill="#111111">
+    <text x="16" y="20" font-size="9" font-weight="700" letter-spacing="1.6">GP-TARS V2 1000 — DECAL SHEET</text>
+    <text x="16" y="30" font-size="4.6" fill="#555555">A2 420 × 594 mm · 1:1 scale · matte vinyl with satin laminate · dashed rules are cut lines, do not print</text>
+  </g>
+  <line x1="16" y1="35" x2="404" y2="35" stroke="#111111" stroke-width="0.6"/>
+
+  <!-- ============ TARS VERTICAL WORDMARK, PORT AND STARBOARD ============ -->
+  <g>
+    <rect x="16" y="46" width="52" height="250" fill="none" stroke="#888888" stroke-width="0.4" stroke-dasharray="3 2"/>
+    <text x="42" y="94" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">T</text>
+    <text x="42" y="152" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">A</text>
+    <text x="42" y="210" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">R</text>
+    <text x="42" y="268" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">S</text>
+    <text x="42" y="303" font-size="4" fill="#555555" text-anchor="middle">WORDMARK · 52 × 250 · ×2</text>
+
+    <rect x="78" y="46" width="52" height="250" fill="none" stroke="#888888" stroke-width="0.4" stroke-dasharray="3 2"/>
+    <text x="104" y="94" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">T</text>
+    <text x="104" y="152" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">A</text>
+    <text x="104" y="210" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">R</text>
+    <text x="104" y="268" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">S</text>
+    <text x="104" y="303" font-size="4" fill="#555555" text-anchor="middle">ALT COLOURWAY</text>
+  </g>
+
+  <!-- ============ DATA PLATE ============ -->
+  <g>
+    <rect x="146" y="46" width="120" height="72" fill="#1a1a1a"/>
+    <text x="154" y="58" font-size="6.4" font-weight="700" fill="#ffffff" letter-spacing="0.8">GP-TARS V2 1000</text>
+    <line x1="154" y1="62" x2="258" y2="62" stroke="#c8a11a" stroke-width="0.7"/>
+    <g font-size="4.2" fill="#cfd6da">
+      <text x="154" y="71">BUILD</text><text x="212" y="71" fill="#ffffff">CONCEPT</text>
+      <text x="154" y="79">HEIGHT</text><text x="212" y="79" fill="#ffffff">1000 mm</text>
+      <text x="154" y="87">MASS CLASS</text><text x="212" y="87" fill="#ffffff">12–25 kg</text>
+      <text x="154" y="95">BUS</text><text x="212" y="95" fill="#ffffff">24 V DC</text>
+      <text x="154" y="103">STRUCTURE</text><text x="212" y="103" fill="#ffffff">6061-T6 / 5052-H32</text>
+      <text x="154" y="111">UNIT</text><text x="212" y="111" fill="#ffffff">001</text>
+    </g>
+    <text x="146" y="124" font-size="4" fill="#555555">DATA PLATE · 120 × 72</text>
+  </g>
+
+  <!-- ============ SAFETY LABELS ============ -->
+  <g>
+    <!-- crush / pinch -->
+    <g transform="translate(146,136)">
+      <path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="16" y="14" width="12" height="3.4" fill="#1a1a1a"/>
+      <rect x="16" y="24" width="12" height="3.4" fill="#1a1a1a"/>
+      <path d="M22,19 l-3.4,3 h6.8 z" fill="#1a1a1a"/>
+      <text x="22" y="47" font-size="4.4" font-weight="700" fill="#1a1a1a" text-anchor="middle">CRUSH HAZARD</text>
+    </g>
+    <!-- high voltage -->
+    <g transform="translate(200,136)">
+      <path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M25,13 l-8,13 h6 l-3,10 9,-14 h-6 z" fill="#1a1a1a"/>
+      <text x="22" y="47" font-size="4.4" font-weight="700" fill="#1a1a1a" text-anchor="middle">24 V DC LIVE</text>
+    </g>
+    <!-- hot surface -->
+    <g transform="translate(254,136)">
+      <path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="22" cy="27" r="5.4" fill="#1a1a1a"/>
+      <path d="M17,18 q3,-4 0,-7 M22,18 q3,-4 0,-7 M27,18 q3,-4 0,-7" stroke="#1a1a1a" stroke-width="1.5" fill="none"/>
+      <text x="22" y="47" font-size="4.4" font-weight="700" fill="#1a1a1a" text-anchor="middle">HOT SURFACE</text>
+    </g>
+    <!-- automatic start -->
+    <g transform="translate(308,136)">
+      <path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="14" y="20" width="7" height="13" fill="#1a1a1a"/>
+      <rect x="23" y="20" width="7" height="13" fill="#1a1a1a"/>
+      <path d="M12,17 h20" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="22" y="47" font-size="4.2" font-weight="700" fill="#1a1a1a" text-anchor="middle">STARTS WITHOUT</text>
+      <text x="22" y="52" font-size="4.2" font-weight="700" fill="#1a1a1a" text-anchor="middle">WARNING</text>
+    </g>
+    <text x="146" y="196" font-size="4" fill="#555555">HAZARD LABELS · 44 × 40 each · ISO 7010 style triangle</text>
+  </g>
+
+  <!-- ============ E-STOP RING ============ -->
+  <g transform="translate(146,210)">
+    <circle cx="35" cy="35" r="35" fill="#c8102e"/>
+    <circle cx="35" cy="35" r="22" fill="#f2c200"/>
+    <circle cx="35" cy="35" r="15" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.6" stroke-dasharray="2 2"/>
+    <text x="35" y="16" font-size="6.6" font-weight="700" fill="#ffffff" text-anchor="middle">EMERGENCY</text>
+    <text x="35" y="61" font-size="6.6" font-weight="700" fill="#ffffff" text-anchor="middle">STOP</text>
+    <text x="0" y="79" font-size="4" fill="#555555">E-STOP SURROUND · Ø70 · centre cut for Ø30 mushroom</text>
+  </g>
+
+  <!-- ============ SERVICE PANEL LABELS ============ -->
+  <g>
+    <g font-size="5.6" font-weight="700" letter-spacing="1.2">
+      <rect x="230" y="212" width="130" height="16" fill="#1a1a1a"/>
+      <text x="238" y="223" fill="#ffffff">COMPUTE ACCESS</text>
+      <rect x="230" y="232" width="130" height="16" fill="#1a1a1a"/>
+      <text x="238" y="243" fill="#ffffff">GPU ACCESS</text>
+      <rect x="230" y="252" width="130" height="16" fill="#1a1a1a"/>
+      <text x="238" y="263" fill="#ffffff">BATTERY ACCESS</text>
+      <rect x="230" y="272" width="130" height="16" fill="#c8102e"/>
+      <text x="238" y="283" fill="#ffffff">ISOLATE BEFORE OPENING</text>
+    </g>
+    <text x="230" y="296" font-size="4" fill="#555555">SERVICE LABELS · 130 × 16 each</text>
+  </g>
+
+  <!-- ============ HAZARD STRIPE STRIPS ============ -->
+  <g>
+    <defs>
+      <pattern id="hz" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="8" height="16" fill="#f2c200"/>
+        <rect x="8" width="8" height="16" fill="#1a1a1a"/>
+      </pattern>
+    </defs>
+    <rect x="16" y="312" width="344" height="14" fill="url(#hz)"/>
+    <rect x="16" y="332" width="344" height="14" fill="url(#hz)"/>
+    <text x="16" y="354" font-size="4" fill="#555555">PINCH-POINT STRIPES · 344 × 14 · apply along limb leading edges and the hip gap</text>
+  </g>
+
+  <!-- ============ PANEL INDEX MARKS ============ -->
+  <g>
+    <g font-size="5" font-weight="700" fill="#1a1a1a">
+      <rect x="16" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="29" y="385" text-anchor="middle">P1</text>
+      <rect x="48" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="61" y="385" text-anchor="middle">P2</text>
+      <rect x="80" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="93" y="385" text-anchor="middle">P3</text>
+      <rect x="112" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="125" y="385" text-anchor="middle">P4</text>
+      <rect x="144" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="157" y="385" text-anchor="middle">S1</text>
+      <rect x="176" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="189" y="385" text-anchor="middle">S2</text>
+      <rect x="208" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="221" y="385" text-anchor="middle">S3</text>
+      <rect x="240" y="368" width="26" height="26" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="253" y="385" text-anchor="middle">S4</text>
+    </g>
+    <text x="16" y="403" font-size="4" fill="#555555">PANEL INDEX · 26 × 26 · one per removable panel, port and starboard</text>
+  </g>
+
+  <!-- ============ DISPLAY SURROUND TRIM ============ -->
+  <g>
+    <rect x="16" y="418" width="140" height="150" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="24" y="426" width="124" height="134" fill="none" stroke="#888888" stroke-width="0.4" stroke-dasharray="3 2"/>
+    <text x="86" y="576" font-size="4" fill="#555555" text-anchor="middle">DISPLAY SURROUND · scale to 268 × 476 aperture</text>
+  </g>
+
+  <!-- ============ NOTES ============ -->
+  <g font-size="4.4" fill="#333333">
+    <text x="176" y="428" font-weight="700" font-size="5.4" fill="#111111">PRINT AND APPLICATION NOTES</text>
+    <text x="176" y="440">1. Artwork is RGB. Convert to the printer's CMYK profile before output.</text>
+    <text x="176" y="450">2. Matte or satin vinyl. Gloss reflects badly under exhibition lighting.</text>
+    <text x="176" y="460">3. Laminate all decals. The limbs strike the ground every gait cycle.</text>
+    <text x="176" y="470">4. Degrease the aluminium with isopropyl alcohol. Do not apply over</text>
+    <text x="176" y="480">   fresh anodising or uncured powder coat.</text>
+    <text x="176" y="490">5. Keep decals 10 mm clear of every panel edge and fastener.</text>
+    <text x="176" y="500">6. Hazard stripes and the E-stop surround are function, not decoration.</text>
+    <text x="176" y="510">   Apply before any powered test.</text>
+    <text x="176" y="520">7. The E-stop centre is cut out. Do not cover the mushroom head.</text>
+    <text x="176" y="530">8. Panel index marks let panels return to the opening they came from.</text>
+    <text x="176" y="546" font-size="4.2" fill="#777777">Hazard pictograms follow ISO 7010 geometry but are not certified</text>
+    <text x="176" y="554" font-size="4.2" fill="#777777">labels. Source certified labels for anything that must be compliant.</text>
+  </g>
+
+  <line x1="16" y1="580" x2="404" y2="580" stroke="#111111" stroke-width="0.6"/>
+  <text x="16" y="588" font-size="4" fill="#555555">GP-TARS V2 1000 · decal sheet revision A · dimensions in millimetres</text>
+</svg>

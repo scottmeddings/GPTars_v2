@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-BiR3Aw6N.css"/><title>Compute and software stack — GP-TARS V2</title><meta name="description" content="This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budge"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
-</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 08</p><h1>Compute and software stack</h1><p class="subtitle">This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budgets that follow from them.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_software_stack.md</b></span><span>SECTIONS <b>24</b></span><span>WORDS <b>3,008</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#host-baseline">Host baseline</a></li><li><a href="#container-inventory">Container inventory</a></li><li><a href="#networking-model">Networking model</a></li><li><a href="#gpu-allocation">GPU allocation</a></li><li><a href="#human-machine-interface">Human-machine interface</a></li><li><a href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></li><li><a href="#memory-budget">Memory budget</a></li><li><a href="#storage-budget">Storage budget</a></li><li><a href="#power-and-thermal-consequences">Power and thermal consequences</a></li><li><a href="#open-decisions">Open decisions</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_software_stack.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed stack, revision Stack V1, 2026-08-10</div><div class="doc-prose"><p>This document specifies the Ubuntu and container architecture that runs on the
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-Br09qGPX.css"/><title>Compute and software stack — GP-TARS V2</title><meta name="description" content="This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budge"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 08</p><h1>Compute and software stack</h1><p class="subtitle">This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budgets that follow from them.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_software_stack.md</b></span><span>SECTIONS <b>26</b></span><span>WORDS <b>3,345</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#host-baseline">Host baseline</a></li><li><a href="#container-inventory">Container inventory</a></li><li><a href="#networking-model">Networking model</a></li><li><a href="#gpu-allocation">GPU allocation</a></li><li><a href="#human-machine-interface">Human-machine interface</a></li><li><a href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></li><li><a href="#memory-budget">Memory budget</a></li><li><a href="#storage-budget">Storage budget</a></li><li><a href="#power-and-thermal-consequences">Power and thermal consequences</a></li><li><a href="#open-decisions">Open decisions</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_software_stack.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed stack, revision Stack V1, 2026-08-10</div><div class="doc-prose"><p>This document specifies the Ubuntu and container architecture that runs on the
 MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the
 memory, storage, power and thermal budgets that follow from them.</p>
 <p>It covers layers 03 to 05 of <code>docs/software_architecture.md</code> only. Layers 01 and
@@ -87,47 +87,75 @@ approximately Y=786–890 and the lower main axis near Y=611.</p>
 <strong>532 mm wide by only 110 mm tall</strong>. A display must fit inside one rigid section;
 nothing may span an articulating axle.</p>
 <h3 id="recommended-display"><a class="anchor" href="#recommended-display">Recommended display</a></h3>
-<p>Allowing for the panel return, aperture doubler and bezel, the usable active area
-in the Upper Lid is approximately <strong>500 × 85 mm</strong>.</p>
-<div class="table-wrap"><table><thead><tr><th>Class</th><th>Active area</th><th>Verdict</th></tr></thead><tbody><tr><td>Wide bar, ~1920 × 480</td><td>~217 × 66 mm</td><td>Comfortable margin on all sides. Recommended</td></tr><tr><td>Wide bar, ~1920 × 550</td><td>~355 × 102 mm</td><td>Fits the width easily but leaves only a few millimetres of height for structure</td></tr><tr><td>Conventional 15.6&quot; 16:9</td><td>345 × 194 mm</td><td><strong>Does not fit.</strong> Nearly twice the available height</td></tr></tbody></table></div>
-<p><strong>A wide bar display is not merely the preferred aesthetic — it is the only class
-that fits the Upper Lid.</strong> This happens to match the film&#39;s readout appearance,
-but the constraint is geometric, not stylistic.</p>
-<p>If a large conventional display is a firm requirement, it cannot live in the
-Upper Lid. The only other candidate window is the front face between the lower
-main and lower secondary axles, Y=611 to 786, giving 532 × 175 mm. A 14&quot;
-landscape panel would consume 174 mm of that 175 mm, leaving nothing for
-structure, so this is recorded as impractical rather than available. Enlarging
-the display beyond the bar class requires changing the body proportions, which
-the brief forbids.</p>
+<p>The Upper Lid therefore admits only a wide bar panel, roughly 500 × 85 mm of
+usable aperture. <strong>The display is not placed there.</strong></p>
+<p>Reference footage of a working replica mounts its screen on the <strong>main front face
+of the lower chassis</strong> instead, and that is the better location. The front face
+below the hip axis is a single rigid section approximately <strong>532 mm wide by 600 mm
+tall</strong>, which is a far larger canvas than the lid.</p>
+<div class="table-wrap"><table><thead><tr><th>Location</th><th>Usable aperture</th><th>Verdict</th></tr></thead><tbody><tr><td>Front face, below the hip axis</td><td>~532 × 600 mm</td><td><strong>Selected.</strong> Admits a full portrait panel</td></tr><tr><td>Upper Lid, above Y=889.9</td><td>~500 × 85 mm</td><td>Bar panels only</td></tr><tr><td>Between the lower axes, Y=611–786</td><td>532 × 175 mm</td><td>Too shallow once structure is allowed for</td></tr></tbody></table></div>
+<p>The modelled aperture is a <strong>21.5 inch portrait panel, 268 × 476 mm active</strong>,
+positioned Y=100 to 576. It clears the hip axis at Y=610.8 by 35 mm, so no panel
+crosses an articulating joint.</p>
+<p>Reserve approximately <strong>25 mm of Z depth</strong> behind the aperture. The mini PC and
+GPU reservations sit deeper in the body, so there is no depth conflict, but the
+25 mm still comes out of the 259.9 mm total that <code>docs/interference_report.md</code>
+lists as risk 1.</p>
+<h3 id="the-cable-problem-solves-itself"><a class="anchor" href="#the-cable-problem-solves-itself">The cable problem solves itself</a></h3>
+<p>An earlier revision of this document placed the display in the Upper Lid and
+concluded, correctly for that position, that no video cable should cross the
+articulating axes.</p>
+<p>Moving the display to the lower chassis front face removes the problem entirely:
+the mini PC service envelope sits at Y=165–390 and the display at Y=100–576, so
+<strong>both are inside the same rigid section</strong>. A direct HDMI or DisplayPort run from
+the mini PC to the panel crosses nothing that moves.</p>
+<p>This is a significant simplification. It removes the need for an Upper Lid
+display controller, removes power and Ethernet from the joint crossing, and lets
+the panel be driven natively at full resolution.</p>
 <p>Reserve approximately <strong>25 mm of Z depth</strong> for panel, driver board, bonding and
 cover. That comes directly out of the 259.9 mm body depth, which
 <code>docs/interference_report.md</code> already lists as risk 1.</p>
-<h3 id="do-not-run-a-display-cable-across-the-pivot"><a class="anchor" href="#do-not-run-a-display-cable-across-the-pivot">Do not run a display cable across the pivot</a></h3>
-<p>The mini PC service envelope sits at Y=165–390. The Upper Lid display sits above
-Y≈890. <strong>Any direct panel cable would cross all four articulating axles</strong>, which
-is already risk 5 in the interference report.</p>
-<p>Do not route eDP, HDMI or DisplayPort across a rotating joint. Instead:</p>
-<ol>
-<li>Place a small display controller or SBC inside the Upper Lid.</li>
-<li>Run only <strong>power and Ethernet</strong> across the pivot, with a service loop or
-rotary routing.</li>
-<li>Have that controller run <code>hmi</code> as a kiosk client of the robot&#39;s own web UI.</li>
-</ol>
-<p>Ethernet and power tolerate flexing, are cheap to loop, and fail gracefully. A
-high-speed differential video pair across a joint that moves every step does not.
-This makes <code>hmi</code> a networked client by design, which is also what makes screen
-sharing straightforward.</p>
+<h3 id="limb-articulation"><a class="anchor" href="#limb-articulation">Limb articulation</a></h3>
+<p>Reference footage of a walking replica shows the gait is a splay-and-close in the
+sagittal plane: the slabs separate into leading and trailing groups, swing apart
+into a wide A-frame, the body translates through, then they close. Every visible
+rotation axis is horizontal and lateral, matching the X-parallel axles in the
+source geometry. No yaw or roll degree of freedom is present.</p>
+<p>Each outer slab bends mid-limb, so there are <strong>two rotational degrees of freedom
+per limb</strong>: a hip at the lower main axis, Y=610.8, and a knee. The knee is
+modelled at half the hip height, Y=305.4. That ratio is an engineering choice,
+not a measurement from the source geometry, and it is parameterised as
+<code>ARM_KNEE_RATIO</code> so it can move once the gait is reconstructed properly.</p>
+<p>The splay is not a stylistic flourish. Standing, the fore-aft footprint is only
+259.9 mm on a 1,000 mm robot, an aspect ratio of 3.8:1. Splaying converts that
+into roughly an 800 mm base. <strong>The splay is the stability mechanism</strong>, which is
+why the reference robot stands slightly splayed even at rest.</p>
+<h3 id="actuator-sizing-follows-from-the-landing-not-the-stance"><a class="anchor" href="#actuator-sizing-follows-from-the-landing-not-the-stance">Actuator sizing follows from the landing, not the stance</a></h3>
+<p>A static estimate: at 20 kg with the centre of gravity offset 200–300 mm
+horizontally from the loaded hip, holding torque is 39–59 N·m. The 60 N·m
+continuous target covers that.</p>
+<p>But every gait cycle ends in a controlled fall and catch. Applying a 2–3 impact
+factor puts the landing case at <strong>80–180 N·m</strong>, which brackets and may exceed the
+100 N·m peak target. The landing also sizes the shafts, bearings and brackets.</p>
+<p>These are order-of-magnitude figures from stated assumptions, not a dynamic
+analysis. They are recorded to show that the peak torque target is the number at
+risk, and that it must not be frozen without proper simulation.</p>
 <h3 id="as-modelled"><a class="anchor" href="#as-modelled">As modelled</a></h3>
-<p>The bodywork and leg-arm slabs now exist in <code>cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d</code>
-as 15 bodies across <code>11_BODY_PANELS</code> and <code>14_ARMS</code>:</p>
+<p>The bodywork and leg-arm slabs exist in
+<code>cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d</code> as 20 bodies across
+<code>11_BODY_PANELS</code> (14) and <code>14_ARMS</code> (6):</p>
 <p><img src="/GPTars_v2/images/gptars-shell-iso.png" alt="Fusion view of the GP-TARS V2 aluminium shell, service panels and leg-arm slabs"></p>
-<div class="table-wrap"><table><thead><tr><th>Group</th><th>Bodies</th></tr></thead><tbody><tr><td>Front service panels</td><td>Battery, compute, GPU, upper and lid, split on 1.5 mm seams</td></tr><tr><td>Rear panels</td><td>Upper and lower</td></tr><tr><td>Sides, top, bottom</td><td>Port, starboard, top lid, bottom lid</td></tr><tr><td>Leg-arm slabs</td><td>Port and starboard, each split at the lower main axis into upper and lower shells</td></tr></tbody></table></div>
-<p>Each arm slab is 209.317 mm wide, giving 4 mm running clearance to the central
-chassis on each side. The shells are modelled at the 1.2 mm sheet gauge. The
-display aperture is cut through <code>PANEL_FRONT_LID</code> at 400 x 70 mm.</p>
+<div class="table-wrap"><table><thead><tr><th>Group</th><th>Bodies</th></tr></thead><tbody><tr><td>Front</td><td>Lower, display, upper and lid</td></tr><tr><td>Rear</td><td>Battery, compute and GPU access, plus upper</td></tr><tr><td>Sides</td><td>Port and starboard, each split at the hip</td></tr><tr><td>Lids</td><td>Top and bottom</td></tr><tr><td>Leg-arms</td><td>Port and starboard, each as shin, thigh and upper</td></tr></tbody></table></div>
+<p>Two rules drive that layout. <strong>No panel crosses the hip axis at Y=610.8</strong>, since
+the upper and lower chassis articulate there; a 6 mm break straddles it. And
+<strong>service access is on the rear</strong>, so the display is never removed to reach the
+GPU or the mini PC.</p>
+<p>Each arm slab is 209.317 mm wide, leaving 4 mm running clearance to the central
+chassis per side. All shells are modelled at the 1.2 mm sheet gauge. The display
+aperture is cut through <code>PANEL_FRONT_DISPLAY</code> at 268 × 476 mm.</p>
 <p>These are form and packaging bodies. They carry no fastener pattern, formed
-returns, beads, doublers or joint hardware, and none of them is releasable.</p>
+returns, beads, doublers, hinges, bearings or joint hardware, the limbs have no
+feet or contact pads, and none of them is releasable.</p>
 <h3 id="panel-and-safety-consequences"><a class="anchor" href="#panel-and-safety-consequences">Panel and safety consequences</a></h3>
 <ul>
 <li>The bodywork is now formed 5052-H32 aluminium. A large display aperture removes
