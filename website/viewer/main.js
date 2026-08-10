@@ -7,17 +7,33 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 // export the same way static/theme.js does.
 
 function isDark() {
-  return document.documentElement.dataset.theme === "dark";
+  // Dark is the site default; only an explicit light choice opts out.
+  return document.documentElement.dataset.theme !== "light";
+}
+
+function fail(container, message) {
+  const note = document.createElement("p");
+  note.className = "viewer-fallback";
+  note.textContent = message;
+  container.appendChild(note);
+  container.classList.add("is-ready");
 }
 
 function init(container) {
+  // Guard against a second boot, e.g. if the bundle is included twice.
+  if (container.dataset.viewerReady) return;
+  container.dataset.viewerReady = "1";
+
   let models;
   try {
     models = JSON.parse(container.dataset.models || "[]");
   } catch {
     models = [];
   }
-  if (!models.length) return;
+  if (!models.length) {
+    fail(container, "No model files were listed for this viewer.");
+    return;
+  }
 
   const stage = document.createElement("div");
   stage.className = "viewer-stage";
@@ -27,7 +43,8 @@ function init(container) {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   } catch {
-    stage.textContent = "This browser cannot display WebGL content.";
+    stage.remove();
+    fail(container, "This browser cannot display WebGL content. The STL files below open in any CAD or mesh viewer.");
     return;
   }
 
@@ -162,11 +179,21 @@ function init(container) {
 }
 
 function boot() {
-  document.querySelectorAll("[data-stl-viewer]").forEach(init);
+  document.querySelectorAll("[data-stl-viewer]").forEach((container) => {
+    try {
+      init(container);
+    } catch (error) {
+      // A viewer failure must never take the rest of the page down.
+      console.error("[gptars] STL viewer failed", error);
+      fail(container, "The interactive model could not be loaded. The STL files below open in any CAD or mesh viewer.");
+    }
+  });
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", boot);
-} else {
+// Wait for load rather than DOMContentLoaded so React has finished hydrating
+// before the viewer touches the DOM.
+if (document.readyState === "complete") {
   boot();
+} else {
+  window.addEventListener("load", boot);
 }

@@ -21,17 +21,18 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Applied before first paint so the sheet never flashes the wrong theme. The
-// GitHub Pages export strips all scripts and re-attaches static/theme.js
-// instead, which reads the same storage key.
-const THEME_INIT = `(()=>{try{const s=localStorage.getItem("gptars-theme");
-document.documentElement.dataset.theme=s??(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){
-document.documentElement.dataset.theme="light"}})()`;
+// The sheet is dark by default. The markup ships with data-theme="dark" so the
+// first paint, and the scriptless GitHub Pages export, are dark without any
+// JavaScript. This only switches to light if the reader has explicitly chosen
+// it, which is why the system colour scheme is deliberately not consulted.
+const THEME_INIT = `(()=>{try{if(localStorage.getItem("gptars-theme")==="light")
+document.documentElement.dataset.theme="light"}catch(e){}})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <head>
+        <meta name="color-scheme" content="dark light" />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>
       <body>{children}</body>

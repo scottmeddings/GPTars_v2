@@ -59,14 +59,23 @@ export default function ModelPage() {
             </div>
           </div>
 
-          <div className="stl-viewer" data-stl-viewer data-models={JSON.stringify(MODELS)}>
-            <noscript>
-              <p className="viewer-fallback">
-                The interactive model needs JavaScript. The STL files are linked below and open in any CAD or mesh
-                viewer.
-              </p>
-            </noscript>
-          </div>
+          {/*
+            The viewer builds its own DOM inside this element. dangerouslySetInnerHTML
+            tells React not to reconcile the subtree, which is what stops hydration
+            failing once the canvas and legend are injected.
+          */}
+          <div
+            className="stl-viewer"
+            data-stl-viewer
+            data-models={JSON.stringify(MODELS)}
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: "" }}
+          />
+          <noscript>
+            <p className="viewer-fallback">
+              The interactive model needs JavaScript. The STL files are linked below and open in any CAD or mesh viewer.
+            </p>
+          </noscript>
 
           <div className="notice warning">
             <b>Form and packaging only:</b> these bodies carry no fastener patterns, formed returns, beads, doublers or

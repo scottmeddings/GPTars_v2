@@ -22,8 +22,8 @@ function subscribe(onChange: () => void): () => void {
 export function ThemeToggle() {
   const dark = useSyncExternalStore(
     subscribe,
-    () => document.documentElement.dataset.theme === "dark",
-    () => false,
+    () => document.documentElement.dataset.theme !== "light",
+    () => true, // Dark is the served default, so the server snapshot matches.
   );
 
   function toggleTheme() {
