@@ -12,8 +12,8 @@ Model: **MINISFORUM AI X1 Pro-370 barebone**
 | Physical size | 195 × 195 × 47.5 mm including feet |
 | Chassis height without feet | 42.5 mm |
 | Mass | 1.5 kg |
-| Internal DC input requirement | 19 V / 7.1 A, approximately 134.9 W maximum |
-| Alternative input | Rear USB4 PD input, 65–100 W |
+| Internal mains PSU | approximately 134.9 W internal supply |
+| Alternative power input | rear USB4 PD input, 65–100 W |
 | Memory | Two DDR5-5600 SO-DIMM slots, up to 128 GB |
 | Storage | Three M.2 2280 NVMe slots |
 | External GPU link | OCuLink PCIe 4.0 x4 |
@@ -21,14 +21,24 @@ Model: **MINISFORUM AI X1 Pro-370 barebone**
 
 The Amazon ASIN is `B0G32PTF92`. The listing is the barebone configuration, so RAM, SSD, and operating system installation must be confirmed separately.
 
+## Compute configuration baseline
+
+Current preferred configuration for the robot is:
+
+- MINISFORUM AI X1 Pro-370
+- 32 GB system RAM if the external GPU is installed initially
+- NVIDIA RTX 2000 Ada Generation 16 GB through OCuLink
+- retain RAM upgrade path to 64 GB or 128 GB later
+
+The system should also be benchmarked without the discrete GPU because the Ryzen AI 9 HX370 includes Radeon 890M graphics and an XDNA 2 NPU. The RTX 2000 Ada remains the performance baseline for local LLM inference, but CAD and wiring should keep it modular and removable.
+
 ## CAD orientation
 
-The unit is reserved vertically:
+The mini PC is reserved vertically:
 
 - X / lateral width: 195 mm
 - Y / vertical height: 195 mm
 - Z / chassis depth: 47.5 mm
-- body location in Concept V1: centred on X and Z, Y=180–375 mm
 
 Service keep-out:
 
@@ -36,7 +46,48 @@ Service keep-out:
 225 × 225 × 100 mm
 ```
 
-This provides initial allowance for vibration isolation, side airflow, front controls, rear cable bends, and vertical removal. Port-specific cut-outs require measurement from the physical machine or an official mechanical drawing.
+This provides initial allowance for vibration isolation, airflow, controls, rear cable bends, and vertical removal. Port-specific cut-outs require measurement from the physical machine or an official mechanical drawing.
+
+The mini PC should be placed in the centre body below the display module and above the battery where packaging allows. It is not to occupy the upper display/face area.
+
+## Upper display / face module
+
+The TV/display is now a **top-of-body component** and forms the primary visible face of GP-TARS.
+
+Design intent:
+
+- display mounted in the upper body/head area, not the centre or lower chassis
+- target display/camera zone approximately 850–950 mm above ground on the 1,000 mm standing robot
+- display face may be tilted rearward approximately 5–10 degrees for adult viewing while remaining visible to children
+- camera located immediately above, beside, or closely integrated with the display so gaze direction and visual interaction appear natural
+- microphone array located in the same upper module where practical
+- speakers may be integrated into the upper module or immediately below it
+- the complete screen/camera/microphone assembly should be removable as a service cassette
+- exact screen cut-out and mounting geometry remain open until the final display model is selected
+
+The display module must not become a primary structural load path. Walking and impact loads pass through the internal aluminium chassis.
+
+## Component vertical layout target
+
+Current packaging order from top to bottom:
+
+```text
+TOP OF ROBOT
+
+DISPLAY / FACE
+CAMERA + MICROPHONES
+
+MINI PC
+RTX 2000 ADA + OCuLink DOCK
+
+POWER DISTRIBUTION / CONTROLLERS
+
+12.8 V BATTERY
+
+LOWER BODY / WALKING STRUCTURE
+```
+
+The battery remains as low and central as possible to reduce centre-of-gravity height. Compute hardware is placed near the middle of the body. The display and sensors are deliberately high for visibility and interaction.
 
 ## Interfaces to preserve
 
@@ -50,13 +101,13 @@ Front/service access:
 
 Rear cable space:
 
-- USB4 PD input
+- rear USB4 PD input
 - HDMI 2.1
 - DisplayPort 2.0
 - two 2.5 GbE ports
 - OCuLink
 - USB 2.0
-- AC input if used during bench testing
+- AC mains inlet for bench/shore power
 - Kensington slot
 
 Side/top access:
@@ -68,53 +119,37 @@ Side/top access:
 
 GP-TARS V2 uses a **12.8 V nominal LiFePO4 main battery bus**.
 
-The preferred current battery is the WattCycle **12.8 V 100 Ah Mini LiFePO4** pack, giving approximately **1,280 Wh** installed energy. The electrical design intentionally remains compatible with larger 12.8 V WattCycle batteries, including the 314 Ah Mini, provided mass, structure, cabling, fusing and packaging are appropriate for the specific build.
+The preferred current battery is the WattCycle **12.8 V 100 Ah Mini LiFePO4** pack, giving approximately **1,280 Wh** installed energy. The electrical design intentionally remains compatible with larger 12.8 V WattCycle batteries, provided mass, structure, cabling, fusing and packaging are appropriate for the specific build.
 
 The robot is therefore designed around a single low-voltage DC bus rather than a 24/25.6 V series battery system.
 
-## Mini PC power conversion
+## Mini PC battery power
 
-The MINISFORUM AI X1 Pro requires a regulated 19 V supply for full-power operation. The selected conversion path is:
+The X1 Pro chassis has an internal AC power supply; there is no exposed 19 V DC barrel input on the rear panel. Therefore the previously proposed direct 12-to-19 V DC converter path is **not used** unless the computer is deliberately modified internally, which is not part of the baseline design.
+
+Preferred onboard battery path:
 
 ```text
 12.8 V LiFePO4 MAIN BUS
         |
-        +-- 20 A branch fuse
+        +-- fused compute branch
         |
-        +-- local isolation/service switch
-        |
-        +-- SZWENGAO WG-12S1920 DC-DC boost converter
+        +-- automotive DC/DC USB-C PD source
                 |
-                +-- regulated 19 V output
-                |
-                +-- MINISFORUM AI X1 Pro DC input
+                +-- 20 V / 5 A, up to 100 W USB-C PD
+                        |
+                        +-- rear USB4 PD-IN on AI X1 Pro
 ```
 
-Selected converter baseline:
+The rear USB4 port is the intended DC battery-input path and must be verified on the physical unit before final harness fabrication. The internal AC inlet remains available for workshop/shore power.
 
-| Item | Value |
-|---|---|
-| Converter | SZWENGAO WG-12S1920 |
-| Function | DC-DC boost converter |
-| Input | nominal 12 V system; verify production unit supports the complete LiFePO4 operating range before final installation |
-| Output | regulated 19 V |
-| Maximum output current | 20 A |
-| Maximum advertised power | 380 W |
-| Topology | non-isolated |
+Because USB-C PD is limited to 100 W while the internal mains supply has a larger power envelope, sustained CPU/NPU workloads must be benchmarked on 100 W PD. If 100 W is insufficient, the preferred fallback is a properly rated 12 V DC to 230–240 V AC pure-sine inverter feeding the factory mains inlet rather than opening or modifying the mini PC.
 
-The X1 Pro itself is expected to require no more than approximately **19 V × 7.1 A = 134.9 W**. The 380 W converter therefore provides substantial thermal and transient headroom and should operate well below its maximum rating.
-
-At approximately 135 W output, expected battery-side current is roughly **11–13 A** depending on battery voltage and conversion efficiency. The current baseline is therefore a **20 A fuse on the 12 V input branch**. Final fuse, cable and connector sizing must be checked against measured startup and sustained current on the completed robot.
-
-The converter must be mounted to a thermally conductive internal structure with free airflow around its finned housing. Do not bury it between insulation, battery foam or wiring bundles.
-
-Because the converter is non-isolated, input and output grounds share the robot common ground. Grounding for the mini PC, RTX 2000 Ada, display and OCuLink dock must be designed as one intentional low-impedance system to minimise ground-loop and EMI problems.
-
-USB-C PD remains available as a backup/bench power method, but the direct regulated **19 V DC path is preferred onboard** because it preserves the X1 Pro's full approximately 135 W input capability rather than imposing the 100 W USB-C PD ceiling.
+The earlier SZWENGAO WG-12S1920 12-to-19 V converter is no longer specified for the mini PC because the production chassis does not expose a 19 V DC input.
 
 ## Confirmed external GPU for the LLM
 
-The onboard accelerator is confirmed as the **NVIDIA RTX 2000 Ada Generation 16 GB**. It connects to the AI X1 Pro through OCuLink PCIe 4.0 x4.
+The onboard discrete accelerator baseline is the **NVIDIA RTX 2000 Ada Generation 16 GB**. It connects to the AI X1 Pro through OCuLink PCIe 4.0 x4.
 
 | Item | Confirmed value |
 |---|---|
@@ -130,9 +165,9 @@ The onboard accelerator is confirmed as the **NVIDIA RTX 2000 Ada Generation 16 
 | Cooling | Active |
 | Display outputs | 4 × mini DisplayPort 1.4a |
 
-The previous 300 × 130 × 60 mm generic GPU reservation is superseded. CAD should reserve the physical card envelope plus the OCuLink adapter, connector bend, airflow and removable service clearance. A preliminary engineering keep-out of **190 × 90 × 70 mm** is acceptable until the actual card and adapter are measured.
+CAD should reserve the physical card envelope plus the OCuLink adapter, connector bend, airflow and removable service clearance. A preliminary engineering keep-out of **190 × 90 × 70 mm** is acceptable until the actual card and adapter are measured.
 
-At 70 W maximum board power the RTX 2000 Ada materially improves the power and thermal budget compared with the former 150 W placeholder while meeting the 16 GB VRAM target.
+At 70 W maximum board power the RTX 2000 Ada fits the current mobile power and thermal strategy while meeting the 16 GB dedicated VRAM target.
 
 The GPU uses its own protected regulated power branch from the **12.8 V main bus** through the selected OCuLink dock/adapter. OCuLink carries PCIe data and does not itself power the card. Final converter, fuse and wiring sizing must use measured complete GPU + adapter consumption rather than the 70 W board figure alone.
 
@@ -152,8 +187,6 @@ Initial accessory converter target:
 - fused input and fused downstream branches
 - over-current, over-temperature and short-circuit protection
 
-The mini PC and GPU are not powered from this general-purpose 12 V accessory rail.
-
 ## Power-domain separation
 
 A shared 12.8 V battery does not mean a shared switched domain. The power distribution unit separates motion and compute after the main battery disconnect:
@@ -163,7 +196,7 @@ A shared 12.8 V battery does not mean a shared switched domain. The power distri
       |
       +-- MOTION CONTACTOR / E-STOP --> 12 V-class motion system
       |
-      +-- 20 A COMPUTE FUSE --> 12-to-19 V WG-12S1920 --> Mini PC
+      +-- COMPUTE FUSE --> 12 V to 100 W USB-C PD --> Mini PC rear USB4 PD-IN
       |
       +-- GPU FUSE --> regulated GPU/dock supply --> RTX 2000 Ada
       |
@@ -195,7 +228,7 @@ For example, a 600 W total load is approximately 47 A at 12.8 V before conversio
 - Do not block the PC's inlet or exhaust faces.
 - Maintain the 225 × 225 × 100 mm mini-PC keep-out until airflow direction is physically verified.
 - Preserve clear intake and exhaust paths around the RTX 2000 Ada active cooler.
-- Mount the WG-12S1920 to a thermally conductive internal plate with airflow.
-- Place temperature probes in PC inlet/exhaust air and near the GPU exhaust and DC-DC converter.
+- Keep display heat isolated from the camera and microphone electronics where practical.
+- Place temperature probes in PC inlet/exhaust air and near the GPU exhaust.
 - Isolate compute exhaust from motor controllers and the battery.
 - Mount compute devices with removable vibration isolation without making them part of the structural load path.
