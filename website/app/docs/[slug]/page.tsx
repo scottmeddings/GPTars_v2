@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { docs } from "virtual:gptars/docs";
-import { formatRevised, SiteNav } from "../../site-nav";
+import { formatRevised, SITE_LINKS, SiteNav } from "../../site-nav";
 
 export function generateStaticParams() {
   return docs.map((entry) => ({ slug: entry.slug }));
@@ -53,13 +53,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
         </header>
 
         <SiteNav
-          links={[
-            { href: "/", label: "Overview" },
-            { href: "/model", label: "3D model" },
-            { href: "/decals", label: "Decals" },
-            { href: "/docs", label: "Documents" },
-            { href: "/parameters", label: "Parameters" },
-          ]}
+          links={SITE_LINKS}
         />
 
         <section className="doc-section">

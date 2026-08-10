@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { parameters } from "virtual:gptars/parameters";
-import { SiteNav } from "../site-nav";
+import { SITE_LINKS, SiteNav } from "../site-nav";
 
 export const metadata: Metadata = {
   title: "3D model — GP-TARS V2",
@@ -42,13 +42,7 @@ export default function ModelPage() {
 
         <SiteNav
           current="/model"
-          links={[
-            { href: "/", label: "Overview" },
-            { href: "/model", label: "3D model" },
-            { href: "/decals", label: "Decals" },
-            { href: "/docs", label: "Documents" },
-            { href: "/parameters", label: "Parameters" },
-          ]}
+          links={SITE_LINKS}
         />
 
         <section>

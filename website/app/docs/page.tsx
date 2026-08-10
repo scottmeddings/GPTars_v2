@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { docs } from "virtual:gptars/docs";
-import { formatRevised, SiteNav } from "../site-nav";
+import { formatRevised, SITE_LINKS, SiteNav } from "../site-nav";
 
 export const metadata: Metadata = {
   title: "Document register — GP-TARS V2",
@@ -34,13 +34,7 @@ export default function DocumentRegister() {
 
         <SiteNav
           current="/docs"
-          links={[
-            { href: "/", label: "Overview" },
-            { href: "/model", label: "3D model" },
-            { href: "/decals", label: "Decals" },
-            { href: "/docs", label: "Documents" },
-            { href: "/parameters", label: "Parameters" },
-          ]}
+          links={SITE_LINKS}
         />
 
         <section>

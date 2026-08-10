@@ -1,6 +1,6 @@
 import { docs } from "virtual:gptars/docs";
 import { parameters } from "virtual:gptars/parameters";
-import { SiteNav } from "./site-nav";
+import { SITE_LINKS, SiteNav } from "./site-nav";
 
 // Every figure on this sheet is read from cad/parameters.py so the published
 // numbers cannot drift away from the values the CAD generators consume.
@@ -176,7 +176,7 @@ export default function Home() {
             </p>
           </div>
           <div className="revision-stamp" aria-label="Project revision">
-            <span>MODEL <b>COMPUTE V2</b></span>
+            <span>MODEL <b>NARROW 480</b></span>
             <span>BUILD <b>HYBRID</b></span>
             <span>UNITS <b>MM</b></span>
             <span>STATUS <b>CONCEPT</b></span>
@@ -185,19 +185,7 @@ export default function Home() {
 
         <SiteNav
           current="/"
-          links={[
-            { href: "#overview", label: "Overview" },
-            { href: "#drawings", label: "Drawings" },
-            { href: "#structure", label: "Structure" },
-            { href: "#walking", label: "Walking" },
-            { href: "#compute", label: "AI compute" },
-            { href: "#software", label: "Software" },
-            { href: "#downloads", label: "Files" },
-            { href: "/model", label: "3D model ↗" },
-            { href: "/decals", label: "Decals ↗" },
-            { href: "/docs", label: "Documents ↗" },
-            { href: "/parameters", label: "Parameters ↗" },
-          ]}
+          links={SITE_LINKS}
         />
 
         <section className="hero" id="overview">
@@ -213,8 +201,8 @@ export default function Home() {
             </div>
           </div>
           <figure className="hero-figure">
-            <img src="/images/gptars-compute-v2.png" alt="Fusion perspective view of the GP-TARS V2 aluminium frame and equipment reservations" />
-            <figcaption>COMPUTE V2 · one-metre packaging study · Fusion assembly</figcaption>
+            <img src="/images/gptars-shell-iso.png" alt="Fusion view of the 480 mm GP-TARS V2 aluminium shell, service panels and leg-arm slabs" />
+            <figcaption>NARROW 480 · 480 × 1000 × 260 mm · Fusion assembly</figcaption>
           </figure>
         </section>
 
@@ -240,12 +228,12 @@ export default function Home() {
           </div>
           <div className="drawing-grid">
             <figure className="drawing drawing-main">
-              <img src="/images/gptars-compute-v2.png" alt="Current GP-TARS V2 compute packaging assembly" />
-              <figcaption><b>Current assembly.</b> Exact mini-PC body and service envelope with provisional GPU, battery and actuator reservations.</figcaption>
+              <img src="/images/gptars-shell-iso.png" alt="Current GP-TARS V2 narrow-body assembly" />
+              <figcaption><b>Current assembly.</b> Narrowed 480 mm body, four slabs, with the leg-arms split at hip and knee.</figcaption>
             </figure>
             <figure className="drawing">
-              <img src="/images/gptars-aluminium-v1.png" alt="GP-TARS V2 aluminium architecture concept" />
-              <figcaption><b>Aluminium V1.</b> 6061 frame architecture and 5052 equipment-tray intent.</figcaption>
+              <img src="/images/gptars-shell-front.png" alt="GP-TARS V2 front elevation showing panel splits and the display aperture" />
+              <figcaption><b>Front elevation.</b> Panel splits, the rear-service layout and the 194 × 345 display aperture.</figcaption>
             </figure>
             <figure className="drawing">
               <img src="/images/tars-original-reference.png" alt="Original imported TARS source geometry in Fusion" />
@@ -269,7 +257,7 @@ export default function Home() {
                   <div className="zone pc">AI X1 PRO</div>
                   <div className="zone battery">24 V BATTERY</div>
                 </div>
-                <div className="dimension width-dim"><span>958.7 mm reference</span></div>
+                <div className="dimension width-dim"><span>480 mm</span></div>
               </div>
             </div>
             <div>

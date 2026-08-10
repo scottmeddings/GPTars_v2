@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SiteNav } from "../site-nav";
+import { SITE_LINKS, SiteNav } from "../site-nav";
 
 export const metadata: Metadata = {
   title: "Decals — GP-TARS V2",
@@ -17,7 +17,7 @@ const decals = [
   ["Service labels", "130 × 16", "×4", "Compute, GPU and battery access, plus isolate before opening"],
   ["Pinch-point stripes", "344 × 14", "×2", "Limb leading edges and the hip gap"],
   ["Panel index marks", "26 × 26", "×8", "Return each panel to the opening it came from"],
-  ["Display surround", "Scales to 268 × 476", "×1", "Bezel trim for the front-face aperture"],
+  ["Display surround", "Scales to 194 × 345", "×1", "Bezel trim for the front-face aperture"],
 ];
 
 const rules = [
@@ -52,13 +52,7 @@ export default function DecalsPage() {
 
         <SiteNav
           current="/decals"
-          links={[
-            { href: "/", label: "Overview" },
-            { href: "/model", label: "3D model" },
-            { href: "/decals", label: "Decals" },
-            { href: "/docs", label: "Documents" },
-            { href: "/parameters", label: "Parameters" },
-          ]}
+          links={SITE_LINKS}
         />
 
         <section>
