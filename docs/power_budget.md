@@ -212,25 +212,51 @@ because its thermal runaway behaviour is much more forgiving than NMC. That
 safety argument is real and should not be dismissed on density alone. But the
 mass penalty is roughly double, and it lands on a budget that is already tight.
 
-### On a 12 V 135 Ah LiFePO4 pack
+### Candidates assessed
 
-A pack of that size is 1,620 Wh, which is more energy than the robot needs, and
-it fails on three other counts:
+| | 12 V 135 Ah LiFePO4 | 24 V 100 Ah LiFePO4 | Target |
+|---|---:|---:|---:|
+| Energy | 1,620 Wh | 2,560 Wh | ~1,000 Wh |
+| Nominal voltage | 12 V | 25.6 V | 24 V |
+| Typical mass | 12–16 kg | **20–26 kg** | 4.5–11 kg |
+| Typical volume | ~12.4 L | ~12.5 L | 5.4 L bay |
+| Verdict | Wrong voltage, too heavy, too large | Correct voltage, far too heavy, too large | — |
 
-- **Voltage.** It is 12 V against a 24 V bus. Two in series doubles the mass to
-  roughly 30 kg. Boosting 12 V to 24 V is lossy and doubles the input current.
-  Running the whole robot at 12 V conflicts with actuators specified for 24–48 V
-  and doubles every current in the machine.
-- **Mass.** Packs of this class are typically 12–16 kg. That alone is most of the
-  12–25 kg budget for the entire robot.
-- **Size.** Typical case dimensions are near 330 × 175 × 215 mm, about 12.4
-  litres against a 5.4 litre reservation, and 330 mm exceeds the 240 mm chassis
-  width. It fits only stood on end, and only if the bay is redesigned.
+The 25.6 V unit fixes the voltage problem: 8S LiFePO4 is the standard
+configuration for a 24 V bus and needs no series pairing or boost stage. It then
+fails harder on the two constraints that actually bind. At roughly 24 kg it is
+the **entire robot budget in one component**, and at about 12.5 litres it is
+more than twice the bay.
 
-The correct shape is a **24 V pack of roughly 40 Ah**, purpose-built rather than
-a caravan or deep-cycle unit. Deep-cycle packs are optimised for cycle life and
-cost at low discharge rates, carry heavy cases and terminals, and size their
-management electronics for currents far beyond the 23 A peak here.
+It is also over-specified for the duty. At the 23 A peak, a 100 Ah pack runs at
+0.23C. That discharge capability is paid for in mass and never used.
+
+### The product class is the mistake
+
+Deep-cycle solar, RV and camping packs are engineered for a different problem:
+stationary installation where mass is irrelevant, cycle life and cost per watt-
+hour dominate, and the discharge rating must suit an inverter drawing hundreds of
+amps. They carry heavy cases, large terminals and oversized management
+electronics to suit.
+
+A walking robot inverts every one of those priorities. What is needed is a
+**purpose-built 24 V pack of roughly 40 Ah**, closer in construction to a light
+electric vehicle or power-tool pack than to a leisure battery.
+
+### Volume also decides the chemistry
+
+At pack level LiFePO4 runs about 150–200 Wh/litre against 250–350 for Li-ion
+NMC. For a 1,000 Wh pack:
+
+| Chemistry | Mass | Volume | Against the 5.4 L bay |
+|---|---:|---:|---|
+| Li-ion NMC, 7S from 21700 cells | ~5 kg | ~3.3 L | Comfortable |
+| LiFePO4, 8S prismatic | ~9 kg | ~5.6 L | Marginal, bay needs enlarging |
+
+So the safety argument for LiFePO4 costs roughly 4 kg **and** the whole of the
+bay's spare volume. It remains a legitimate choice for a machine that falls over
+deliberately, but it must be taken deliberately, with the mass budget reopened at
+the same time.
 
 ### The mass budget will not close on its own
 
