@@ -147,21 +147,23 @@ ARM_SLAB_WIDTH = 116.0
 # Upper Lid. The lid offers only 110 mm of height; the front face below the hip
 # axis offers roughly 600 mm, which admits a full portrait panel.
 DISPLAY_PRESENT = True
-DISPLAY_LOCATION = "Chassis / front face, below the lower main axis"
-DISPLAY_CLASS = "15.4 inch portrait TFT-LED, 12 V"
-DISPLAY_ACTIVE_WIDTH = 194.0
-DISPLAY_ACTIVE_HEIGHT = 345.0
-DISPLAY_ORIGIN_Y = 230.0
-DISPLAY_MARGIN_PER_SIDE = 23.0
+DISPLAY_LOCATION = "Chassis / upper front face, above the hip axis"
+DISPLAY_CLASS = "14 inch portrait TFT-LED, 12 V"
+DISPLAY_ACTIVE_WIDTH = 174.0
+DISPLAY_ACTIVE_HEIGHT = 310.0
+DISPLAY_ORIGIN_Y = 655.0
+DISPLAY_MARGIN_PER_SIDE = 33.0
+DISPLAY_CENTRE_Y = 810.0
+UPPER_CHASSIS_ASSUMED_RIGID = True
 DISPLAY_DEPTH_RESERVATION = 35.0
 # Candidate unit: unbranded 15.4 inch 12 V portable TV, HDMI in, 18 W.
 # 360 mm and 28 mm are the listed figures; the 220 mm bezel height is inferred
 # and the seller quotes a 10-30 mm measurement tolerance, so all three must be
 # measured on the physical unit before the aperture is cut.
-DISPLAY_MODULE_WIDTH = 235.0
-DISPLAY_MODULE_HEIGHT = 360.0
+DISPLAY_MODULE_WIDTH = 215.0
+DISPLAY_MODULE_HEIGHT = 328.0
 DISPLAY_MODULE_THICKNESS = 28.0
-DISPLAY_MODULE_CLEARANCE_PER_SIDE = 1.3
+DISPLAY_MODULE_CLEARANCE_PER_SIDE = 11.3
 DISPLAY_MODULE_TOLERANCE_STATED = 30.0
 DISPLAY_STACK_DEPTH = 33.2
 DISPLAY_SUPPLY_V = 12.0
