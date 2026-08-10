@@ -19,6 +19,7 @@ const READING_ORDER = [
   "aluminium_architecture",
   "compute_hardware",
   "compute_software_stack",
+  "power_budget",
   "software_architecture",
   "interference_report",
 ];
@@ -31,6 +32,7 @@ const NAV_LABELS: Record<string, string> = {
   aluminium_architecture: "Architecture",
   compute_hardware: "Compute",
   compute_software_stack: "Software stack",
+  power_budget: "Power",
   software_architecture: "Software",
   interference_report: "Interference",
 };
