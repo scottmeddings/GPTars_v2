@@ -62,9 +62,10 @@ MINI_PC_WIDTH = 195.0
 MINI_PC_HEIGHT = 195.0
 MINI_PC_DEPTH = 47.5
 MINI_PC_MASS_KG = 1.5
-MINI_PC_KEEP_OUT_WIDTH = 225.0
+MINI_PC_ORIENTATION = "Edge-on; board plane parallel to the side panels"
+MINI_PC_KEEP_OUT_WIDTH = 100.0
 MINI_PC_KEEP_OUT_HEIGHT = 225.0
-MINI_PC_KEEP_OUT_DEPTH = 100.0
+MINI_PC_KEEP_OUT_DEPTH = 210.0
 MINI_PC_POWER_INTERNAL_W = 134.9
 MINI_PC_USB4_PD_INPUT_W = 100.0
 MINI_PC_USB4_PD_INPUT_V = 20.0
@@ -74,22 +75,24 @@ MINI_PC_USB4_PD_INPUT_V = 20.0
 GPU_REQUIRED = True
 GPU_ROLE = "Local LLM inference"
 GPU_VENDOR_TARGET = "NVIDIA"
+GPU_ORIENTATION = "Vertical; the 300 mm card length runs up the body"
 GPU_LENGTH = 300.0
 GPU_HEIGHT = 130.0
 GPU_WIDTH = 60.0
+GPU_LATERAL_DEMAND = 130.0
 GPU_LINK = "OCuLink PCIe 4.0 x4"
 GPU_POWER_SOURCE = "Independent protected supply; TBD"
 GPU_PSU_ENVELOPE = None
 
-BATTERY_WIDTH = 300.0
-BATTERY_DEPTH = 150.0
-BATTERY_HEIGHT = 120.0
+BATTERY_WIDTH = 200.0
+BATTERY_HEIGHT = 150.0
+BATTERY_DEPTH = 180.0
 
-# Main actuator placeholders
-ACTUATOR_MAIN_PLACEHOLDER_DIAMETER = 120.0
-ACTUATOR_MAIN_PLACEHOLDER_LENGTH = 100.0
-ACTUATOR_SECONDARY_PLACEHOLDER_DIAMETER = 70.0
-ACTUATOR_SECONDARY_PLACEHOLDER_LENGTH = 70.0
+# Actuator placeholders, one hip and one knee module per side.
+ACTUATOR_HIP_PLACEHOLDER_DIAMETER = 120.0
+ACTUATOR_HIP_PLACEHOLDER_LENGTH = 100.0
+ACTUATOR_KNEE_PLACEHOLDER_DIAMETER = 70.0
+ACTUATOR_KNEE_PLACEHOLDER_LENGTH = 70.0
 
 # Cooling reservation options
 FAN_SIZES = (80.0, 92.0, 120.0)
@@ -134,31 +137,39 @@ ARM_KNEE_RATIO = 0.5
 AXLE_KNEE_Y = AXLE_LOWER_MAIN_Y * ARM_KNEE_RATIO
 ARM_CLEARANCE = 4.0
 ARM_JOINT_GAP = 2.0
-ARM_SLAB_WIDTH = 209.317
+ARM_SLAB_WIDTH = 116.0
 
 # Onboard display, on the main front face of the lower chassis rather than the
 # Upper Lid. The lid offers only 110 mm of height; the front face below the hip
 # axis offers roughly 600 mm, which admits a full portrait panel.
 DISPLAY_PRESENT = True
 DISPLAY_LOCATION = "Chassis / front face, below the lower main axis"
-DISPLAY_CLASS = "15.6 inch portrait LCD"
+DISPLAY_CLASS = "15.4 inch portrait TFT-LED, 12 V"
 DISPLAY_ACTIVE_WIDTH = 194.0
 DISPLAY_ACTIVE_HEIGHT = 345.0
 DISPLAY_ORIGIN_Y = 130.0
 DISPLAY_MARGIN_PER_SIDE = 23.0
-DISPLAY_DEPTH_RESERVATION = 25.0
-# Bare panel module outline for a 15.6 inch class panel, portrait.
-DISPLAY_MODULE_WIDTH = 223.8
-DISPLAY_MODULE_HEIGHT = 359.5
-DISPLAY_MODULE_THICKNESS = 5.5
-DISPLAY_MODULE_CLEARANCE_PER_SIDE = 6.9
-DISPLAY_STACK_DEPTH = 22.9
+DISPLAY_DEPTH_RESERVATION = 35.0
+# Candidate unit: unbranded 15.4 inch 12 V portable TV, HDMI in, 18 W.
+# 360 mm and 28 mm are the listed figures; the 220 mm bezel height is inferred
+# and the seller quotes a 10-30 mm measurement tolerance, so all three must be
+# measured on the physical unit before the aperture is cut.
+DISPLAY_MODULE_WIDTH = 220.0
+DISPLAY_MODULE_HEIGHT = 360.0
+DISPLAY_MODULE_THICKNESS = 28.0
+DISPLAY_MODULE_CLEARANCE_PER_SIDE = 8.8
+DISPLAY_MODULE_TOLERANCE_STATED = 30.0
+DISPLAY_STACK_DEPTH = 33.2
+DISPLAY_SUPPLY_V = 12.0
+DISPLAY_POWER_W = 18.0
+DISPLAY_AUDIO_W = 2.0
+DISPLAY_SPEAKERS = "Two 32 mm, driven over HDMI audio"
 DISPLAY_COVER_THICKNESS = 2.0
 DISPLAY_DOUBLER_THICKNESS = 2.0
 DISPLAY_INTERFACE = "HDMI from the mini PC; both sit in the lower chassis"
 DISPLAY_COVER_MATERIAL = "Chemically strengthened glass or bonded polycarbonate"
 DISPLAY_MASS_ESTIMATE_KG = 0.8
-DISPLAY_LINK = "Ethernet and power; no video across an articulating joint"
+DISPLAY_LINK = "Direct HDMI from the mini PC; nothing crosses a moving joint"
 PANEL_HIP_BREAK_GAP = 6.0
 
 # Compute stack. Units here are GB and counts, not millimetres.
