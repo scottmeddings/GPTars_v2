@@ -138,7 +138,7 @@ intent and V2 should scale that intent rather than invent a new location.
 ### The constraint that sets the size
 
 The central chassis measures 133.232 × 250.050 × 65.070 mm in the source and
-therefore **532 × 999 × 260 mm** at the 3.993659 reference scale. That is a large
+**532 × 999 × 260 mm** at the 3.993659 reference scale, but the build width was subsequently narrowed to **240 mm** (see below). That is a large
 front face, but it is not one rigid body: the upper and lower chassis articulate
 about the main and secondary axles. Source axis heights are measured from a base
 at `SOURCE_Y_MIN = -10.366961`, so height above ground is
@@ -155,28 +155,32 @@ These agree with `docs/interference_report.md`, which records the upper axes at
 approximately Y=786–890 and the lower main axis near Y=611.
 
 The Upper Lid volume above the upper secondary axle is therefore
-**532 mm wide by only 110 mm tall**. A display must fit inside one rigid section;
+**240 mm wide by only 110 mm tall**. A display must fit inside one rigid section;
 nothing may span an articulating axle.
 
 ### Recommended display
 
-The Upper Lid therefore admits only a wide bar panel, roughly 500 × 85 mm of
+The Upper Lid therefore admits only a wide bar panel, roughly 210 × 85 mm of
 usable aperture. **The display is not placed there.**
 
 Reference footage of a working replica mounts its screen on the **main front face
 of the lower chassis** instead, and that is the better location. The front face
-below the hip axis is a single rigid section approximately **532 mm wide by 600 mm
+below the hip axis is a single rigid section approximately **240 mm wide by 600 mm
 tall**, which is a far larger canvas than the lid.
 
 | Location | Usable aperture | Verdict |
 |---|---|---|
-| Front face, below the hip axis | ~532 × 600 mm | **Selected.** Admits a full portrait panel |
-| Upper Lid, above Y=889.9 | ~500 × 85 mm | Bar panels only |
-| Between the lower axes, Y=611–786 | 532 × 175 mm | Too shallow once structure is allowed for |
+| Front face, below the hip axis | ~240 × 600 mm | **Selected.** Admits a full portrait panel |
+| Upper Lid, above Y=889.9 | ~210 × 85 mm | Bar panels only |
+| Between the lower axes, Y=611–786 | 240 × 175 mm | Too shallow once structure is allowed for |
 
-The modelled aperture is a **21.5 inch portrait panel, 268 × 476 mm active**,
-positioned Y=100 to 576. It clears the hip axis at Y=610.8 by 35 mm, so no panel
-crosses an articulating joint.
+The modelled aperture is a **15.6 inch portrait panel, 194 × 345 mm active**,
+positioned Y=130 to 475. It clears the hip axis at Y=610.8 comfortably, so no
+panel crosses an articulating joint.
+
+Panel size is set by the **240 mm chassis**, not by preference. With 23 mm of
+margin each side for the panel return and aperture doubler, 194 mm is the widest
+active area that fits. A 21.5 inch panel at 268 mm wide will not go in.
 
 Reserve approximately **25 mm of Z depth** behind the aperture. The mini PC and
 GPU reservations sit deeper in the body, so there is no depth conflict, but the
@@ -258,7 +262,7 @@ GPU or the mini PC.
 
 Each arm slab is 209.317 mm wide, leaving 4 mm running clearance to the central
 chassis per side. All shells are modelled at the 1.2 mm sheet gauge. The display
-aperture is cut through `PANEL_FRONT_DISPLAY` at 268 × 476 mm.
+aperture is cut through `PANEL_FRONT_DISPLAY` at 194 × 345 mm.
 
 These are form and packaging bodies. They carry no fastener pattern, formed
 returns, beads, doublers, hinges, bearings or joint hardware, the limbs have no

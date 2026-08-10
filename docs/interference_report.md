@@ -2,6 +2,43 @@
 
 Status: preliminary envelope review only. A production interference report requires the missing scaled BREP, reconstructed joints, joint limits, and component sweep bodies.
 
+> **Superseded by the 480 mm rebuild, 2026-08-10.** Everything below the Narrow-body section was written against the 958.7 mm scaled-source width and a horizontally mounted GPU. The clearances it reports no longer describe the model. It is retained as the record of how the wide layout failed.
+
+## Narrow-body review, 480 mm
+
+The body is now 480 mm wide as four 120 mm slabs, with a 240 mm central chassis, depth unchanged at 259.867 mm. Verified extent of the robot bodies, excluding the source reference envelope: **480.0 × 1000.0 × 259.9 mm**.
+
+Equipment was repacked because the previous reservations were wider than the new chassis:
+
+| Reservation | Was | Now | Reason |
+|---|---|---|---|
+| GPU | 300 × 130 × 60, flat | 130 × 300 × 60, vertical | The brief always specified a vertical card; the model had it flat, and 300 mm lateral no longer fits |
+| Mini PC | 195 × 195 × 47.5, facing forward | 47.5 × 195 × 195, edge-on | Turning the board plane parallel to the side panels drops its lateral demand to 47.5 mm |
+| Battery | 300 × 150 × 120 | 200 × 150 × 180 | Width traded for depth at approximately constant volume |
+
+### Confirmed conflicts
+
+An axis-aligned check over all 48 bodies returns 30 overlaps. Most are joint modules correctly occupying both parts they connect. Two are genuine defects:
+
+| A | B | Overlap XYZ (mm) | Volume (mm³) | Disposition |
+|---|---|---|---:|---|
+| `FRAME_VERTICAL_1_0` | Mini PC service keep-out | 20 × 225 × 40 | 180,000 | **Real.** Move the rail outboard, split it around the PC, or reduce the service envelope |
+| `FRAME_VERTICAL_1_1` | Mini PC service keep-out | 20 × 225 × 40 | 180,000 | **Real.** Same |
+| `ACTUATOR_HIP_*` | Arm thigh and upper shells | 66 × 59 × 120 | 467,280 | Expected. A hip module must occupy both the chassis and the limb it drives |
+| `ACTUATOR_KNEE_*` | Arm shin and thigh shells | 70 × 34 × 70 | 166,600 | Expected. Same reasoning at the knee |
+
+The mini PC conflict is the packaging consequence of narrowing. At a 240 mm chassis the 225 mm service envelope cannot pass between 20 mm frame rails, so the rails, the envelope, or the service method must change before the frame is committed.
+
+### Mass consequence
+
+Skin area scales with perimeter. Narrowing takes the section perimeter from 2,437 mm to 1,480 mm, so the 1.2 mm aluminium skin falls from approximately 9.4 kg to **roughly 5.7 kg**. That is the largest single mass saving identified so far and materially improves the 12–25 kg target.
+
+### Still not checked
+
+Joint sweeps, cable bends, GPU dock and supply, connector protrusion, airflow, panel fasteners, service extraction paths, and clearance against a verified external BREP.
+
+---
+
 Latest concept model checked: `cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d`.
 
 ## Reserved equipment envelopes

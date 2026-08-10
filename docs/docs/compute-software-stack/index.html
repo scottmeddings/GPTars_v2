@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-DrNNGO8w.css"/><title>Compute and software stack — GP-TARS V2</title><meta name="description" content="This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budge"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
-</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 08</p><h1>Compute and software stack</h1><p class="subtitle">This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budgets that follow from them.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_software_stack.md</b></span><span>SECTIONS <b>26</b></span><span>WORDS <b>3,345</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#host-baseline">Host baseline</a></li><li><a href="#container-inventory">Container inventory</a></li><li><a href="#networking-model">Networking model</a></li><li><a href="#gpu-allocation">GPU allocation</a></li><li><a href="#human-machine-interface">Human-machine interface</a></li><li><a href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></li><li><a href="#memory-budget">Memory budget</a></li><li><a href="#storage-budget">Storage budget</a></li><li><a href="#power-and-thermal-consequences">Power and thermal consequences</a></li><li><a href="#open-decisions">Open decisions</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_software_stack.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed stack, revision Stack V1, 2026-08-10</div><div class="doc-prose"><p>This document specifies the Ubuntu and container architecture that runs on the
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 08</p><h1>Compute and software stack</h1><p class="subtitle">This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budgets that follow from them.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_software_stack.md</b></span><span>SECTIONS <b>26</b></span><span>WORDS <b>3,401</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#host-baseline">Host baseline</a></li><li><a href="#container-inventory">Container inventory</a></li><li><a href="#networking-model">Networking model</a></li><li><a href="#gpu-allocation">GPU allocation</a></li><li><a href="#human-machine-interface">Human-machine interface</a></li><li><a href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></li><li><a href="#memory-budget">Memory budget</a></li><li><a href="#storage-budget">Storage budget</a></li><li><a href="#power-and-thermal-consequences">Power and thermal consequences</a></li><li><a href="#open-decisions">Open decisions</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_software_stack.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed stack, revision Stack V1, 2026-08-10</div><div class="doc-prose"><p>This document specifies the Ubuntu and container architecture that runs on the
 MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the
 memory, storage, power and thermal budgets that follow from them.</p>
 <p>It covers layers 03 to 05 of <code>docs/software_architecture.md</code> only. Layers 01 and
@@ -75,7 +75,7 @@ intent and V2 should scale that intent rather than invent a new location.</p>
 <p><img src="/GPTars_v2/images/gptars-elevation.svg" alt="GP-TARS V2 front elevation showing the four-slab form, articulation axes, equipment reservations and the Upper Lid display"></p>
 <h3 id="the-constraint-that-sets-the-size"><a class="anchor" href="#the-constraint-that-sets-the-size">The constraint that sets the size</a></h3>
 <p>The central chassis measures 133.232 × 250.050 × 65.070 mm in the source and
-therefore <strong>532 × 999 × 260 mm</strong> at the 3.993659 reference scale. That is a large
+<strong>532 × 999 × 260 mm</strong> at the 3.993659 reference scale, but the build width was subsequently narrowed to <strong>240 mm</strong> (see below). That is a large
 front face, but it is not one rigid body: the upper and lower chassis articulate
 about the main and secondary axles. Source axis heights are measured from a base
 at <code>SOURCE_Y_MIN = -10.366961</code>, so height above ground is
@@ -84,19 +84,22 @@ at <code>SOURCE_Y_MIN = -10.366961</code>, so height above ground is
 <p>These agree with <code>docs/interference_report.md</code>, which records the upper axes at
 approximately Y=786–890 and the lower main axis near Y=611.</p>
 <p>The Upper Lid volume above the upper secondary axle is therefore
-<strong>532 mm wide by only 110 mm tall</strong>. A display must fit inside one rigid section;
+<strong>240 mm wide by only 110 mm tall</strong>. A display must fit inside one rigid section;
 nothing may span an articulating axle.</p>
 <h3 id="recommended-display"><a class="anchor" href="#recommended-display">Recommended display</a></h3>
-<p>The Upper Lid therefore admits only a wide bar panel, roughly 500 × 85 mm of
+<p>The Upper Lid therefore admits only a wide bar panel, roughly 210 × 85 mm of
 usable aperture. <strong>The display is not placed there.</strong></p>
 <p>Reference footage of a working replica mounts its screen on the <strong>main front face
 of the lower chassis</strong> instead, and that is the better location. The front face
-below the hip axis is a single rigid section approximately <strong>532 mm wide by 600 mm
+below the hip axis is a single rigid section approximately <strong>240 mm wide by 600 mm
 tall</strong>, which is a far larger canvas than the lid.</p>
-<div class="table-wrap"><table><thead><tr><th>Location</th><th>Usable aperture</th><th>Verdict</th></tr></thead><tbody><tr><td>Front face, below the hip axis</td><td>~532 × 600 mm</td><td><strong>Selected.</strong> Admits a full portrait panel</td></tr><tr><td>Upper Lid, above Y=889.9</td><td>~500 × 85 mm</td><td>Bar panels only</td></tr><tr><td>Between the lower axes, Y=611–786</td><td>532 × 175 mm</td><td>Too shallow once structure is allowed for</td></tr></tbody></table></div>
-<p>The modelled aperture is a <strong>21.5 inch portrait panel, 268 × 476 mm active</strong>,
-positioned Y=100 to 576. It clears the hip axis at Y=610.8 by 35 mm, so no panel
-crosses an articulating joint.</p>
+<div class="table-wrap"><table><thead><tr><th>Location</th><th>Usable aperture</th><th>Verdict</th></tr></thead><tbody><tr><td>Front face, below the hip axis</td><td>~240 × 600 mm</td><td><strong>Selected.</strong> Admits a full portrait panel</td></tr><tr><td>Upper Lid, above Y=889.9</td><td>~210 × 85 mm</td><td>Bar panels only</td></tr><tr><td>Between the lower axes, Y=611–786</td><td>240 × 175 mm</td><td>Too shallow once structure is allowed for</td></tr></tbody></table></div>
+<p>The modelled aperture is a <strong>15.6 inch portrait panel, 194 × 345 mm active</strong>,
+positioned Y=130 to 475. It clears the hip axis at Y=610.8 comfortably, so no
+panel crosses an articulating joint.</p>
+<p>Panel size is set by the <strong>240 mm chassis</strong>, not by preference. With 23 mm of
+margin each side for the panel return and aperture doubler, 194 mm is the widest
+active area that fits. A 21.5 inch panel at 268 mm wide will not go in.</p>
 <p>Reserve approximately <strong>25 mm of Z depth</strong> behind the aperture. The mini PC and
 GPU reservations sit deeper in the body, so there is no depth conflict, but the
 25 mm still comes out of the 259.9 mm total that <code>docs/interference_report.md</code>
@@ -152,7 +155,7 @@ the upper and lower chassis articulate there; a 6 mm break straddles it. And
 GPU or the mini PC.</p>
 <p>Each arm slab is 209.317 mm wide, leaving 4 mm running clearance to the central
 chassis per side. All shells are modelled at the 1.2 mm sheet gauge. The display
-aperture is cut through <code>PANEL_FRONT_DISPLAY</code> at 268 × 476 mm.</p>
+aperture is cut through <code>PANEL_FRONT_DISPLAY</code> at 194 × 345 mm.</p>
 <p>These are form and packaging bodies. They carry no fastener pattern, formed
 returns, beads, doublers, hinges, bearings or joint hardware, the limbs have no
 feet or contact pads, and none of them is releasable.</p>

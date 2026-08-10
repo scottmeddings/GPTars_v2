@@ -109,9 +109,19 @@ AXLE_LOWER_SECONDARY_Y = AXLE_LOWER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_ME
 AXLE_UPPER_MAIN_Y = AXLE_UPPER_MAIN_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 AXLE_UPPER_SECONDARY_Y = AXLE_UPPER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 
-# Central chassis, excluding the port and starboard leg/arm sections.
+# Body width. The scaled source gives 958.718 mm, but that is a faithful copy of
+# the hobby model rather than the screen silhouette, which reads at roughly
+# 0.45 x height. The build width is a deliberate departure, set as four equal
+# slabs and floored by the 195 mm mini PC. Depth is unchanged.
+ROBOT_WIDTH_SOURCE_SCALED = 958.718
+ROBOT_WIDTH = 480.0
+SLAB_COUNT = 4
+SLAB_WIDTH = 120.0
+CENTRAL_CHASSIS_WIDTH = 240.0
+
+# Superseded, retained as the source reference only.
 CENTRAL_CHASSIS_WIDTH_SOURCE = 133.232
-CENTRAL_CHASSIS_WIDTH = CENTRAL_CHASSIS_WIDTH_SOURCE * REFERENCE_SCALE_MEASURED
+CENTRAL_CHASSIS_WIDTH_SCALED = CENTRAL_CHASSIS_WIDTH_SOURCE * REFERENCE_SCALE_MEASURED
 
 # Upper Lid front face, the only rigid section above the top articulation axis.
 UPPER_LID_FRONT_WIDTH = CENTRAL_CHASSIS_WIDTH
@@ -131,13 +141,14 @@ ARM_SLAB_WIDTH = 209.317
 # axis offers roughly 600 mm, which admits a full portrait panel.
 DISPLAY_PRESENT = True
 DISPLAY_LOCATION = "Chassis / front face, below the lower main axis"
-DISPLAY_CLASS = "21.5 inch portrait LCD"
-DISPLAY_ACTIVE_WIDTH = 268.0
-DISPLAY_ACTIVE_HEIGHT = 476.0
-DISPLAY_ORIGIN_Y = 100.0
+DISPLAY_CLASS = "15.6 inch portrait LCD"
+DISPLAY_ACTIVE_WIDTH = 194.0
+DISPLAY_ACTIVE_HEIGHT = 345.0
+DISPLAY_ORIGIN_Y = 130.0
+DISPLAY_MARGIN_PER_SIDE = 23.0
 DISPLAY_DEPTH_RESERVATION = 25.0
 DISPLAY_COVER_MATERIAL = "Chemically strengthened glass or bonded polycarbonate"
-DISPLAY_MASS_ESTIMATE_KG = 1.2
+DISPLAY_MASS_ESTIMATE_KG = 0.8
 DISPLAY_LINK = "Ethernet and power; no video across an articulating joint"
 PANEL_HIP_BREAK_GAP = 6.0
 
