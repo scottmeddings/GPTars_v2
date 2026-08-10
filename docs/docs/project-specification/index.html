@@ -1,0 +1,609 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-B0Ex2Wrd.css"/><title>GP-TARS V2 — 1 Metre Walking Robot CAD Project — GP-TARS V2</title><meta name="description" content="We are building a full-size robotic version of GPTARS based on:"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 01 of 07</p><h1>GP-TARS V2 — 1 Metre Walking Robot CAD Project</h1><p class="subtitle">We are building a full-size robotic version of GPTARS based on:</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>09 Aug 2026</b></span><span>SOURCE <b>docs/project_specification.md</b></span><span>SECTIONS <b>8</b></span><span>WORDS <b>2,134</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Dark sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#source-files">Source Files</a></li><li><a href="#physical-emergency-stop">Physical emergency stop</a></li><li><a href="#mass-consequence">Mass consequence</a></li><li><a href="#stage-1">Stage 1</a></li><li><a href="#stage-2">Stage 2</a></li><li><a href="#stage-3">Stage 3</a></li><li><a href="#stage-4">Stage 4</a></li><li><a href="#stage-5">Stage 5</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/project_specification.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="doc-prose"><p>We are building a full-size robotic version of GPTARS based on:</p>
+<p><a href="https://github.com/poboisvert/GPTARS_Interstellar">https://github.com/poboisvert/GPTARS_Interstellar</a></p>
+<p>This is <strong>not</strong> a static prop and not simply an enlarged version of the original hobby-servo robot.</p>
+<p>The target is:</p>
+<p><strong>GP-TARS V2 — an approximately 1,000 mm tall, self-propelled walking TARS-style robot with onboard local AI compute.</strong></p>
+<h2 id="source-files"><a class="anchor" href="#source-files">Source Files</a></h2>
+<p>The project workspace should contain or be given access to:</p>
+<ul>
+<li>Original GPTARS repository</li>
+<li><code>GPTARS_Interstellar-main.zip</code></li>
+<li><code>GP_TARS_V2_1000mm_scaled.brep</code></li>
+<li><code>GP_TARS_V2_1000mm_CAD_README.txt</code></li>
+</ul>
+<p>The existing GPTARS design is the visual and kinematic reference.</p>
+<p>The original full robot geometry measured approximately:</p>
+<ul>
+<li>Tall axis: 250.35 mm</li>
+<li>Other dimensions approximately: 240 mm × 65 mm</li>
+</ul>
+<p>The external geometry has initially been uniformly scaled by:</p>
+<p><strong>3.9943785</strong></p>
+<p>to produce an exact overall height of:</p>
+<p><strong>1000 mm</strong></p>
+<p>Do not assume that original screw holes, servo mounts, wall thicknesses, shafts, bearings or internal mechanisms should also remain scaled.</p>
+<p>The scaled model is only the <strong>external dimensional reference</strong>.</p>
+<hr>
+<h1 id="main-project-objective"><a class="anchor" href="#main-project-objective">MAIN PROJECT OBJECTIVE</a></h1>
+<p>Create a new parametric CAD design named:</p>
+<h1 id="gp-tars-v2-1000"><a class="anchor" href="#gp-tars-v2-1000">GP-TARS V2 1000</a></h1>
+<p>The robot must:</p>
+<ul>
+<li>remain visually recognisable as TARS</li>
+<li>stand approximately 1000 mm tall</li>
+<li>reproduce TARS-style articulated walking</li>
+<li>support its own weight</li>
+<li>turn left and right</li>
+<li>execute controlled pivoting</li>
+<li>recover to vertical</li>
+<li>contain onboard batteries</li>
+<li>contain onboard computer hardware</li>
+<li>contain an NVIDIA GPU</li>
+<li>contain real-time motor control electronics</li>
+<li>be serviceable</li>
+<li>have removable panels</li>
+<li>use metal structural components</li>
+<li>use removable panels primarily as cosmetic bodywork</li>
+</ul>
+<p>The mechanical structure must NOT rely on body panels of any material for primary structural loads.</p>
+<blockquote>
+<p><strong>Revision, 2026-08-10 — bodywork material superseded.</strong> This specification
+originally called for printed PETG/ASA/CF cosmetic panels. Production bodywork
+is now formed 5052-H32 aluminium sheet. See <code>docs/aluminium_architecture.md</code>
+for the material schedule and the mass consequence recorded below.</p>
+<p>The load-path rule is unchanged and matters <em>more</em> under this decision: formed
+aluminium panels look structural and must still never be treated as such.</p>
+</blockquote>
+<hr>
+<h1 id="cad-design-philosophy"><a class="anchor" href="#cad-design-philosophy">CAD DESIGN PHILOSOPHY</a></h1>
+<p>Separate the design into:</p>
+<ol>
+<li>External cosmetic shell</li>
+<li>Internal aluminium skeleton</li>
+<li>Walking joints</li>
+<li>Actuator assemblies</li>
+<li>Bearings and shafts</li>
+<li>Battery compartment</li>
+<li>Compute compartment</li>
+<li>GPU compartment</li>
+<li>Electronics compartment</li>
+<li>Cooling system</li>
+<li>Sensors</li>
+<li>Wiring channels</li>
+<li>Service panels</li>
+<li>Safety systems</li>
+</ol>
+<p>Maintain the original TARS proportions wherever mechanically practical.</p>
+<hr>
+<h1 id="parametric-master-variables"><a class="anchor" href="#parametric-master-variables">PARAMETRIC MASTER VARIABLES</a></h1>
+<p>Create a master parameter/configuration file.</p>
+<p>Use millimetres unless otherwise specified.</p>
+<p>Initial parameters:</p>
+<pre><code class="language-text">ROBOT_HEIGHT = 1000
+
+SHELL_WALL = 1.2
+SHELL_WALL_MIN = 1.0
+SHELL_WALL_MAX = 1.6
+
+FRAME_PROFILE_SMALL = 20
+FRAME_PROFILE_LARGE_X = 20
+FRAME_PROFILE_LARGE_Y = 40
+
+MAIN_SHAFT_DIAMETER = 20
+SECONDARY_SHAFT_DIAMETER = 12
+
+MAIN_ACTUATOR_CONTINUOUS_TORQUE = 60 Nm minimum design target
+MAIN_ACTUATOR_PEAK_TORQUE = 100 Nm minimum initial design target
+
+SECONDARY_ACTUATOR_TORQUE = 10–25 Nm
+
+BATTERY_VOLTAGE = 24 V
+
+GROUND_CLEARANCE_TARGET = 10–25 mm
+
+STRUCTURAL_MATERIAL = 6061-T6 aluminium
+
+PANEL_MATERIAL =
+5052-H32 aluminium sheet
+</code></pre>
+<p>Shell wall values are sheet gauges, not printed wall thicknesses. The superseded
+printed specification was 3.0 mm nominal over a 2.5–4.0 mm range.</p>
+<p>Do not permanently lock actuator torque until proper static and dynamic calculations are performed.</p>
+<hr>
+<h1 id="structural-design"><a class="anchor" href="#structural-design">STRUCTURAL DESIGN</a></h1>
+<p>Create a central aluminium structural chassis.</p>
+<p>Preferred materials:</p>
+<ul>
+<li>6061-T6 aluminium</li>
+<li>20×20 extrusion where lightly loaded</li>
+<li>20×40 extrusion or fabricated aluminium sections at primary load points</li>
+<li>CNC aluminium actuator brackets</li>
+<li>steel shafts at major pivots</li>
+</ul>
+<p>Avoid relying on long printed pivot shafts.</p>
+<p>Major loads must transfer:</p>
+<pre><code class="language-text">foot/contact surface
+    ↓
+lower frame
+    ↓
+joint shaft
+    ↓
+bearings
+    ↓
+actuator bracket
+    ↓
+central structural frame
+</code></pre>
+<p>The formed aluminium exterior should bolt onto the structural chassis through
+isolated fixings, never becoming part of the load path.</p>
+<hr>
+<h1 id="walking-mechanism"><a class="anchor" href="#walking-mechanism">WALKING MECHANISM</a></h1>
+<p>The original GPTARS walking concept uses coordinated lifting, rotation and controlled falling/pivoting.</p>
+<p>GP-TARS V2 should preserve this general movement but replace hobby servo open-loop control with closed-loop robotic actuators.</p>
+<p>Primary walking sequence:</p>
+<pre><code class="language-text">STAND
+
+→ SHIFT CENTRE OF MASS
+
+→ UNLOAD / LIFT LEADING SECTION
+
+→ ROTATE LEADING SECTION
+
+→ CONTROLLED PIVOT
+
+→ DETECT GROUND CONTACT
+
+→ ABSORB LANDING
+
+→ ROTATE BODY THROUGH
+
+→ RECOVER TO VERTICAL
+
+→ VERIFY STABILITY
+
+→ NEXT STEP
+</code></pre>
+<p>Create CAD joint limits for every moving component.</p>
+<p>Mechanical hard stops should exist before any joint reaches a physically damaging position.</p>
+<p>Do not depend exclusively upon software travel limits.</p>
+<hr>
+<h1 id="actuators"><a class="anchor" href="#actuators">ACTUATORS</a></h1>
+<p>Do NOT use the original RC hobby servos.</p>
+<p>Design around integrated BLDC robotic actuators containing:</p>
+<ul>
+<li>brushless motor</li>
+<li>reduction gearbox</li>
+<li>absolute or high-resolution encoder</li>
+<li>CAN communications</li>
+<li>current measurement</li>
+<li>torque/current limiting</li>
+</ul>
+<p>Initial design envelope for main actuators:</p>
+<pre><code class="language-text">Diameter:
+80–120 mm
+
+Length:
+50–100 mm
+
+Continuous torque:
+&gt;= 60 Nm preferred
+
+Peak torque:
+&gt;= 100 Nm preferred
+
+Supply:
+24–48 V compatible
+</code></pre>
+<p>Use placeholder actuator geometry initially so actuator brands can later be swapped.</p>
+<p>Create actuator components such as:</p>
+<pre><code class="language-text">ACTUATOR_MAIN_PLACEHOLDER
+
+ACTUATOR_SECONDARY_PLACEHOLDER
+</code></pre>
+<p>Do not design the chassis around one proprietary motor until the torque analysis is complete.</p>
+<hr>
+<h1 id="main-pivots"><a class="anchor" href="#main-pivots">MAIN PIVOTS</a></h1>
+<p>Use proper shafts and bearings.</p>
+<p>Initial main pivot:</p>
+<pre><code class="language-text">20 mm steel shaft
+</code></pre>
+<p>Suggested bearing starting point:</p>
+<pre><code class="language-text">20 mm ID sealed bearings
+</code></pre>
+<p>Use two bearings where practical to resist moment loads rather than cantilevering joints off a single bearing.</p>
+<p>Design replaceable bearing carriers.</p>
+<hr>
+<h1 id="compute-system"><a class="anchor" href="#compute-system">COMPUTE SYSTEM</a></h1>
+<p>The robot will contain a high-performance mini PC.</p>
+<p>Allow approximately:</p>
+<pre><code class="language-text">220 mm × 220 mm × 80 mm
+</code></pre>
+<p>for the mini-PC installation envelope until exact measurements are inserted.</p>
+<p>The computer will handle:</p>
+<ul>
+<li>local LLM</li>
+<li>vision</li>
+<li>speech recognition</li>
+<li>text-to-speech</li>
+<li>ROS 2</li>
+<li>navigation</li>
+<li>behaviour</li>
+<li>high-level motion requests</li>
+</ul>
+<p>The computer must NOT directly control motor commutation or safety-critical joint control.</p>
+<hr>
+<h1 id="local-gpu"><a class="anchor" href="#local-gpu">LOCAL GPU</a></h1>
+<p>Design an onboard NVIDIA GPU compartment.</p>
+<p>Do not assume a specific final GPU yet.</p>
+<p>Initial envelope:</p>
+<pre><code class="language-text">GPU length = 300 mm
+GPU height = 130 mm
+GPU thickness = 60 mm
+</code></pre>
+<p>Make these CAD parameters:</p>
+<pre><code class="language-text">GPU_LENGTH
+GPU_HEIGHT
+GPU_WIDTH
+</code></pre>
+<p>GPU should preferably be mounted vertically.</p>
+<p>Provide:</p>
+<ul>
+<li>intake airflow</li>
+<li>exhaust airflow</li>
+<li>removable GPU bracket</li>
+<li>PCIe/OCuLink cable path</li>
+<li>protection from vibration</li>
+<li>access without dismantling the complete robot</li>
+</ul>
+<p>The GPU mount should support a card approximately equivalent in size to a modern 2–3 slot NVIDIA GPU.</p>
+<hr>
+<h1 id="cooling"><a class="anchor" href="#cooling">COOLING</a></h1>
+<p>Create a bottom-to-top airflow path.</p>
+<p>Preferred layout:</p>
+<pre><code class="language-text">LOW AIR INTAKE
+      ↓
+FILTER
+      ↓
+GPU
+      ↓
+MINI PC
+      ↓
+EXHAUST FANS
+      ↓
+HIGH EXHAUST
+</code></pre>
+<p>Keep motor-controller cooling separate where practical.</p>
+<p>Add fan mounting locations.</p>
+<p>Initial fan sizes to consider:</p>
+<ul>
+<li>80 mm</li>
+<li>92 mm</li>
+<li>120 mm</li>
+</ul>
+<p>Do not compromise structural members for airflow.</p>
+<hr>
+<h1 id="battery"><a class="anchor" href="#battery">BATTERY</a></h1>
+<p>Battery should be positioned as low as possible.</p>
+<p>Initial system voltage:</p>
+<p><strong>24 V</strong></p>
+<p>Create a configurable battery envelope approximately:</p>
+<pre><code class="language-text">300 mm wide
+150 mm deep
+120 mm high
+</code></pre>
+<p>This is only a placeholder until battery energy requirements are calculated.</p>
+<p>Battery tray requirements:</p>
+<ul>
+<li>bolted metal tray</li>
+<li>retaining strap</li>
+<li>removable</li>
+<li>protected from GPU heat</li>
+<li>protected from actuator impact</li>
+<li>accessible charging connector</li>
+<li>fused main output</li>
+<li>manual disconnect</li>
+</ul>
+<p>The battery location should lower the centre of gravity.</p>
+<hr>
+<h1 id="electronics"><a class="anchor" href="#electronics">ELECTRONICS</a></h1>
+<p>Provide mounting areas for:</p>
+<ul>
+<li>real-time motor controller</li>
+<li>CAN interface</li>
+<li>power distribution</li>
+<li>motor fuses</li>
+<li>contactors</li>
+<li>DC/DC converters</li>
+<li>IMU</li>
+<li>emergency-stop controller</li>
+<li>cooling controller</li>
+<li>network switch if needed</li>
+</ul>
+<p>Possible real-time controller:</p>
+<ul>
+<li>STM32</li>
+<li>Teensy</li>
+<li>similar deterministic MCU</li>
+</ul>
+<p>Architecture:</p>
+<pre><code class="language-text">MINI PC
+   │
+USB / Ethernet / CAN
+   │
+REAL-TIME CONTROLLER
+   │
+CAN BUS
+   │
+BLDC ACTUATORS
+</code></pre>
+<hr>
+<h1 id="safety"><a class="anchor" href="#safety">SAFETY</a></h1>
+<p>The mechanical model must include provision for:</p>
+<h2 id="physical-emergency-stop"><a class="anchor" href="#physical-emergency-stop">Physical emergency stop</a></h2>
+<p>Large mushroom E-stop.</p>
+<p>The E-stop should disable actuator power independently of the local LLM or operating system.</p>
+<p>Also design:</p>
+<ul>
+<li>actuator power contactor</li>
+<li>main battery disconnect</li>
+<li>fuse panel</li>
+<li>joint mechanical hard stops</li>
+<li>accessible service disconnect</li>
+</ul>
+<p>Do not place E-stop somewhere that becomes inaccessible while the robot is moving.</p>
+<hr>
+<h1 id="sensors"><a class="anchor" href="#sensors">SENSORS</a></h1>
+<p>Reserve mounting provisions for:</p>
+<ul>
+<li>IMU</li>
+<li>front RGB camera</li>
+<li>depth camera</li>
+<li>microphone array</li>
+<li>ToF sensors</li>
+<li>ground contact sensors</li>
+<li>joint encoders</li>
+<li>optional LiDAR</li>
+</ul>
+<p>Do not permanently model specific sensors yet unless required.</p>
+<p>Use replaceable mounting plates.</p>
+<hr>
+<h1 id="centre-of-gravity"><a class="anchor" href="#centre-of-gravity">CENTRE OF GRAVITY</a></h1>
+<p>Create CAD reference points for:</p>
+<pre><code class="language-text">COG_STATIC
+
+COG_BATTERY
+
+COG_GPU
+
+COG_COMPUTE
+</code></pre>
+<p>Use component masses when available.</p>
+<p>The CAD project should eventually calculate approximate overall centre of gravity.</p>
+<p>Keep heavy components centred laterally.</p>
+<p>Place the battery below the GPU and computer where possible.</p>
+<hr>
+<h1 id="body-panels"><a class="anchor" href="#body-panels">BODY PANELS</a></h1>
+<p>Use the existing scaled TARS geometry as reference surfaces.</p>
+<p>Redesign external panels instead of simply scaling the old STL wall thickness.</p>
+<p>Preferred panel thickness:</p>
+<pre><code class="language-text">1.0–1.6 mm formed 5052-H32 sheet, 1.2 mm nominal
+</code></pre>
+<p>Use folded returns, swaged beads and local doublers to control panel flex rather
+than increasing gauge. Ribbing a printed panel and stiffening a sheet-metal panel
+are not the same problem.</p>
+<p>Panels should be removable using:</p>
+<ul>
+<li>M3</li>
+<li>M4</li>
+<li>M5</li>
+</ul>
+<p>fasteners depending on location.</p>
+<p>Use rivnuts, nut plates or captive fasteners in the sheet. Heat-set inserts no
+longer apply now that the bodywork is metal.</p>
+<p>Isolate the panels from the 6061-T6 chassis where dissimilar-metal or
+fastener-bearing contact could cause galvanic corrosion or fretting.</p>
+<p>Structural joints should use bolts into aluminium or steel.</p>
+<h2 id="mass-consequence"><a class="anchor" href="#mass-consequence">Mass consequence</a></h2>
+<p>A complete 1.2 mm skin over the rectangular envelope is approximately 9.4 kg
+before formed returns, doublers and hardware, against a 12–25 kg total design
+target. Panel geometry, openings and a controlled mass budget must therefore be
+established before any bodywork is released. See <code>docs/interference_report.md</code>.</p>
+<hr>
+<h1 id="serviceability"><a class="anchor" href="#serviceability">SERVICEABILITY</a></h1>
+<p>Major areas should be accessible separately.</p>
+<p>Create panels for:</p>
+<pre><code class="language-text">COMPUTE ACCESS
+
+GPU ACCESS
+
+BATTERY ACCESS
+
+MOTOR CONTROLLER ACCESS
+
+LEFT ACTUATOR ACCESS
+
+RIGHT ACTUATOR ACCESS
+</code></pre>
+<p>Aim to replace the GPU or mini PC without removing the walking mechanism.</p>
+<p>Aim to replace an actuator without completely disassembling the body.</p>
+<hr>
+<h1 id="cad-component-tree"><a class="anchor" href="#cad-component-tree">CAD COMPONENT TREE</a></h1>
+<p>Use a clean assembly hierarchy.</p>
+<p>Recommended structure:</p>
+<pre><code class="language-text">GP_TARS_V2_1000
+│
+├── 00_MASTER_REFERENCE
+│
+│   └── Original_1000mm_Scaled_Geometry
+│
+├── 01_FRAME
+│   ├── Central_Spine
+│   ├── Left_Frame
+│   ├── Right_Frame
+│   └── Crossmembers
+│
+├── 02_JOINTS
+│   ├── Upper_Pivot
+│   ├── Lower_Pivot
+│   ├── Left_Leg_Pivot
+│   └── Right_Leg_Pivot
+│
+├── 03_ACTUATORS
+│
+├── 04_BEARINGS_SHAFTS
+│
+├── 05_BATTERY
+│
+├── 06_COMPUTE
+│
+├── 07_GPU
+│
+├── 08_ELECTRONICS
+│
+├── 09_COOLING
+│
+├── 10_SENSORS
+│
+├── 11_BODY_PANELS
+│
+├── 12_FASTENERS
+│
+└── 13_WIRING
+</code></pre>
+<hr>
+<h1 id="software-cad-automation"><a class="anchor" href="#software-cad-automation">SOFTWARE / CAD AUTOMATION</a></h1>
+<p>Where possible, generate geometry parametrically using Python.</p>
+<p>Preferred options:</p>
+<ul>
+<li>CadQuery</li>
+<li>FreeCAD Python</li>
+<li>Fusion 360 Python API</li>
+</ul>
+<p>Create scripts under:</p>
+<pre><code class="language-text">cad/
+</code></pre>
+<p>Suggested structure:</p>
+<pre><code class="language-text">cad/
+├── README.md
+├── parameters.py
+├── gp_tars_master.py
+├── frame.py
+├── actuator_placeholders.py
+├── battery.py
+├── compute.py
+├── gpu.py
+├── cooling.py
+├── export.py
+└── output/
+</code></pre>
+<p>Running:</p>
+<pre><code class="language-bash">python cad/export.py
+</code></pre>
+<p>should eventually generate:</p>
+<pre><code class="language-text">output/
+├── GP_TARS_V2_MASTER.step
+├── GP_TARS_V2_FRAME.step
+├── GP_TARS_V2_ASSEMBLY.step
+└── STL/
+</code></pre>
+<p>Do not overwrite original GPTARS source CAD.</p>
+<hr>
+<h1 id="first-task"><a class="anchor" href="#first-task">FIRST TASK</a></h1>
+<p>Do NOT attempt to completely redesign the robot immediately.</p>
+<p>Perform this sequence:</p>
+<h2 id="stage-1"><a class="anchor" href="#stage-1">Stage 1</a></h2>
+<p>Inspect all original GPTARS CAD/STL/STEP files.</p>
+<p>Document:</p>
+<ul>
+<li>component names</li>
+<li>external dimensions</li>
+<li>moving components</li>
+<li>original pivot locations</li>
+<li>original servo locations</li>
+<li>original joint axes</li>
+</ul>
+<p>Create:</p>
+<pre><code class="language-text">docs/original_geometry_analysis.md
+</code></pre>
+<hr>
+<h2 id="stage-2"><a class="anchor" href="#stage-2">Stage 2</a></h2>
+<p>Import or reference the existing:</p>
+<pre><code class="language-text">GP_TARS_V2_1000mm_scaled.brep
+</code></pre>
+<p>and establish the 1000 mm body as the master external envelope.</p>
+<p>Create datum planes and axes for:</p>
+<ul>
+<li>vertical centreline</li>
+<li>lateral centreline</li>
+<li>front/back centre</li>
+<li>main joint axes</li>
+</ul>
+<hr>
+<h2 id="stage-3"><a class="anchor" href="#stage-3">Stage 3</a></h2>
+<p>Create a simplified aluminium internal frame within the shell.</p>
+<p>Do NOT create body panels yet.</p>
+<p>Create space reservations for:</p>
+<ul>
+<li>actuators</li>
+<li>battery</li>
+<li>mini PC</li>
+<li>GPU</li>
+<li>controllers</li>
+</ul>
+<hr>
+<h2 id="stage-4"><a class="anchor" href="#stage-4">Stage 4</a></h2>
+<p>Generate an interference report.</p>
+<p>Check:</p>
+<ul>
+<li>frame vs shell</li>
+<li>actuator vs shell</li>
+<li>GPU vs frame</li>
+<li>battery vs walking mechanism</li>
+<li>wiring clearance</li>
+<li>joint sweep clearance</li>
+</ul>
+<p>Document this in:</p>
+<pre><code class="language-text">docs/interference_report.md
+</code></pre>
+<hr>
+<h2 id="stage-5"><a class="anchor" href="#stage-5">Stage 5</a></h2>
+<p>Create engineering drawings showing:</p>
+<ul>
+<li>front view</li>
+<li>side view</li>
+<li>top view</li>
+<li>main dimensions</li>
+<li>joint axes</li>
+<li>actuator centres</li>
+<li>battery location</li>
+<li>compute location</li>
+<li>GPU location</li>
+</ul>
+<hr>
+<h1 id="important"><a class="anchor" href="#important">IMPORTANT</a></h1>
+<p>Do not simply create a four-times larger copy of the original hobby robot.</p>
+<p>Use the original design for:</p>
+<ul>
+<li>appearance</li>
+<li>proportions</li>
+<li>articulation concept</li>
+<li>general motion concept</li>
+</ul>
+<p>Redesign the internals as a real approximately 1 metre, 12–25 kg class autonomous walking robot.</p>
+<p>Prioritise:</p>
+<ol>
+<li>Mechanical safety</li>
+<li>Stable walking geometry</li>
+<li>Low centre of gravity</li>
+<li>Structural stiffness</li>
+<li>Serviceability</li>
+<li>Thermal management</li>
+<li>Appearance</li>
+</ol>
+<p>Do not compromise structural integrity merely to preserve an internal feature of the original small-scale design.</p>
+<p>Before making large design assumptions, document them in:</p>
+<pre><code class="language-text">docs/design_assumptions.md
+</code></pre>
+<p>Begin by inspecting the existing CAD files and reporting the exact geometry, component structure and proposed V2 joint locations before committing to the final internal frame.</p>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><span></span><a class="doc-pager-next" href="/GPTars_v2/docs/design-assumptions"><small>NEXT →</small><b>Design assumptions and open decisions</b></a></nav></section><footer><span>GP‑TARS V2 · GP-TARS V2 — 1 METRE WALKING ROBOT CAD PROJECT</span><span>RENDERED FROM docs/project_specification.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

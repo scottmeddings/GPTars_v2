@@ -4,3 +4,18 @@ __pycache__/
 *.log
 cad/output/STL/*
 !cad/output/STL/.gitkeep
+
+# Local agent/editor settings
+.claude/
+
+# Website build artefacts and local tooling state
+node_modules/
+website/dist/
+website/.wrangler/
+website/.vite/
+website/.env*
+
+# Generated at build time by build/docs-vite-plugin.ts from the docs/*.md
+# sources. The docs/ tree itself is the published GitHub Pages output and is
+# committed deliberately.
+website/public/downloads/*.md

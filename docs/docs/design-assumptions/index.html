@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-B0Ex2Wrd.css"/><title>Design assumptions and open decisions — GP-TARS V2</title><meta name="description" content="- **Reference**: measured from source geometry. - **Placeholder**: reserved envelope, deliberately replaceable. - **Design target**: engineering objective requiring verification. - **Open**: no commit"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 02 of 07</p><h1>Design assumptions and open decisions</h1><p class="subtitle">- **Reference**: measured from source geometry. - **Placeholder**: reserved envelope, deliberately replaceable. - **Design target**: engineering objective requiring verification. - **Open**: no commitment may be made yet.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>09 Aug 2026</b></span><span>SOURCE <b>docs/design_assumptions.md</b></span><span>SECTIONS <b>4</b></span><span>WORDS <b>578</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Dark sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#status-labels">Status labels</a></li><li><a href="#current-assumptions">Current assumptions</a></li><li><a href="#decisions-required-before-final-frame-commitment">Decisions required before final frame commitment</a></li><li><a href="#safety-assumption">Safety assumption</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/design_assumptions.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="doc-prose"><h2 id="status-labels"><a class="anchor" href="#status-labels">Status labels</a></h2>
+<ul>
+<li><strong>Reference</strong>: measured from source geometry.</li>
+<li><strong>Placeholder</strong>: reserved envelope, deliberately replaceable.</li>
+<li><strong>Design target</strong>: engineering objective requiring verification.</li>
+<li><strong>Open</strong>: no commitment may be made yet.</li>
+</ul>
+<h2 id="current-assumptions"><a class="anchor" href="#current-assumptions">Current assumptions</a></h2>
+<ol>
+<li>The 1,000 mm target is the Y extent of the standing external reference envelope.</li>
+<li>The exact imported STEP is normalised with scale <code>3.993658692</code>; the brief&#39;s BREP scale <code>3.9943785</code> remains unverified until the missing BREP is supplied.</li>
+<li>X is lateral, Y vertical, and Z front/back.</li>
+<li>Cosmetic proportions come from the scaled source; structural and purchased parts use real engineering dimensions.</li>
+<li>Primary structure is 6061-T6 aluminium. Light framing may use 20×20 extrusion; primary load paths should start with 20×40 or fabricated/CNC sections.</li>
+<li>Major shafts start at 20 mm steel, secondary shafts at 12 mm, both subject to bending and fatigue checks.</li>
+<li>Each major pivot uses two separated sealed bearings where packaging allows. Cantilevered single-bearing joints are rejected as a baseline.</li>
+<li>Main actuators remain generic 80–120 mm diameter by 50–100 mm long BLDC/CAN placeholders.</li>
+<li>Main torque targets of 60 N·m continuous and 100 N·m peak are not selections. They require mass, acceleration, impact-factor, lever-arm, and recovery-case calculations.</li>
+<li>Design mass class is 12–25 kg. A mass budget has not yet been established.</li>
+<li>Battery placeholder is 300×150×120 mm at 24 V, mounted as low and central as joint sweep permits.</li>
+<li>Compute hardware is the MINISFORUM AI X1 Pro-370: 195×195×47.5 mm and 1.5 kg, mounted vertically inside a 225×225×100 mm service/airflow keep-out.</li>
+<li>An external NVIDIA GPU is required for local LLM inference and connects through OCuLink PCIe 4.0 x4. Its current 300×130×60 mm envelope is provisional, preferably vertical, and accessible through a dedicated service panel.</li>
+<li>Motor commutation and safety interlocks are handled by a deterministic MCU/CAN layer, not the mini PC or LLM.</li>
+<li>Bottom-to-top GPU/compute airflow is reserved. Motor-controller cooling should be separated where practical.</li>
+<li>Exterior bodywork is formed 5052-H32 aluminium sheet, nominally 1.2 mm with a 1.0–1.6 mm range, folded returns, beads, and local doublers.</li>
+<li>Load-bearing structure, joint bulkheads, and actuator brackets use 6061-T6 aluminium. Steel remains required for shafts, bearing elements, and selected fasteners.</li>
+<li>The earlier <code>TARS_1m_frame_layout_v1.f3d</code> is a packaging concept only. It is not approved for walking loads and must not be fabricated.</li>
+</ol>
+<h2 id="decisions-required-before-final-frame-commitment"><a class="anchor" href="#decisions-required-before-final-frame-commitment">Decisions required before final frame commitment</a></h2>
+<ul>
+<li>Supply and validate <code>GP_TARS_V2_1000mm_scaled.brep</code> or approve the measured STEP as the master envelope.</li>
+<li>Define walking degrees of freedom and reconstruct source motion with collision sweeps.</li>
+<li>Establish full mass budget and component mass estimates.</li>
+<li>Reconcile the aluminium panel mass with the 12–25 kg total design target.</li>
+<li>Calculate static holding, controlled-fall, landing, recovery, and fault load cases.</li>
+<li>Select actuator topology only after torque-speed-thermal analysis.</li>
+<li>Size main shafts, bearings, carriers, and brackets from calculated radial/axial/moment loads.</li>
+<li>Define battery energy and discharge requirements.</li>
+<li>Select the exact NVIDIA GPU, OCuLink adapter/dock, independent GPU power supply, and cooling arrangement; retain replaceable trays until all are verified.</li>
+<li>Select and test the 24 V-to-USB-C-PD power path for the AI X1 Pro, or explicitly accept an inverter solution.</li>
+<li>Define fall-arrest/test-rig provisions for early walking tests.</li>
+<li>Establish joint hard-stop angles after shell and equipment sweep studies.</li>
+</ul>
+<h2 id="safety-assumption"><a class="anchor" href="#safety-assumption">Safety assumption</a></h2>
+<p>No unrestrained walking test is permitted from placeholder CAD. Initial motion testing requires an overhead restraint or other engineered fall-arrest fixture, independent E-stop power removal, conservative current limits, and a clear exclusion zone.</p>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/project-specification"><small>← PREVIOUS</small><b>GP-TARS V2 — 1 Metre Walking Robot CAD Project</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/original-geometry-analysis"><small>NEXT →</small><b>Original GPTARS geometry analysis</b></a></nav></section><footer><span>GP‑TARS V2 · DESIGN ASSUMPTIONS AND OPEN DECISIONS</span><span>RENDERED FROM docs/design_assumptions.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

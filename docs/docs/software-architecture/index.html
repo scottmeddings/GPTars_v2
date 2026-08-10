@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-B0Ex2Wrd.css"/><title>GP-TARS V2 software architecture — GP-TARS V2</title><meta name="description" content="Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller."/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 07</p><h1>GP-TARS V2 software architecture</h1><p class="subtitle">Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/software_architecture.md</b></span><span>SECTIONS <b>9</b></span><span>WORDS <b>720</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Dark sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#core-decision">Core decision</a></li><li><a href="#layered-system">Layered system</a></li><li><a href="#community-software-reuse">Community software reuse</a></li><li><a href="#operating-stack">Operating stack</a></li><li><a href="#llm-command-boundary">LLM command boundary</a></li><li><a href="#proposed-repository-structure">Proposed repository structure</a></li><li><a href="#ros-communication-model">ROS communication model</a></li><li><a href="#development-sequence">Development sequence</a></li><li><a href="#safety-release-gate">Safety release gate</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/software_architecture.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed architecture, revision Software V1, 2026-08-10</div><div class="doc-prose"><h2 id="core-decision"><a class="anchor" href="#core-decision">Core decision</a></h2>
+<p>Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller.</p>
+<p>The operating principle is:</p>
+<blockquote>
+<p>TARS-AI supplies the character. ROS 2 supplies the robot. A dedicated MCU supplies deterministic motion and safety.</p>
+</blockquote>
+<h2 id="layered-system"><a class="anchor" href="#layered-system">Layered system</a></h2>
+<ol>
+<li><strong>Independent safety:</strong> hardwired E-stop loop, motor contactor, power isolation and hard limits.</li>
+<li><strong>Real-time motion:</strong> dedicated MCU connected by CAN/CAN-FD; encoder monitoring, actuator commands, brakes, joint limits, watchdog and safe stop.</li>
+<li><strong>Robot control:</strong> ROS 2 Jazzy on Ubuntu 24.04 LTS; URDF/Xacro model, ros2_control hardware interface, trajectories, state estimation and diagnostics.</li>
+<li><strong>Behaviour supervisor:</strong> validates high-level intent against mode, robot state, balance, limits, active faults and operator permission.</li>
+<li><strong>TARS-AI experience:</strong> personality, wake word, STT, TTS, memory/RAG, vision, dashboard and skills.</li>
+</ol>
+<p>The MINISFORUM AI X1 Pro runs the non-real-time layers. It must not perform motor commutation or be the only path to a safe shutdown.</p>
+<h2 id="community-software-reuse"><a class="anchor" href="#community-software-reuse">Community software reuse</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Subsystem</th><th>Decision</th><th>Treatment</th></tr></thead><tbody><tr><td>Character/persona system</td><td>Reuse</td><td>Preserve TARS character and response behaviour</td></tr><tr><td>Wake word, STT and barge-in</td><td>Reuse</td><td>Retain modular speech pipeline</td></tr><tr><td>Piper TTS</td><td>Reuse</td><td>Local, low-latency speech</td></tr><tr><td>Memory/RAG and message router</td><td>Reuse</td><td>Place behind stable service boundaries</td></tr><tr><td>Vision and web dashboard</td><td>Adapt</td><td>Run heavy work on the mini PC and external GPU</td></tr><tr><td>Movement skill registry</td><td>Adapt</td><td>Emit restricted ROS actions only</td></tr><tr><td>PCA9685 servo controller</td><td>Replace</td><td>Not suitable for full-scale walking loads</td></tr><tr><td>Threaded direct movement calls</td><td>Replace</td><td>Use supervised, cancellable and monitored trajectories</td></tr></tbody></table></div>
+<p>Primary references:</p>
+<ul>
+<li>TARS-AI V3: <a href="https://github.com/TARS-AI-Community/TARS-AI">https://github.com/TARS-AI-Community/TARS-AI</a></li>
+<li>Original GPTARS Interstellar project: <a href="https://github.com/poboisvert/GPTARS_Interstellar">https://github.com/poboisvert/GPTARS_Interstellar</a></li>
+<li>ROS 2 interfaces: <a href="https://docs.ros.org/en/jazzy/How-To-Guides/Topics-Services-Actions.html">https://docs.ros.org/en/jazzy/How-To-Guides/Topics-Services-Actions.html</a></li>
+<li>ros2_control joint trajectory controller: <a href="https://control.ros.org/jazzy/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html">https://control.ros.org/jazzy/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html</a></li>
+<li>llama.cpp: <a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></li>
+</ul>
+<h2 id="operating-stack"><a class="anchor" href="#operating-stack">Operating stack</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Selection</th></tr></thead><tbody><tr><td>Host OS</td><td>Ubuntu 24.04 LTS</td></tr><tr><td>Robot framework</td><td>ROS 2 Jazzy</td></tr><tr><td>Motion framework</td><td>ros2_control with a custom CAN hardware interface</td></tr><tr><td>LLM runtime</td><td>CUDA-enabled llama.cpp server with an OpenAI-style API</td></tr><tr><td>Real-time layer</td><td>Dedicated MCU with CAN/CAN-FD and watchdog</td></tr><tr><td>Simulation</td><td>URDF/Xacro plus ROS 2 mock hardware; dynamic simulation to follow</td></tr></tbody></table></div>
+<h2 id="llm-command-boundary"><a class="anchor" href="#llm-command-boundary">LLM command boundary</a></h2>
+<p>The LLM may request only named high-level actions, for example:</p>
+<pre><code class="language-text">perform_gesture(&quot;wave_right&quot;)
+walk_relative(distance=0.30, speed=0.05)
+turn_relative(angle_degrees=15)
+stop_motion()
+return_to_neutral()
+</code></pre>
+<p>The LLM must never receive an interface for raw PWM, motor current, direct torque, unchecked joint angles, disabled limits or safety bypass.</p>
+<p>The behaviour supervisor must approve every motion request. ROS actions provide execution feedback and cancellation. The real-time MCU independently rejects stale, malformed or out-of-limit commands.</p>
+<h2 id="proposed-repository-structure"><a class="anchor" href="#proposed-repository-structure">Proposed repository structure</a></h2>
+<pre><code class="language-text">software/
+├── ros2_ws/src/
+│   ├── gptars_description/
+│   ├── gptars_interfaces/
+│   ├── gptars_hardware/
+│   ├── gptars_control/
+│   ├── gptars_safety/
+│   ├── gptars_behaviors/
+│   ├── gptars_state/
+│   └── tars_ai_bridge/
+├── firmware/
+│   └── motion_controller/
+├── simulation/
+├── ai/
+├── dashboard/
+├── config/
+└── tests/
+</code></pre>
+<h2 id="ros-communication-model"><a class="anchor" href="#ros-communication-model">ROS communication model</a></h2>
+<ul>
+<li><strong>Topics:</strong> continuous joint state, IMU, temperature, battery, fault and diagnostic streams.</li>
+<li><strong>Services:</strong> short request/response operations such as reading configuration, entering maintenance mode or requesting an approved fault reset.</li>
+<li><strong>Actions:</strong> cancellable walking, turning, homing, recovery and gesture sequences with progress feedback and results.</li>
+<li><strong>Hardwired:</strong> E-stop, motor contactor and final power removal remain independent of ROS and the LLM.</li>
+</ul>
+<h2 id="development-sequence"><a class="anchor" href="#development-sequence">Development sequence</a></h2>
+<ol>
+<li>Create URDF/Xacro from the verified Fusion joint layout and run all joints with mock hardware.</li>
+<li>Implement the MCU/CAN protocol and test a single restrained actuator with encoder feedback, limits and watchdog.</li>
+<li>Add the safety supervisor, E-stop state, contactor control, faults and deterministic safe stopping.</li>
+<li>Run neutral poses and gestures while the robot is supported by an independent fall-arrest fixture.</li>
+<li>Develop monitored step, turn, stop and recovery actions before enabling voice motion.</li>
+<li>Connect TARS-AI personality, speech, memory and vision through the restricted behaviour bridge.</li>
+<li>Run the local LLM server on the external NVIDIA GPU and measure latency, VRAM, heat and electrical load.</li>
+</ol>
+<h2 id="safety-release-gate"><a class="anchor" href="#safety-release-gate">Safety release gate</a></h2>
+<p>Voice- or LLM-triggered movement remains disabled until the physical E-stop, contactor removal, communications watchdog, joint limits, fault handling and restrained trajectory tests have all passed.</p>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/compute-hardware"><small>← PREVIOUS</small><b>Compute hardware</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/interference-report"><small>NEXT →</small><b>Preliminary interference and reservation report</b></a></nav></section><footer><span>GP‑TARS V2 · GP-TARS V2 SOFTWARE ARCHITECTURE</span><span>RENDERED FROM docs/software_architecture.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

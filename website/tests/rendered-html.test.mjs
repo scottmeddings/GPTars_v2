@@ -1,0 +1,127 @@
+import assert from "node:assert/strict";
+import { access, readdir, readFile } from "node:fs/promises";
+import test from "node:test";
+
+async function render(pathname = "/") {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+
+  return worker.fetch(
+    new Request(`http://localhost${pathname}`, {
+      headers: { accept: "text/html" },
+    }),
+    {
+      ASSETS: {
+        fetch: async () => new Response("Not found", { status: 404 }),
+      },
+    },
+    {
+      waitUntil() {},
+      passThroughOnException() {},
+    },
+  );
+}
+
+async function renderText(pathname) {
+  const response = await render(pathname);
+  assert.equal(response.status, 200, `${pathname} should render`);
+  return response.text();
+}
+
+test("server-renders the GP-TARS engineering site", async () => {
+  const response = await render("/");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  assert.match(html, /<title>GP-TARS V2 — 1 Metre Walking Robot<\/title>/i);
+  assert.match(html, /Autonomous walking TARS/);
+  assert.match(html, /60 N·m|<strong>60<\/strong>/);
+  assert.match(html, /Sensors and independent safety/);
+  assert.match(html, /Development roadmap/);
+  assert.match(html, /MINISFORUM AI X1 Pro-370/);
+  assert.match(html, /Software architecture/);
+  assert.match(html, /Download current Fusion model/);
+  assert.match(html, /Concept status:/);
+});
+
+test("publishes every docs/*.md source as a rendered page", async () => {
+  const sources = (await readdir(new URL("../../docs", import.meta.url))).filter((name) =>
+    name.endsWith(".md"),
+  );
+  assert.ok(sources.length >= 7, "expected the full document set in docs/");
+
+  const register = await renderText("/docs");
+  assert.match(register, /Document register/);
+
+  for (const name of sources) {
+    const slug = name.replace(/\.md$/, "").replace(/[^\da-z]+/gi, "-").toLowerCase();
+    const html = await renderText(`/docs/${slug}`);
+
+    // The document title from the markdown H1 must reach the page.
+    const source = await readFile(new URL(`../../docs/${name}`, import.meta.url), "utf8");
+    const title = source.match(/^#\s+(.+)$/m)[1].trim();
+    assert.match(html, new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(html, /class="doc-prose"/, `${slug} should render prose`);
+    assert.match(html, new RegExp(`/downloads/${name}`), `${slug} should offer its source`);
+  }
+});
+
+test("publishes cad/parameters.py values without drift", async () => {
+  const source = await readFile(new URL("../../cad/parameters.py", import.meta.url), "utf8");
+  const parameters = Object.fromEntries(
+    [...source.matchAll(/^([A-Z][A-Z\d_]*)\s*=\s*(.+?)\s*(?:#.*)?$/gm)].map(([, name, raw]) => [
+      name,
+      raw.trim(),
+    ]),
+  );
+
+  const register = await renderText("/parameters");
+  assert.match(register, /Parameter register/);
+  for (const name of Object.keys(parameters)) {
+    assert.match(register, new RegExp(name), `${name} should appear in the register`);
+  }
+
+  // The overview sheet must quote the source of truth, not a retyped copy.
+  const home = await renderText("/");
+  const shellMaterial = parameters.SHELL_MATERIAL.replace(/^["']|["']$/g, "");
+  assert.match(home, new RegExp(shellMaterial), "shell material must match parameters.py");
+
+  const scale = (
+    Number(parameters.ROBOT_HEIGHT) / Number(parameters.SOURCE_HEIGHT_MEASURED)
+  ).toFixed(6);
+  assert.match(home, new RegExp(scale.replace(".", "\\.")), "scale factor must be the derived value");
+  assert.doesNotMatch(home, /3\.9943785/, "the unverified brief scale factor must not be published");
+});
+
+test("keeps the downloadable engineering files in the site bundle", async () => {
+  const requiredFiles = [
+    "../public/downloads/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d",
+    "../public/downloads/GP_TARS_V2_1000_ALUMINIUM_CONCEPT_V1.f3d",
+    "../public/downloads/project_specification.md",
+    "../public/downloads/software_architecture.md",
+    "../public/images/gptars-compute-v2.png",
+    "../public/images/gptars-aluminium-v1.png",
+  ];
+
+  await Promise.all(requiredFiles.map((file) => access(new URL(file, import.meta.url))));
+
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /id="drawings"/);
+  assert.match(page, /id="compute"/);
+  assert.match(page, /id="software"/);
+  assert.match(page, /id="downloads"/);
+});
+
+test("mirrors every markdown source into the download bundle", async () => {
+  const sources = (await readdir(new URL("../../docs", import.meta.url))).filter((name) =>
+    name.endsWith(".md"),
+  );
+
+  for (const name of sources) {
+    const published = await readFile(new URL(`../public/downloads/${name}`, import.meta.url), "utf8");
+    const original = await readFile(new URL(`../../docs/${name}`, import.meta.url), "utf8");
+    assert.equal(published, original, `${name} download copy must match its source`);
+  }
+});
