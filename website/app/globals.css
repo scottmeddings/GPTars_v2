@@ -125,6 +125,22 @@ code{font-family:var(--mono);font-size:.88em;background:var(--paper);border:1px 
 .doc-pager small{display:block;color:var(--accent-dark);font:800 .58rem var(--mono);letter-spacing:.1em}
 .doc-pager b{display:block;margin-top:.3rem;font-size:.78rem}
 
+/* ---- Interactive STL viewer (/model) ---- */
+.stl-viewer{position:relative;border:1px solid var(--line);background:var(--paper);min-height:34rem;display:flex;flex-direction:column}
+.viewer-stage{flex:1;min-height:34rem;width:100%;position:relative;cursor:grab}
+.viewer-stage:active{cursor:grabbing}
+.viewer-stage canvas{display:block;width:100%;height:100%}
+.stl-viewer:not(.is-ready):after{content:"LOADING ASSEMBLY…";position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font:700 .7rem var(--mono);letter-spacing:.12em;pointer-events:none}
+.viewer-legend{display:flex;flex-wrap:wrap;gap:.4rem;padding:.7rem;border-top:1px solid var(--line);background:var(--sheet)}
+.viewer-toggle{display:inline-flex;align-items:center;gap:.45rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:.45rem .7rem;font:700 .64rem var(--mono);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.viewer-toggle:hover{border-color:var(--accent)}
+.viewer-toggle i{width:.72rem;height:.72rem;border:1px solid var(--line);font-style:normal}
+.viewer-toggle.is-off{color:var(--muted);opacity:.55}
+.viewer-toggle.is-off i{opacity:.25}
+.viewer-reset{margin-left:auto}
+.viewer-fallback{margin:0;padding:2rem;color:var(--muted);font-size:.82rem}
+@media(max-width:740px){.stl-viewer,.viewer-stage{min-height:24rem}.viewer-reset{margin-left:0}}
+
 .parameter-group{margin-top:1.8rem}
 .parameter-group .subheading{padding-bottom:.4rem;border-bottom:2px solid var(--ink);color:var(--ink)}
 .parameter-name{color:var(--ink);font-weight:650}

@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-BiR3Aw6N.css"/><title>Compute and software stack — GP-TARS V2</title><meta name="description" content="This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budge"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 06 of 08</p><h1>Compute and software stack</h1><p class="subtitle">This document specifies the Ubuntu and container architecture that runs on the MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the memory, storage, power and thermal budgets that follow from them.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/compute_software_stack.md</b></span><span>SECTIONS <b>24</b></span><span>WORDS <b>3,008</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Dark sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#host-baseline">Host baseline</a></li><li><a href="#container-inventory">Container inventory</a></li><li><a href="#networking-model">Networking model</a></li><li><a href="#gpu-allocation">GPU allocation</a></li><li><a href="#human-machine-interface">Human-machine interface</a></li><li><a href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></li><li><a href="#memory-budget">Memory budget</a></li><li><a href="#storage-budget">Storage budget</a></li><li><a href="#power-and-thermal-consequences">Power and thermal consequences</a></li><li><a href="#open-decisions">Open decisions</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/compute_software_stack.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed stack, revision Stack V1, 2026-08-10</div><div class="doc-prose"><p>This document specifies the Ubuntu and container architecture that runs on the
+MINISFORUM AI X1 Pro-370, the onboard display and screen-sharing design, and the
+memory, storage, power and thermal budgets that follow from them.</p>
+<p>It covers layers 03 to 05 of <code>docs/software_architecture.md</code> only. Layers 01 and
+02 — the hardwired E-stop loop, the actuator contactor and the deterministic
+motion MCU — are hardware and firmware. Nothing in this document may become a
+dependency of stopping the robot.</p>
+<h2 id="host-baseline"><a class="anchor" href="#host-baseline">Host baseline</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Selection</th><th>Note</th></tr></thead><tbody><tr><td>Distribution</td><td>Ubuntu 24.04 LTS, server (no desktop)</td><td>Matches ROS 2 Jazzy&#39;s supported platform</td></tr><tr><td>Kernel</td><td>Stock <code>linux-generic</code>, <code>PREEMPT</code></td><td>Hard real-time lives on the MCU, not here</td></tr><tr><td>Container runtime</td><td>Docker Engine + Compose v2</td><td></td></tr><tr><td>GPU runtime</td><td><code>nvidia-container-toolkit</code></td><td>Required for CUDA inside containers</td></tr><tr><td>CAN</td><td>SocketCAN, <code>can0</code> brought up by systemd before Docker</td><td></td></tr><tr><td>Time</td><td><code>chrony</code>, with the MCU as a monotonic cross-check</td><td>Log correlation across a fall is worthless without it</td></tr></tbody></table></div>
+<p>The mini PC runs no graphical session on the host. The onboard display is driven
+from a container in kiosk mode (see <em>Human-machine interface</em>).</p>
+<p>Isolate two CPU cores for the ROS 2 control path using <code>isolcpus</code> and pin the
+<code>ros-control</code> container to them. Container overhead is namespacing, not
+virtualisation, so throughput is unaffected — but scheduling jitter under a
+loaded LLM is real, and the control loop must not compete with inference.</p>
+<h2 id="container-inventory"><a class="anchor" href="#container-inventory">Container inventory</a></h2>
+<p>Eleven containers. The split follows failure domain and update cadence, not
+service granularity for its own sake; every additional split is another IPC hop
+in a latency path.</p>
+<h3 id="tier-1-robot-core"><a class="anchor" href="#tier-1-robot-core">Tier 1 — robot core</a></h3>
+<p>Must start and run with no AI stack present.</p>
+<div class="table-wrap"><table><thead><tr><th>Container</th><th>Contents</th><th>Devices</th></tr></thead><tbody><tr><td><code>ros-control</code></td><td>ros2_control, CAN hardware interface, URDF/<code>robot_state_publisher</code>, TF, state estimation</td><td><code>can0</code></td></tr><tr><td><code>safety-supervisor</code></td><td>Behaviour supervisor, fault state machine, MCU watchdog peer</td><td><code>can0</code> (read), serial</td></tr></tbody></table></div>
+<p><code>safety-supervisor</code> is deliberately separate from <code>ros-control</code>. It must survive
+an out-of-memory event or crash anywhere in the intelligence stack, and it should
+be auditable and updatable independently. Give it a memory reservation, not just
+a limit.</p>
+<h3 id="tier-2-perception-and-interaction"><a class="anchor" href="#tier-2-perception-and-interaction">Tier 2 — perception and interaction</a></h3>
+<div class="table-wrap"><table><thead><tr><th>Container</th><th>Contents</th><th>Devices</th></tr></thead><tbody><tr><td><code>llm-server</code></td><td>llama.cpp CUDA server, OpenAI-style API</td><td>NVIDIA GPU</td></tr><tr><td><code>vision</code></td><td>Camera pipeline, depth, detection and recognition</td><td>V4L2, depth camera, NVIDIA GPU</td></tr><tr><td><code>speech</code></td><td>Wake word, STT and TTS as one pipeline</td><td>ALSA/USB audio</td></tr></tbody></table></div>
+<p><code>speech</code> is intentionally one container. Wake word, transcription and speech
+output chain directly, and barge-in is latency-critical; splitting them adds
+round trips to the path a person actually feels.</p>
+<h3 id="tier-3-behaviour-data-and-interface"><a class="anchor" href="#tier-3-behaviour-data-and-interface">Tier 3 — behaviour, data and interface</a></h3>
+<div class="table-wrap"><table><thead><tr><th>Container</th><th>Contents</th><th>Devices</th></tr></thead><tbody><tr><td><code>tars-ai</code></td><td>Persona, message router, memory orchestration, skill registry</td><td>—</td></tr><tr><td><code>memory</code></td><td>Vector store and embeddings</td><td>Data volume</td></tr><tr><td><code>hmi</code></td><td>Onboard display UI in kiosk mode</td><td>DRM/KMS or remote panel</td></tr><tr><td><code>streaming</code></td><td>WebRTC/RTSP/HLS server for screen sharing</td><td>iGPU encoder</td></tr></tbody></table></div>
+<h3 id="tier-4-operations"><a class="anchor" href="#tier-4-operations">Tier 4 — operations</a></h3>
+<div class="table-wrap"><table><thead><tr><th>Container</th><th>Contents</th></tr></thead><tbody><tr><td><code>observability</code></td><td>Log and metric shipping, rosbag recording, health endpoints</td></tr></tbody></table></div>
+<p>A robot that falls over without a recording is a robot that falls over twice.</p>
+<h3 id="reduced-sets"><a class="anchor" href="#reduced-sets">Reduced sets</a></h3>
+<ul>
+<li><strong>First bring-up (5):</strong> <code>ros-control</code>, <code>safety-supervisor</code>, <code>observability</code>,
+<code>hmi</code>, <code>streaming</code>. No AI at all until joints move under supervision.</li>
+<li><strong>Permanent merge candidate:</strong> fold <code>hmi</code> into <code>tars-ai</code> if the interface stays
+a thin web client.</li>
+</ul>
+<h2 id="networking-model"><a class="anchor" href="#networking-model">Networking model</a></h2>
+<p>All containers run with <code>network_mode: host</code>.</p>
+<p>ROS 2 discovery is DDS multicast, which bridged Docker networking breaks. Host
+networking is standard practice for robots and is assumed throughout. The
+consequence must be understood: isolation between these containers is process,
+filesystem and cgroup, <strong>not</strong> network. Any container can reach any ROS 2 topic.</p>
+<p>The LLM command boundary in <code>docs/software_architecture.md</code> is therefore enforced
+in <code>safety-supervisor</code>, not by network segmentation. Do not weaken it on the
+assumption that containers cannot see each other.</p>
+<p>Grant devices explicitly with <code>--device</code>. No container in this stack runs
+<code>--privileged</code>; a privileged container adjacent to a safety system defeats the
+authority boundary the whole architecture exists to create.</p>
+<h2 id="gpu-allocation"><a class="anchor" href="#gpu-allocation">GPU allocation</a></h2>
+<p>The external NVIDIA card is the scarce resource, and <code>llm-server</code> and <code>vision</code>
+both want it. VRAM, not system RAM, is the binding constraint on this robot.</p>
+<div class="table-wrap"><table><thead><tr><th>VRAM</th><th>What it supports</th></tr></thead><tbody><tr><td>16 GB</td><td>A 14B-class model at Q4 (~9 GB) plus vision (~3 GB). Workable, but the two compete and context length is limited</td></tr><tr><td>24 GB</td><td>A 32B-class model at Q4, or a 14B model with comfortable vision headroom and long context</td></tr></tbody></table></div>
+<p>24 GB is the better buy if the bay and its independent supply allow it. It is
+cheaper than discovering after the GPU bracket is fabricated that vision and the
+language model cannot co-reside.</p>
+<p>Set explicit VRAM limits per container rather than letting both allocate freely.
+An OOM inside CUDA during a walking trial is a fault case, not an inconvenience.</p>
+<p>Video encoding for screen sharing uses the <strong>Radeon 890M integrated GPU</strong> via
+VA-API, not the NVIDIA card. This keeps encode traffic off the OCuLink PCIe 4.0
+x4 link, leaves NVENC free, and keeps the display pipeline local to whatever
+drives the panel.</p>
+<h2 id="human-machine-interface"><a class="anchor" href="#human-machine-interface">Human-machine interface</a></h2>
+<h3 id="what-the-source-geometry-already-contains"><a class="anchor" href="#what-the-source-geometry-already-contains">What the source geometry already contains</a></h3>
+<p>The imported GPTARS assembly contains <code>Screen</code>, <code>Screen Protector</code> and a
+<code>Screen support</code> under <code>Chassis / Upper Lid</code>. A display is original design
+intent and V2 should scale that intent rather than invent a new location.</p>
+<p><img src="/GPTars_v2/images/gptars-elevation.svg" alt="GP-TARS V2 front elevation showing the four-slab form, articulation axes, equipment reservations and the Upper Lid display"></p>
+<h3 id="the-constraint-that-sets-the-size"><a class="anchor" href="#the-constraint-that-sets-the-size">The constraint that sets the size</a></h3>
+<p>The central chassis measures 133.232 × 250.050 × 65.070 mm in the source and
+therefore <strong>532 × 999 × 260 mm</strong> at the 3.993659 reference scale. That is a large
+front face, but it is not one rigid body: the upper and lower chassis articulate
+about the main and secondary axles. Source axis heights are measured from a base
+at <code>SOURCE_Y_MIN = -10.366961</code>, so height above ground is
+<code>(Y_source - SOURCE_Y_MIN) x 3.993659</code>:</p>
+<div class="table-wrap"><table><thead><tr><th>Axle</th><th>Source Y</th><th>Scaled height (mm)</th></tr></thead><tbody><tr><td>Upper secondary</td><td>212.460</td><td>889.9</td></tr><tr><td>Upper main</td><td>199.460</td><td>838.0</td></tr><tr><td>Lower secondary</td><td>186.460</td><td>786.1</td></tr><tr><td>Lower main</td><td>142.585</td><td>610.8</td></tr></tbody></table></div>
+<p>These agree with <code>docs/interference_report.md</code>, which records the upper axes at
+approximately Y=786–890 and the lower main axis near Y=611.</p>
+<p>The Upper Lid volume above the upper secondary axle is therefore
+<strong>532 mm wide by only 110 mm tall</strong>. A display must fit inside one rigid section;
+nothing may span an articulating axle.</p>
+<h3 id="recommended-display"><a class="anchor" href="#recommended-display">Recommended display</a></h3>
+<p>Allowing for the panel return, aperture doubler and bezel, the usable active area
+in the Upper Lid is approximately <strong>500 × 85 mm</strong>.</p>
+<div class="table-wrap"><table><thead><tr><th>Class</th><th>Active area</th><th>Verdict</th></tr></thead><tbody><tr><td>Wide bar, ~1920 × 480</td><td>~217 × 66 mm</td><td>Comfortable margin on all sides. Recommended</td></tr><tr><td>Wide bar, ~1920 × 550</td><td>~355 × 102 mm</td><td>Fits the width easily but leaves only a few millimetres of height for structure</td></tr><tr><td>Conventional 15.6&quot; 16:9</td><td>345 × 194 mm</td><td><strong>Does not fit.</strong> Nearly twice the available height</td></tr></tbody></table></div>
+<p><strong>A wide bar display is not merely the preferred aesthetic — it is the only class
+that fits the Upper Lid.</strong> This happens to match the film&#39;s readout appearance,
+but the constraint is geometric, not stylistic.</p>
+<p>If a large conventional display is a firm requirement, it cannot live in the
+Upper Lid. The only other candidate window is the front face between the lower
+main and lower secondary axles, Y=611 to 786, giving 532 × 175 mm. A 14&quot;
+landscape panel would consume 174 mm of that 175 mm, leaving nothing for
+structure, so this is recorded as impractical rather than available. Enlarging
+the display beyond the bar class requires changing the body proportions, which
+the brief forbids.</p>
+<p>Reserve approximately <strong>25 mm of Z depth</strong> for panel, driver board, bonding and
+cover. That comes directly out of the 259.9 mm body depth, which
+<code>docs/interference_report.md</code> already lists as risk 1.</p>
+<h3 id="do-not-run-a-display-cable-across-the-pivot"><a class="anchor" href="#do-not-run-a-display-cable-across-the-pivot">Do not run a display cable across the pivot</a></h3>
+<p>The mini PC service envelope sits at Y=165–390. The Upper Lid display sits above
+Y≈890. <strong>Any direct panel cable would cross all four articulating axles</strong>, which
+is already risk 5 in the interference report.</p>
+<p>Do not route eDP, HDMI or DisplayPort across a rotating joint. Instead:</p>
+<ol>
+<li>Place a small display controller or SBC inside the Upper Lid.</li>
+<li>Run only <strong>power and Ethernet</strong> across the pivot, with a service loop or
+rotary routing.</li>
+<li>Have that controller run <code>hmi</code> as a kiosk client of the robot&#39;s own web UI.</li>
+</ol>
+<p>Ethernet and power tolerate flexing, are cheap to loop, and fail gracefully. A
+high-speed differential video pair across a joint that moves every step does not.
+This makes <code>hmi</code> a networked client by design, which is also what makes screen
+sharing straightforward.</p>
+<h3 id="as-modelled"><a class="anchor" href="#as-modelled">As modelled</a></h3>
+<p>The bodywork and leg-arm slabs now exist in <code>cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d</code>
+as 15 bodies across <code>11_BODY_PANELS</code> and <code>14_ARMS</code>:</p>
+<p><img src="/GPTars_v2/images/gptars-shell-iso.png" alt="Fusion view of the GP-TARS V2 aluminium shell, service panels and leg-arm slabs"></p>
+<div class="table-wrap"><table><thead><tr><th>Group</th><th>Bodies</th></tr></thead><tbody><tr><td>Front service panels</td><td>Battery, compute, GPU, upper and lid, split on 1.5 mm seams</td></tr><tr><td>Rear panels</td><td>Upper and lower</td></tr><tr><td>Sides, top, bottom</td><td>Port, starboard, top lid, bottom lid</td></tr><tr><td>Leg-arm slabs</td><td>Port and starboard, each split at the lower main axis into upper and lower shells</td></tr></tbody></table></div>
+<p>Each arm slab is 209.317 mm wide, giving 4 mm running clearance to the central
+chassis on each side. The shells are modelled at the 1.2 mm sheet gauge. The
+display aperture is cut through <code>PANEL_FRONT_LID</code> at 400 x 70 mm.</p>
+<p>These are form and packaging bodies. They carry no fastener pattern, formed
+returns, beads, doublers or joint hardware, and none of them is releasable.</p>
+<h3 id="panel-and-safety-consequences"><a class="anchor" href="#panel-and-safety-consequences">Panel and safety consequences</a></h3>
+<ul>
+<li>The bodywork is now formed 5052-H32 aluminium. A large display aperture removes
+significant stiffness from a 1.2 mm panel and requires a local doubler or a
+bonded subframe around the full opening.</li>
+<li>The gait involves controlled falling and landing. Do not fit ordinary cover
+glass. Use chemically strengthened thin glass or bonded polycarbonate, recessed
+behind the panel line, on compliant mounts.</li>
+<li>Mount the display away from the primary landing edge.</li>
+<li>The screen assembly needs its own service panel per the serviceability rules,
+with connector strain relief that does not cross a moving joint.</li>
+<li>Budget 300–800 g depending on size, against a 12–25 kg target in which the
+aluminium skin already accounts for approximately 9.4 kg.</li>
+</ul>
+<h2 id="screen-sharing-to-apple-tv"><a class="anchor" href="#screen-sharing-to-apple-tv">Screen sharing to Apple TV</a></h2>
+<h3 id="the-problem-stated-honestly"><a class="anchor" href="#the-problem-stated-honestly">The problem, stated honestly</a></h3>
+<p><strong>There is no reliable open-source AirPlay screen-mirroring <em>sender</em> for Linux.</strong>
+UxPlay and Shairport-Sync are AirPlay <em>receivers</em> — they make a Linux box a
+target, which is the opposite of what is wanted here. Apple does not publish a
+mirroring sender for Linux, and AirPlay 2 mirroring is authenticated.</p>
+<p>Any plan that depends on the robot pushing an AirPlay mirror to an Apple TV
+should be treated as unproven until demonstrated on the actual hardware. Do not
+design the interface around it.</p>
+<h3 id="recommended-approach-pull-do-not-push"><a class="anchor" href="#recommended-approach-pull-do-not-push">Recommended approach: pull, do not push</a></h3>
+<p>Invert the direction. The robot continuously publishes its interface as a
+network stream; the television pulls it on demand.</p>
+<pre><code class="language-text">hmi (web UI)
+   │
+   │ framebuffer or second headless render
+   ▼
+streaming container
+   │  VA-API encode on Radeon 890M
+   ├── WebRTC   → sub-second, for live operator view
+   ├── RTSP     → VLC on tvOS, works today with no development
+   └── HLS      → higher latency, most compatible
+   ▼
+Apple TV
+</code></pre>
+<p>Use <code>go2rtc</code> or MediaMTX in the <code>streaming</code> container; both serve WebRTC, RTSP
+and HLS from one source and are well suited to an always-on publisher.</p>
+<div class="table-wrap"><table><thead><tr><th>Path</th><th>Effort</th><th>Latency</th><th>Notes</th></tr></thead><tbody><tr><td>VLC on tvOS pulling RTSP</td><td>None — install and enter a URL</td><td>1–3 s</td><td>Works today. Recommended starting point</td></tr><tr><td>Custom tvOS app</td><td>Apple Developer account, SwiftUI + WebRTC</td><td>&lt; 1 s</td><td>Bonjour discovery, one-tap connect, polished</td></tr><tr><td>AirPlay mirroring from Linux</td><td>Unproven</td><td>—</td><td>Not recommended as a dependency</td></tr><tr><td>Chromecast instead</td><td>Low — mature Linux senders exist</td><td>1–2 s</td><td>Only if the display target is negotiable</td></tr></tbody></table></div>
+<p>&quot;At any time&quot; is satisfied by the stream always being available and advertised
+over Bonjour/mDNS on the local network, with the television choosing when to
+attach. This is more robust than a push model, because nothing on the robot has
+to track or maintain a session with a device that may be off.</p>
+<p>AirPlay <strong>audio</strong> is a separate and much easier case. RAOP senders for Linux do
+exist, so routing TARS&#39;s speech to Apple TV speakers or AirPlay receivers is
+achievable independently of video.</p>
+<h3 id="access-control"><a class="anchor" href="#access-control">Access control</a></h3>
+<p>The stream shows whatever the robot is doing and may include camera views. It
+must not be an unauthenticated open port. Require a token or client certificate,
+bind it to the robot&#39;s own network interface, and make it inoperable when the
+robot is in a maintenance or fault state.</p>
+<h2 id="memory-budget"><a class="anchor" href="#memory-budget">Memory budget</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Component</th><th>RAM</th></tr></thead><tbody><tr><td>Ubuntu 24.04 headless and Docker daemon</td><td>2.5 GB</td></tr><tr><td><code>ros-control</code> and <code>safety-supervisor</code></td><td>2 GB</td></tr><tr><td><code>vision</code></td><td>3 GB</td></tr><tr><td><code>speech</code></td><td>3 GB</td></tr><tr><td><code>llm-server</code> host side</td><td>2–4 GB</td></tr><tr><td><code>tars-ai</code> and <code>memory</code></td><td>3 GB</td></tr><tr><td><code>hmi</code>, <code>streaming</code>, <code>observability</code></td><td>2.3 GB</td></tr><tr><td><strong>Steady state</strong></td><td><strong>~20 GB</strong></td></tr></tbody></table></div>
+<p>Steady state is misleading on its own. Size for the peaks:</p>
+<ul>
+<li><code>colcon build</code> on device: 4–8 GB with parallel jobs</li>
+<li>rosbag recording bursts</li>
+<li>page cache holding model files so a model swap does not stall on storage</li>
+<li>a second model resident during comparison</li>
+</ul>
+<p><strong>Specification: 64 GB, as 2 × 32 GB DDR5-5600 SO-DIMM.</strong> This fills both slots
+and keeps dual-channel operation. 32 GB works but leaves no room to build,
+record and infer at the same time. 96 or 128 GB is only justified if a model is
+partially offloaded to CPU, which is a symptom of insufficient VRAM rather than a
+design goal.</p>
+<p>Set the Radeon 890M UMA allocation in firmware to the minimum (512 MB to 2 GB).
+The discrete card performs inference; the integrated GPU only drives the display
+pipeline and the video encoder, and should not reserve system memory it will not
+use.</p>
+<h2 id="storage-budget"><a class="anchor" href="#storage-budget">Storage budget</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Consumer</th><th>Space</th></tr></thead><tbody><tr><td>Ubuntu and development tools</td><td>30 GB</td></tr><tr><td>Docker images — CUDA bases are 6–8 GB each</td><td>60–100 GB</td></tr><tr><td>Models: language, speech, vision, voices</td><td>50–80 GB</td></tr><tr><td>ROS 2 workspace and colcon build artefacts</td><td>20–30 GB</td></tr><tr><td>Swap</td><td>16 GB</td></tr><tr><td>rosbag and stream recordings</td><td>50–100 GB <strong>per test session</strong></td></tr></tbody></table></div>
+<p>Recorded data dominates and is the reason 1 TB fails in practice: it works until
+walking trials begin, after which time goes into pruning logs instead of
+diagnosing faults.</p>
+<p>The AI X1 Pro-370 has <strong>three M.2 2280 slots</strong>. Use them by role:</p>
+<div class="table-wrap"><table><thead><tr><th>Slot</th><th>Size</th><th>Role</th><th>Requirement</th></tr></thead><tbody><tr><td>1</td><td>1 TB TLC</td><td>OS, Docker, models</td><td>Reliability and read speed</td></tr><tr><td>2</td><td>2 TB TLC</td><td>rosbags, recordings, datasets</td><td>Write endurance; avoid QLC</td></tr><tr><td>3</td><td>—</td><td>Spare or expansion</td><td>Consider thermal cost before filling</td></tr></tbody></table></div>
+<p>At roughly 10 GB per hour of logging, annual writes reach several terabytes, so
+endurance matters more than peak sequential speed on the data drive.</p>
+<h2 id="power-and-thermal-consequences"><a class="anchor" href="#power-and-thermal-consequences">Power and thermal consequences</a></h2>
+<p>Two constraints from existing documents tighten as a direct result of this stack.</p>
+<p><strong>Power.</strong> <code>docs/compute_hardware.md</code> selects 24 V to a 100 W USB-C PD source
+feeding the rear USB4 input, against an internal supply rated 134.9 W, and
+already flags that sustained performance must be tested at that ceiling. This
+specification adds 64 GB of DDR5, two or three NVMe drives at 5–8 W each under
+load, and a display at 5–15 W. That consumes the remaining headroom and pushes
+the decision towards the inverter option previously recorded as not preferred, or
+towards accepting throttling. This must be measured, not assumed.</p>
+<p>The GPU is unaffected: OCuLink carries no card power, so the graphics card and
+its independent supply are a separate budget.</p>
+<p><strong>Thermal.</strong> <code>docs/project_specification.md</code> specifies airflow as intake, filter,
+GPU, mini PC, exhaust. The mini PC therefore receives GPU exhaust as its intake
+air. NVMe drives throttle at approximately 70 °C, and this places two or three of
+them in pre-heated air inside a sealed aluminium body. Either duct the mini PC a
+dedicated cold intake, or reorder the path so the PC sits upstream of the GPU.
+Resolve this before the compute bay geometry is frozen.</p>
+<p>The display adds a further heat source at the top of the body, where the
+bottom-to-top airflow is already warmest.</p>
+<h2 id="open-decisions"><a class="anchor" href="#open-decisions">Open decisions</a></h2>
+<ul>
+<li>Select the GPU. VRAM drives model choice, the vision/LLM split and the bay
+envelope; nothing downstream can be frozen first.</li>
+<li>Measure the compute stack against the 100 W PD limit, or approve the inverter.</li>
+<li>Resolve the mini PC intake air temperature before freezing the bay.</li>
+<li>Choose display size and type, then confirm the Upper Lid aperture against panel
+stiffness and the landing case.</li>
+<li>Confirm the Upper Lid controller and the power/Ethernet route across the upper
+main axle, including the service loop geometry.</li>
+<li>Demonstrate the chosen streaming path to a real Apple TV before committing the
+interface design to it.</li>
+<li>Define the stream authentication scheme and its behaviour in fault states.</li>
+</ul>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/compute-hardware"><small>← PREVIOUS</small><b>Compute hardware</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/software-architecture"><small>NEXT →</small><b>GP-TARS V2 software architecture</b></a></nav></section><footer><span>GP‑TARS V2 · COMPUTE AND SOFTWARE STACK</span><span>RENDERED FROM docs/compute_software_stack.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

@@ -19,3 +19,6 @@ website/.env*
 # sources. The docs/ tree itself is the published GitHub Pages output and is
 # committed deliberately.
 website/public/downloads/*.md
+
+# Bundled from website/viewer/ by `npm run build:viewer`
+website/public/viewer.js

@@ -24,6 +24,7 @@ const documentSlugs = (await readdir(path.join(projectRoot, "docs")))
 
 const routes = [
   { route: "/", output: "index.html" },
+  { route: "/model", output: path.join("model", "index.html") },
   { route: "/docs", output: path.join("docs", "index.html") },
   { route: "/parameters", output: path.join("parameters", "index.html") },
   ...documentSlugs.map((slug) => ({
@@ -42,7 +43,14 @@ if (!stylesheet) throw new Error("Compiled site stylesheet was not found");
  */
 function toStaticHtml(html) {
   return html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    // Model URLs live inside a data attribute whose quotes are HTML-escaped,
+    // so rebase both forms before the generic href/src pass, which cannot
+    // reach inside an attribute value.
+    .replaceAll('"/models/', `"${basePath}models/`)
+    .replaceAll("&quot;/models/", `&quot;${basePath}models/`)
+    // Strip the RSC runtime but keep scripts marked data-static, such as the
+    // STL viewer bundle, which the page genuinely needs.
+    .replace(/<script\b(?![^>]*\bdata-static\b)[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<link\b[^>]*rel=["']modulepreload["'][^>]*>/gi, "")
     .replace(/\sdata-rsc-css-href="[^"]*"/gi, "")
     .replace(/\sdata-precedence="[^"]*"/gi, "")
@@ -59,7 +67,7 @@ function toStaticHtml(html) {
 
 // Replace only the generated directories, leaving the docs/*.md sources alone.
 await mkdir(outputRoot, { recursive: true });
-for (const directory of ["assets", "images", "downloads", "parameters"]) {
+for (const directory of ["assets", "images", "downloads", "parameters", "models", "model"]) {
   await rm(path.join(outputRoot, directory), { recursive: true, force: true });
 }
 for (const slug of documentSlugs) {
@@ -70,6 +78,8 @@ await rm(path.join(outputRoot, "docs", "index.html"), { force: true });
 await cp(path.join(siteRoot, "dist/client/assets"), path.join(outputRoot, "assets"), { recursive: true });
 await cp(path.join(siteRoot, "public/images"), path.join(outputRoot, "images"), { recursive: true });
 await cp(path.join(siteRoot, "public/downloads"), path.join(outputRoot, "downloads"), { recursive: true });
+await cp(path.join(siteRoot, "public/models"), path.join(outputRoot, "models"), { recursive: true });
+await cp(path.join(siteRoot, "public/viewer.js"), path.join(outputRoot, "viewer.js"));
 await cp(path.join(siteRoot, "public/og.png"), path.join(outputRoot, "og.png"));
 await cp(path.join(siteRoot, "public/og-project-summary-v2.png"), path.join(outputRoot, "og-project-summary-v2.png"));
 await cp(path.join(siteRoot, "public/favicon.svg"), path.join(outputRoot, "favicon.svg"));

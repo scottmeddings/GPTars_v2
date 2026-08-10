@@ -55,6 +55,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ slug:
         <SiteNav
           links={[
             { href: "/", label: "Overview" },
+            { href: "/model", label: "3D model" },
             { href: "/docs", label: "Documents" },
             { href: "/parameters", label: "Parameters" },
           ]}

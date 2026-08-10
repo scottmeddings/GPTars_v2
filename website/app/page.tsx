@@ -193,6 +193,7 @@ export default function Home() {
             { href: "#compute", label: "AI compute" },
             { href: "#software", label: "Software" },
             { href: "#downloads", label: "Files" },
+            { href: "/model", label: "3D model ↗" },
             { href: "/docs", label: "Documents ↗" },
             { href: "/parameters", label: "Parameters ↗" },
           ]}

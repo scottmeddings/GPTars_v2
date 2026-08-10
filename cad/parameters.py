@@ -93,3 +93,51 @@ ACTUATOR_SECONDARY_PLACEHOLDER_LENGTH = 70.0
 
 # Cooling reservation options
 FAN_SIZES = (80.0, 92.0, 120.0)
+
+# Reconstructed articulation axes.
+# Source axis heights are measured in the imported STEP, whose base sits at
+# SOURCE_Y_MIN. Height above ground is (Y_source - SOURCE_Y_MIN), then scaled.
+# These agree with the axis positions recorded in docs/interference_report.md.
+SOURCE_Y_MIN = -10.366961
+AXLE_LOWER_MAIN_HEIGHT_SOURCE = 152.951961
+AXLE_LOWER_SECONDARY_HEIGHT_SOURCE = 196.826961
+AXLE_UPPER_MAIN_HEIGHT_SOURCE = 209.826961
+AXLE_UPPER_SECONDARY_HEIGHT_SOURCE = 222.826961
+
+AXLE_LOWER_MAIN_Y = AXLE_LOWER_MAIN_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
+AXLE_LOWER_SECONDARY_Y = AXLE_LOWER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
+AXLE_UPPER_MAIN_Y = AXLE_UPPER_MAIN_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
+AXLE_UPPER_SECONDARY_Y = AXLE_UPPER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
+
+# Central chassis, excluding the port and starboard leg/arm sections.
+CENTRAL_CHASSIS_WIDTH_SOURCE = 133.232
+CENTRAL_CHASSIS_WIDTH = CENTRAL_CHASSIS_WIDTH_SOURCE * REFERENCE_SCALE_MEASURED
+
+# Upper Lid front face, the only rigid section above the top articulation axis.
+UPPER_LID_FRONT_WIDTH = CENTRAL_CHASSIS_WIDTH
+UPPER_LID_FRONT_HEIGHT = ROBOT_HEIGHT - AXLE_UPPER_SECONDARY_Y
+
+# Onboard display. The source assembly already carries Screen, Screen Protector
+# and Screen support under Chassis / Upper Lid; V2 scales that intent.
+# Only a wide bar panel fits the available Upper Lid height.
+DISPLAY_PRESENT = True
+DISPLAY_LOCATION = "Chassis / Upper Lid"
+DISPLAY_CLASS = "Wide bar LCD"
+DISPLAY_ACTIVE_WIDTH_MAX = 500.0
+DISPLAY_ACTIVE_HEIGHT_MAX = 85.0
+DISPLAY_DEPTH_RESERVATION = 25.0
+DISPLAY_COVER_MATERIAL = "Chemically strengthened glass or bonded polycarbonate"
+DISPLAY_MASS_ESTIMATE_KG = 0.5
+DISPLAY_LINK = "Ethernet and power across the axles; no video across a joint"
+
+# Compute stack. Units here are GB and counts, not millimetres.
+HOST_OS = "Ubuntu 24.04 LTS"
+ROS_DISTRO = "Jazzy"
+CONTAINER_COUNT = 11
+SYSTEM_RAM_GB = 64
+SYSTEM_RAM_CONFIG = "2 x 32 GB DDR5-5600 SO-DIMM"
+GPU_VRAM_MIN_GB = 16
+GPU_VRAM_PREFERRED_GB = 24
+NVME_SLOTS_AVAILABLE = 3
+NVME_SYSTEM_GB = 1000
+NVME_DATA_GB = 2000

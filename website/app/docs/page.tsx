@@ -36,6 +36,7 @@ export default function DocumentRegister() {
           current="/docs"
           links={[
             { href: "/", label: "Overview" },
+            { href: "/model", label: "3D model" },
             { href: "/docs", label: "Documents" },
             { href: "/parameters", label: "Parameters" },
           ]}

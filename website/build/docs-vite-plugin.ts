@@ -18,6 +18,7 @@ const READING_ORDER = [
   "original_geometry_analysis",
   "aluminium_architecture",
   "compute_hardware",
+  "compute_software_stack",
   "software_architecture",
   "interference_report",
 ];
@@ -29,6 +30,7 @@ const NAV_LABELS: Record<string, string> = {
   original_geometry_analysis: "Source geometry",
   aluminium_architecture: "Architecture",
   compute_hardware: "Compute",
+  compute_software_stack: "Software stack",
   software_architecture: "Software",
   interference_report: "Interference",
 };
