@@ -25,6 +25,7 @@ const documentSlugs = (await readdir(path.join(projectRoot, "docs")))
 const routes = [
   { route: "/", output: "index.html" },
   { route: "/model", output: path.join("model", "index.html") },
+  { route: "/decals", output: path.join("decals", "index.html") },
   { route: "/docs", output: path.join("docs", "index.html") },
   { route: "/parameters", output: path.join("parameters", "index.html") },
   ...documentSlugs.map((slug) => ({

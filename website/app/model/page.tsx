@@ -45,6 +45,7 @@ export default function ModelPage() {
           links={[
             { href: "/", label: "Overview" },
             { href: "/model", label: "3D model" },
+            { href: "/decals", label: "Decals" },
             { href: "/docs", label: "Documents" },
             { href: "/parameters", label: "Parameters" },
           ]}

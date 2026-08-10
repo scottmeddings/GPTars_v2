@@ -125,6 +125,13 @@ code{font-family:var(--mono);font-size:.88em;background:var(--paper);border:1px 
 .doc-pager small{display:block;color:var(--accent-dark);font:800 .58rem var(--mono);letter-spacing:.1em}
 .doc-pager b{display:block;margin-top:.3rem;font-size:.78rem}
 
+/* ---- Decal sheet (/decals) ---- */
+.decal-sheet{margin:0;border:1px solid var(--line);background:#f4f6f7;padding:clamp(.6rem,2vw,1.4rem)}
+.decal-sheet img{display:block;width:100%;max-width:44rem;height:auto;margin:0 auto;background:#fff;box-shadow:0 10px 34px -22px rgba(0,0,0,.7)}
+.decal-sheet figcaption{margin-top:.75rem;color:#58656e;font:600 .64rem/1.5 var(--mono);letter-spacing:.04em;text-align:center}
+.decal-purpose{white-space:normal;max-width:40ch;color:var(--muted)}
+.decal-sheet + .download-list{margin-top:.75rem}
+
 /* ---- Interactive STL viewer (/model) ---- */
 .stl-viewer{position:relative;border:1px solid var(--line);background:var(--paper);min-height:34rem;display:flex;flex-direction:column}
 .viewer-stage{flex:1;min-height:34rem;width:100%;position:relative;cursor:grab}

@@ -194,6 +194,7 @@ export default function Home() {
             { href: "#software", label: "Software" },
             { href: "#downloads", label: "Files" },
             { href: "/model", label: "3D model ↗" },
+            { href: "/decals", label: "Decals ↗" },
             { href: "/docs", label: "Documents ↗" },
             { href: "/parameters", label: "Parameters ↗" },
           ]}
