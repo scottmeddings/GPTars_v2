@@ -12,7 +12,7 @@ Model: **MINISFORUM AI X1 Pro-370 barebone**
 | Physical size | 195 × 195 × 47.5 mm including feet |
 | Chassis height without feet | 42.5 mm |
 | Mass | 1.5 kg |
-| Internal power supply | 19 V / 7.1 A, 134.9 W internal output rating |
+| Internal DC input requirement | 19 V / 7.1 A, approximately 134.9 W maximum |
 | Alternative input | Rear USB4 PD input, 65–100 W |
 | Memory | Two DDR5-5600 SO-DIMM slots, up to 128 GB |
 | Storage | Three M.2 2280 NVMe slots |
@@ -56,7 +56,7 @@ Rear cable space:
 - two 2.5 GbE ports
 - OCuLink
 - USB 2.0
-- AC input if used
+- AC input if used during bench testing
 - Kensington slot
 
 Side/top access:
@@ -66,23 +66,51 @@ Side/top access:
 
 ## Selected robot power architecture
 
-GP-TARS uses two matched **WattCycle 12.8 V 50 Ah LiFePO4 batteries in series** as the main energy source. The resulting nominal robot bus is **25.6 V, 50 Ah, 1,280 Wh**.
+GP-TARS V2 uses a **12.8 V nominal LiFePO4 main battery bus**.
 
-The mini PC does **not** run from a 12 V rail. The selected prototype path is:
+The preferred current battery is the WattCycle **12.8 V 100 Ah Mini LiFePO4** pack, giving approximately **1,280 Wh** installed energy. The electrical design intentionally remains compatible with larger 12.8 V WattCycle batteries, including the 314 Ah Mini, provided mass, structure, cabling, fusing and packaging are appropriate for the specific build.
+
+The robot is therefore designed around a single low-voltage DC bus rather than a 24/25.6 V series battery system.
+
+## Mini PC power conversion
+
+The MINISFORUM AI X1 Pro requires a regulated 19 V supply for full-power operation. The selected conversion path is:
 
 ```text
-25.6 V main battery bus
+12.8 V LiFePO4 MAIN BUS
         |
-        +-- dedicated fused DC/DC branch
+        +-- 20 A branch fuse
+        |
+        +-- local isolation/service switch
+        |
+        +-- SZWENGAO WG-12S1920 DC-DC boost converter
                 |
-                +-- regulated USB-C PD, 20 V / 5 A, up to 100 W
-                        |
-                        +-- rear USB4 PD input on AI X1 Pro
+                +-- regulated 19 V output
+                |
+                +-- MINISFORUM AI X1 Pro DC input
 ```
 
-The X1 Pro accepts 65–100 W PD input on its rear USB4 port. Sustained compute performance must be validated under the 100 W PD ceiling. If testing shows the PC needs more than 100 W for the intended workload, the fallback is a dedicated regulated 19 V DC supply sized to the machine rather than an AC inverter where practical.
+Selected converter baseline:
 
-Do not connect the 25.6 V battery bus directly to any mini-PC input. The converter must support the full charged-to-discharged voltage range of the two-series LiFePO4 bank and provide current limiting, input/output protection, appropriate grounding, and transient margin.
+| Item | Value |
+|---|---|
+| Converter | SZWENGAO WG-12S1920 |
+| Function | DC-DC boost converter |
+| Input | nominal 12 V system; verify production unit supports the complete LiFePO4 operating range before final installation |
+| Output | regulated 19 V |
+| Maximum output current | 20 A |
+| Maximum advertised power | 380 W |
+| Topology | non-isolated |
+
+The X1 Pro itself is expected to require no more than approximately **19 V × 7.1 A = 134.9 W**. The 380 W converter therefore provides substantial thermal and transient headroom and should operate well below its maximum rating.
+
+At approximately 135 W output, expected battery-side current is roughly **11–13 A** depending on battery voltage and conversion efficiency. The current baseline is therefore a **20 A fuse on the 12 V input branch**. Final fuse, cable and connector sizing must be checked against measured startup and sustained current on the completed robot.
+
+The converter must be mounted to a thermally conductive internal structure with free airflow around its finned housing. Do not bury it between insulation, battery foam or wiring bundles.
+
+Because the converter is non-isolated, input and output grounds share the robot common ground. Grounding for the mini PC, RTX 2000 Ada, display and OCuLink dock must be designed as one intentional low-impedance system to minimise ground-loop and EMI problems.
+
+USB-C PD remains available as a backup/bench power method, but the direct regulated **19 V DC path is preferred onboard** because it preserves the X1 Pro's full approximately 135 W input capability rather than imposing the 100 W USB-C PD ceiling.
 
 ## Confirmed external GPU for the LLM
 
@@ -106,19 +134,21 @@ The previous 300 × 130 × 60 mm generic GPU reservation is superseded. CAD shou
 
 At 70 W maximum board power the RTX 2000 Ada materially improves the power and thermal budget compared with the former 150 W placeholder while meeting the 16 GB VRAM target.
 
-The GPU uses its own protected regulated power branch from the 25.6 V main bus through the selected OCuLink dock/adapter. OCuLink carries PCIe data and does not itself power the card. Final converter, fuse and wiring sizing must use measured complete GPU + adapter consumption rather than the 70 W board figure alone.
+The GPU uses its own protected regulated power branch from the **12.8 V main bus** through the selected OCuLink dock/adapter. OCuLink carries PCIe data and does not itself power the card. Final converter, fuse and wiring sizing must use measured complete GPU + adapter consumption rather than the 70 W board figure alone.
 
 The GPU and its supply must remain separately removable from the mini PC tray.
 
 ## 12 V accessory rail
 
-The display, audio amplifier, fans and other 12 V accessories are powered from a dedicated **25.6 V to regulated 12 V buck converter**.
+The display, audio amplifier, fans, lighting and other nominal 12 V accessories use a **regulated 12 V buck-boost rail** from the 12.8 V LiFePO4 main bus.
 
-Initial converter target:
+A regulator is still required even though the battery is called a 12 V battery because LiFePO4 terminal voltage varies with state of charge and charging conditions. Sensitive 12 V electronics should not be connected directly to the raw battery unless explicitly rated for the complete battery voltage range.
+
+Initial accessory converter target:
 
 - regulated 12 V output
 - 20–30 A rating to provide useful accessory and transient margin
-- input range covering the complete two-series LiFePO4 operating voltage
+- input range covering the complete 4S LiFePO4 operating voltage
 - fused input and fused downstream branches
 - over-current, over-temperature and short-circuit protection
 
@@ -126,27 +156,46 @@ The mini PC and GPU are not powered from this general-purpose 12 V accessory rai
 
 ## Power-domain separation
 
-A shared battery does not mean a shared switched domain. The power distribution unit separates motion and compute after the main battery disconnect:
+A shared 12.8 V battery does not mean a shared switched domain. The power distribution unit separates motion and compute after the main battery disconnect:
 
 ```text
-25.6 V MAIN BUS
+12.8 V LiFePO4 MAIN BUS
       |
-      +-- MOTION CONTACTOR / E-STOP --> 24 V-class actuators
+      +-- MOTION CONTACTOR / E-STOP --> 12 V-class motion system
       |
-      +-- COMPUTE FUSE --> 20 V USB-C PD --> Mini PC
+      +-- 20 A COMPUTE FUSE --> 12-to-19 V WG-12S1920 --> Mini PC
       |
-      +-- GPU FUSE --> regulated GPU supply --> RTX 2000 Ada / dock
+      +-- GPU FUSE --> regulated GPU/dock supply --> RTX 2000 Ada
       |
-      +-- AUX FUSE --> 12 V buck --> display / audio / fans
+      +-- AUX FUSE --> regulated 12 V buck-boost --> display/audio/fans/lights
+      |
+      +-- SAFETY SUPPLY --> safety MCU / contactor supervision
 ```
 
 The physical emergency stop must remove actuator power immediately while leaving the safety controller and, where practical, the compute system powered so that GP-TARS can log the event, retain perception and report its stopped state.
+
+## 12 V design implications
+
+Moving from a 24/25.6 V bus to 12.8 V approximately doubles current for a given power level. This must be reflected in:
+
+- actuator selection
+- motor controller ratings
+- fuse sizes
+- contactor ratings
+- cable cross-section
+- connectors
+- busbar sizing
+- voltage-drop calculations
+- thermal management
+
+For example, a 600 W total load is approximately 47 A at 12.8 V before conversion losses. The architecture therefore targets battery packs with substantial BMS current capability and short, low-resistance high-current wiring.
 
 ## Thermal design
 
 - Do not block the PC's inlet or exhaust faces.
 - Maintain the 225 × 225 × 100 mm mini-PC keep-out until airflow direction is physically verified.
 - Preserve clear intake and exhaust paths around the RTX 2000 Ada active cooler.
-- Place temperature probes in PC inlet/exhaust air and near the GPU exhaust.
+- Mount the WG-12S1920 to a thermally conductive internal plate with airflow.
+- Place temperature probes in PC inlet/exhaust air and near the GPU exhaust and DC-DC converter.
 - Isolate compute exhaust from motor controllers and the battery.
-- Mount both compute devices with removable vibration isolation without making either part of the structural load path.
+- Mount compute devices with removable vibration isolation without making them part of the structural load path.
