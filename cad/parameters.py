@@ -75,13 +75,17 @@ MINI_PC_USB4_PD_INPUT_V = 20.0
 GPU_REQUIRED = True
 GPU_ROLE = "Local LLM inference"
 GPU_VENDOR_TARGET = "NVIDIA"
-GPU_ORIENTATION = "Vertical; the 300 mm card length runs up the body"
-GPU_LENGTH = 300.0
-GPU_HEIGHT = 130.0
-GPU_WIDTH = 60.0
-GPU_LATERAL_DEMAND = 130.0
+GPU_MODEL = "NVIDIA RTX 2000 Ada Generation"
+GPU_VRAM_GB = 16
+GPU_TDP_W = 70.0
+GPU_AUX_POWER_CONNECTOR = False
+GPU_ORIENTATION = "Vertical, single slot; the 168 mm card length runs up the body"
+GPU_LENGTH = 168.0
+GPU_HEIGHT = 69.0
+GPU_WIDTH = 17.6
+GPU_LATERAL_DEMAND = 90.0
 GPU_LINK = "OCuLink PCIe 4.0 x4"
-GPU_POWER_SOURCE = "Independent protected supply; TBD"
+GPU_POWER_SOURCE = "Slot power only, 70 W; no separate GPU PSU required"
 GPU_PSU_ENVELOPE = None
 
 BATTERY_WIDTH = 200.0
@@ -147,17 +151,17 @@ DISPLAY_LOCATION = "Chassis / front face, below the lower main axis"
 DISPLAY_CLASS = "15.4 inch portrait TFT-LED, 12 V"
 DISPLAY_ACTIVE_WIDTH = 194.0
 DISPLAY_ACTIVE_HEIGHT = 345.0
-DISPLAY_ORIGIN_Y = 130.0
+DISPLAY_ORIGIN_Y = 230.0
 DISPLAY_MARGIN_PER_SIDE = 23.0
 DISPLAY_DEPTH_RESERVATION = 35.0
 # Candidate unit: unbranded 15.4 inch 12 V portable TV, HDMI in, 18 W.
 # 360 mm and 28 mm are the listed figures; the 220 mm bezel height is inferred
 # and the seller quotes a 10-30 mm measurement tolerance, so all three must be
 # measured on the physical unit before the aperture is cut.
-DISPLAY_MODULE_WIDTH = 220.0
+DISPLAY_MODULE_WIDTH = 235.0
 DISPLAY_MODULE_HEIGHT = 360.0
 DISPLAY_MODULE_THICKNESS = 28.0
-DISPLAY_MODULE_CLEARANCE_PER_SIDE = 8.8
+DISPLAY_MODULE_CLEARANCE_PER_SIDE = 1.3
 DISPLAY_MODULE_TOLERANCE_STATED = 30.0
 DISPLAY_STACK_DEPTH = 33.2
 DISPLAY_SUPPLY_V = 12.0
@@ -187,10 +191,10 @@ NVME_DATA_GB = 2000
 # Power budget. See docs/power_budget.md for the mode breakdown.
 POWER_MODE_SLEEP_W = 8.0
 POWER_MODE_ATTENTIVE_W = 39.0
-POWER_MODE_CONVERSATION_W = 251.0
+POWER_MODE_CONVERSATION_W = 160.0
 POWER_MODE_WALKING_W = 300.0
-POWER_PEAK_OVERLAP_W = 550.0
-POWER_PEAK_CURRENT_A = 23.0
+POWER_PEAK_OVERLAP_W = 460.0
+POWER_PEAK_CURRENT_A = 19.2
 GPU_POWER_GATED = True
 GPU_GATING_METHOD = "Driver runtime suspend; hard isolation only in deep sleep"
 BATTERY_ENERGY_TARGET_WH = 1000.0
@@ -198,3 +202,8 @@ BATTERY_CAPACITY_TARGET_AH = 40.0
 BATTERY_USABLE_FRACTION = 0.9
 BATTERY_CHEMISTRY = "Undecided; NMC for mass, LiFePO4 for thermal safety"
 ACTUATOR_BRAKES_REQUIRED = True
+
+# Frame rails sit against the side panels so the clear span between them can
+# take the GPU and mini PC side by side.
+FRAME_RAIL_OUTBOARD_X = 118.8
+FRAME_CLEAR_SPAN = 197.6

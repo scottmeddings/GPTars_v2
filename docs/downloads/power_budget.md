@@ -40,7 +40,7 @@ Half the budget is one component. The architecture therefore keeps the GPU but
 |---|---|---:|
 | 0 — Deep sleep | PC suspended, GPU unpowered, wake word on a dedicated MCU, brakes engaged, display off | **~8 W** |
 | 1 — Attentive | PC awake at capped TDP, display dimmed, sensors live, GPU still down | **~39 W** |
-| 2 — Conversational | GPU powered and model resident, inference bursts, vision active | **~251 W** |
+| 2 — Conversational | GPU powered and model resident, inference bursts, vision active | **~160 W** |
 | 3 — Walking | Actuators driving, GPU deliberately down | **~250–420 W** |
 
 ### Mode 0 — deep sleep, ~8 W
@@ -69,19 +69,23 @@ sub-watt device can do.
 | Actuators on brakes | 1 |
 | Conversion losses | 4 |
 
-### Mode 2 — conversational, ~251 W
+### Mode 2 — conversational, ~160 W
 
 | Item | W |
 |---|---:|
-| External GPU, active | 150 |
+| External GPU, RTX 2000 Ada at 70 W | 70 |
 | Mini PC | 45 |
 | Vision and sensors | 12 |
 | Display | 12 |
 | Safety and brakes | 4 |
-| Conversion losses | 28 |
+| Conversion losses | 17 |
 
-150 W is a sustained figure. Real inference is bursty, so a conversation
-averages nearer 90 W of GPU draw; the sustained number is used for sizing.
+The GPU is the **RTX 2000 Ada**: 16 GB, 70 W, single slot, and with no
+auxiliary power connector it runs on slot power alone. That deletes the separate
+GPU supply, the 12VHPWR cable bend problem and most of the thermal load. It was
+chosen on VRAM per watt rather than throughput: 0.23 GB/W against 0.048 for a
+250 W RTX 5070, which also offers only 12 GB and would have put conversational
+draw at about 358 W.
 
 ### Mode 3 — walking, ~250–420 W
 
@@ -99,7 +103,7 @@ between footfalls, and gating it keeps the two largest loads from peaking
 together. This is a benefit of power gating beyond energy saving: it de-conflicts
 the actuator current surge from the inference load.
 
-If conversation and walking must overlap, budget approximately **550 W** and size
+If conversation and walking must overlap, budget approximately **460 W** and size
 the wiring, fusing and battery C-rate for that case, or have the behaviour
 supervisor forbid it.
 
@@ -165,7 +169,7 @@ Runtimes assume 90% usable capacity, about 1,080 Wh, to protect cell life.
 |---|---:|---:|
 | 0 — Deep sleep | 8 W | **135 h, about 5.6 days** |
 | 1 — Attentive | 39 W | 27.7 h |
-| 2 — Conversational | 251 W | 4.3 h |
+| 2 — Conversational | 160 W | **6.8 h** |
 | 3 — Walking | 300 W | 3.6 h |
 
 Mixed duty is more useful than any single mode. At 70% attentive, 20%
@@ -177,8 +181,8 @@ sleep and 10% attentive the average is about 11 W, or roughly **four days**. Two
 days of *availability* is achievable. Two days of *continuous operation* is not,
 and no plausible battery inside this body changes that.
 
-Peak current at the 550 W overlap case is approximately 23 A at 24 V, which is
-0.46C on a 50 Ah pack and unremarkable. Wiring, fusing, the contactor and the
+Peak current at the 460 W overlap case is approximately 19 A at 24 V, which is
+0.48C on a 40 Ah pack and unremarkable. Wiring, fusing, the contactor and the
 connectors must still be rated for it.
 
 ## How much battery is actually needed
@@ -189,9 +193,9 @@ Sizing from a realistic two-day deployment rather than from continuous operation
 |---|---:|---:|
 | 43 h asleep | 8 W | 344 Wh |
 | 4 h attentive | 39 W | 156 Wh |
-| 1 h conversation | 251 W | 251 Wh |
+| 1 h conversation | 160 W | 160 Wh |
 | ~10 min walking | 300 W | 50 Wh |
-| **Total** | | **~800 Wh** |
+| **Total** | | **~710 Wh** |
 
 With 90% usable that is about **890 Wh**, or **37 Ah at 24 V**. Rounding up for
 ageing and margin gives a target of **1,000 Wh, roughly 40 Ah at 24 V**.
@@ -228,8 +232,8 @@ fails harder on the two constraints that actually bind. At roughly 24 kg it is
 the **entire robot budget in one component**, and at about 12.5 litres it is
 more than twice the bay.
 
-It is also over-specified for the duty. At the 23 A peak, a 100 Ah pack runs at
-0.23C. That discharge capability is paid for in mass and never used.
+It is also over-specified for the duty. At the 19 A peak, a 100 Ah pack runs at
+0.19C. That discharge capability is paid for in mass and never used.
 
 ### The product class is the mistake
 
