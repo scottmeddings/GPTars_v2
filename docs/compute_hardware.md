@@ -13,7 +13,7 @@ Model: **MINISFORUM AI X1 Pro-370 barebone**
 | Chassis height without feet | 42.5 mm |
 | Mass | 1.5 kg |
 | Internal power supply | 19 V / 7.1 A, 134.9 W internal output rating |
-| Alternative input | Rear USB4 PD input, up to 100 W |
+| Alternative input | Rear USB4 PD input, 65–100 W |
 | Memory | Two DDR5-5600 SO-DIMM slots, up to 128 GB |
 | Storage | Three M.2 2280 NVMe slots |
 | External GPU link | OCuLink PCIe 4.0 x4 |
@@ -64,27 +64,89 @@ Side/top access:
 - SD card slot
 - fingerprint sensor
 
-## Robot power decision
+## Selected robot power architecture
 
-The computer has an internal AC power supply, while GP-TARS uses a nominal 24 V DC battery bus. Two candidate approaches remain:
+GP-TARS uses two matched **WattCycle 12.8 V 50 Ah LiFePO4 batteries in series** as the main energy source. The resulting nominal robot bus is **25.6 V, 50 Ah, 1,280 Wh**.
 
-1. Preferred prototype path: 24 V battery to a regulated 100 W USB-C PD source, feeding the rear USB4 PD input at 20 V / 5 A. Sustained compute performance must be tested under the 100 W input limit.
-2. Alternative: 24 V battery to a suitably rated inverter feeding the internal AC supply. This adds conversion loss, mass, heat, and EMI and is not preferred.
+The mini PC does **not** run from a 12 V rail. The selected prototype path is:
 
-Do not connect the 24 V battery directly to any mini-PC input. The selected converter must provide current limiting, input/output protection, appropriate grounding, and sufficient transient margin.
+```text
+25.6 V main battery bus
+        |
+        +-- dedicated fused DC/DC branch
+                |
+                +-- regulated USB-C PD, 20 V / 5 A, up to 100 W
+                        |
+                        +-- rear USB4 PD input on AI X1 Pro
+```
 
-## Required external GPU for the LLM
+The X1 Pro accepts 65–100 W PD input on its rear USB4 port. Sustained compute performance must be validated under the 100 W PD ceiling. If testing shows the PC needs more than 100 W for the intended workload, the fallback is a dedicated regulated 19 V DC supply sized to the machine rather than an AC inverter where practical.
 
-An external NVIDIA GPU is a required part of the onboard LLM system. It will connect to the AI X1 Pro through OCuLink PCIe 4.0 x4. The current 300 × 130 × 60 mm CAD reservation represents only a provisional graphics-card envelope; it does not yet include a power supply, OCuLink adapter/dock, cable bend volume, fans, ducts, or finger clearance.
+Do not connect the 25.6 V battery bus directly to any mini-PC input. The converter must support the full charged-to-discharged voltage range of the two-series LiFePO4 bank and provide current limiting, input/output protection, appropriate grounding, and transient margin.
 
-The GPU must have an independent protected power supply because OCuLink carries PCIe data and does not power the card. Final electrical design requires the exact GPU's sustained and transient power requirements. Do not size the robot battery, DC converter, wiring, fuse, contactor, connectors, or cooling system from the provisional envelope.
+## Confirmed external GPU for the LLM
 
-The exact GPU choice should be driven first by usable VRAM for the intended model and quantisation, then by sustained power, physical size, and cooling. The GPU and its supply must be separately removable from the mini PC tray.
+The onboard accelerator is confirmed as the **NVIDIA RTX 2000 Ada Generation 16 GB**. It connects to the AI X1 Pro through OCuLink PCIe 4.0 x4.
+
+| Item | Confirmed value |
+|---|---|
+| GPU | NVIDIA RTX 2000 Ada Generation |
+| Architecture | Ada Lovelace |
+| VRAM | 16 GB GDDR6 with ECC |
+| Maximum board power | 70 W |
+| Native graphics bus | PCIe Gen 4 x8 |
+| OCuLink host link | PCIe 4.0 x4 through external adapter |
+| Card form factor | Low-profile, dual-slot |
+| Card height | 2.7 in / 68.6 mm |
+| Card length | 6.6 in / 167.6 mm |
+| Cooling | Active |
+| Display outputs | 4 × mini DisplayPort 1.4a |
+
+The previous 300 × 130 × 60 mm generic GPU reservation is superseded. CAD should reserve the physical card envelope plus the OCuLink adapter, connector bend, airflow and removable service clearance. A preliminary engineering keep-out of **190 × 90 × 70 mm** is acceptable until the actual card and adapter are measured.
+
+At 70 W maximum board power the RTX 2000 Ada materially improves the power and thermal budget compared with the former 150 W placeholder while meeting the 16 GB VRAM target.
+
+The GPU uses its own protected regulated power branch from the 25.6 V main bus through the selected OCuLink dock/adapter. OCuLink carries PCIe data and does not itself power the card. Final converter, fuse and wiring sizing must use measured complete GPU + adapter consumption rather than the 70 W board figure alone.
+
+The GPU and its supply must remain separately removable from the mini PC tray.
+
+## 12 V accessory rail
+
+The display, audio amplifier, fans and other 12 V accessories are powered from a dedicated **25.6 V to regulated 12 V buck converter**.
+
+Initial converter target:
+
+- regulated 12 V output
+- 20–30 A rating to provide useful accessory and transient margin
+- input range covering the complete two-series LiFePO4 operating voltage
+- fused input and fused downstream branches
+- over-current, over-temperature and short-circuit protection
+
+The mini PC and GPU are not powered from this general-purpose 12 V accessory rail.
+
+## Power-domain separation
+
+A shared battery does not mean a shared switched domain. The power distribution unit separates motion and compute after the main battery disconnect:
+
+```text
+25.6 V MAIN BUS
+      |
+      +-- MOTION CONTACTOR / E-STOP --> 24 V-class actuators
+      |
+      +-- COMPUTE FUSE --> 20 V USB-C PD --> Mini PC
+      |
+      +-- GPU FUSE --> regulated GPU supply --> RTX 2000 Ada / dock
+      |
+      +-- AUX FUSE --> 12 V buck --> display / audio / fans
+```
+
+The physical emergency stop must remove actuator power immediately while leaving the safety controller and, where practical, the compute system powered so that GP-TARS can log the event, retain perception and report its stopped state.
 
 ## Thermal design
 
 - Do not block the PC's inlet or exhaust faces.
-- Maintain the 225 × 225 × 100 mm keep-out until airflow direction is physically verified.
-- Place temperature probes in PC inlet and exhaust air.
-- Isolate PC exhaust from motor controllers and the battery.
-- Mount with removable vibration isolators without making the unit part of the structural load path.
+- Maintain the 225 × 225 × 100 mm mini-PC keep-out until airflow direction is physically verified.
+- Preserve clear intake and exhaust paths around the RTX 2000 Ada active cooler.
+- Place temperature probes in PC inlet/exhaust air and near the GPU exhaust.
+- Isolate compute exhaust from motor controllers and the battery.
+- Mount both compute devices with removable vibration isolation without making either part of the structural load path.
