@@ -1,0 +1,210 @@
+"""Rebuild the GP-TARS V2 assembly from cad/parameters.py.
+
+Run inside Fusion 360. Creates a new design document and generates the whole
+model, so the assembly is reproducible rather than a hand-built artifact that
+lives or dies with an editing session.
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "build_model", "/Users/scott/Documents/GPtars/cad/build_model.py")
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    result = m.build(app)
+
+Geometry is form and packaging only. No fastener patterns, formed returns,
+beads, bearings or joint hardware, and nothing here is releasable.
+"""
+
+import importlib.util
+import os
+
+import adsk.core
+import adsk.fusion
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def load_parameters():
+    spec = importlib.util.spec_from_file_location("parameters", os.path.join(HERE, "parameters.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class Builder:
+    """Thin wrapper over TemporaryBRepManager. All inputs are millimetres."""
+
+    def __init__(self, root):
+        self.root = root
+        self.tbm = adsk.fusion.TemporaryBRepManager.get()
+        self._components = {}
+
+    def box(self, x0, y0, z0, dx, dy, dz):
+        centre = adsk.core.Point3D.create((x0 + dx / 2) * 0.1, (y0 + dy / 2) * 0.1, (z0 + dz / 2) * 0.1)
+        obb = adsk.core.OrientedBoundingBox3D.create(
+            centre, adsk.core.Vector3D.create(1, 0, 0), adsk.core.Vector3D.create(0, 1, 0),
+            dx * 0.1, dy * 0.1, dz * 0.1)
+        return self.tbm.createBox(obb)
+
+    def cyl_x(self, x1, x2, r, y, z=0.0):
+        """Cylinder with its axis along X, which is every joint axis on this robot."""
+        return self.tbm.createCylinderOrCone(
+            adsk.core.Point3D.create(x1 * 0.1, y * 0.1, z * 0.1), r * 0.1,
+            adsk.core.Point3D.create(x2 * 0.1, y * 0.1, z * 0.1), r * 0.1)
+
+    def cut(self, target, tool):
+        self.tbm.booleanOperation(target, tool, adsk.fusion.BooleanTypes.DifferenceBooleanType)
+        return target
+
+    def shell(self, x0, y0, z0, dx, dy, dz, t):
+        return self.cut(self.box(x0, y0, z0, dx, dy, dz),
+                        self.box(x0 + t, y0 + t, z0 + t, dx - 2 * t, dy - 2 * t, dz - 2 * t))
+
+    def component(self, name):
+        if name not in self._components:
+            occ = self.root.occurrences.addNewComponent(adsk.core.Matrix3D.create())
+            occ.component.name = name
+            self._components[name] = occ.component
+        return self._components[name]
+
+    def add(self, component_name, body, body_name):
+        comp = self.component(component_name)
+        feature = comp.features.baseFeatures.add()
+        feature.startEdit()
+        comp.bRepBodies.add(body, feature)
+        feature.finishEdit()
+        comp.bRepBodies.item(comp.bRepBodies.count - 1).name = body_name
+
+
+def build(app, document=None):
+    p = load_parameters()
+
+    if document is None:
+        document = app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
+    design = adsk.fusion.Design.cast(document.products.itemByProductType("DesignProductType"))
+    b = Builder(design.rootComponent)
+
+    # ---- derived working dimensions -------------------------------------
+    H = p.ROBOT_HEIGHT
+    HW = p.ROBOT_WIDTH / 2                     # 240
+    CHW = p.CENTRAL_CHASSIS_WIDTH / 2          # 120
+    HD = p.ROBOT_DEPTH_REFERENCE / 2           # 129.934
+    T = p.SHELL_WALL
+    GAP = 1.5
+    HIP = p.AXLE_LOWER_MAIN_Y
+    HIP_GAP = p.PANEL_HIP_BREAK_GAP
+    LOW_TOP, UPP_BOT = HIP - HIP_GAP / 2, HIP + HIP_GAP / 2
+    PANEL_IN = HD - T
+    RAIL_X, RAIL_W = p.FRAME_RAIL_OUTBOARD_X - 20.0, 20.0   # 98.8
+    BH_Y0, BH_Y1 = 570.0, 652.0
+    ARM_IN = CHW + p.ARM_CLEARANCE
+    ARM_W = HW - ARM_IN
+
+    # ---- 00 reference ---------------------------------------------------
+    b.add("00_MASTER_REFERENCE", b.box(-HW, 0, -HD, HW * 2, H, HD * 2), "EXTERNAL_REFERENCE_ENVELOPE")
+    b.add("00_MASTER_REFERENCE", b.box(-CHW, 0, -HD, CHW * 2, H, HD * 2), "CENTRAL_CHASSIS_REFERENCE")
+
+    # ---- 01 frame: rails terminate into the hip bulkheads ---------------
+    for i, x0 in ((0, -RAIL_X - RAIL_W), (1, RAIL_X)):
+        for j, z0 in ((0, -85.0), (1, 45.0)):
+            b.add("01_FRAME", b.box(x0, 30.0, z0, RAIL_W, BH_Y0 - 30.0, 40.0), f"RAIL_LOWER_{i}_{j}")
+            b.add("01_FRAME", b.box(x0, BH_Y1, z0, RAIL_W, 950.0 - BH_Y1, 40.0), f"RAIL_UPPER_{i}_{j}")
+    for k, fy in enumerate((30.0, 205.0, 480.0, 660.0, 930.0)):
+        for label, fz in (("FRONT", 65.0), ("REAR", -85.0)):
+            b.add("01_FRAME", b.box(-RAIL_X, fy, fz, RAIL_X * 2, 20.0, 20.0), f"CROSS_{k}_{label}")
+        for label, fx in (("PORT", -RAIL_X - RAIL_W), ("STBD", RAIL_X)):
+            b.add("01_FRAME", b.box(fx, fy, -85.0, RAIL_W, 20.0, 170.0), f"DEPTH_{k}_{label}")
+
+    # ---- 02 joints: machined bulkhead carries the bearing and the drive --
+    for side, x0 in (("PORT", -RAIL_X - RAIL_W), ("STARBOARD", RAIL_X)):
+        b.add("02_JOINTS", b.box(x0, BH_Y0, -85.0, RAIL_W, BH_Y1 - BH_Y0, 170.0), f"HIP_BULKHEAD_{side}")
+
+    # ---- 03 drive, 04 shafts, outer carriers ----------------------------
+    for side, s in (("PORT", -1.0), ("STARBOARD", 1.0)):
+        def span(a, c):
+            return (s * c, s * a) if s < 0 else (a, c)
+        a1, a2 = span(5.0, 5.0 + p.ACTUATOR_LENGTH)
+        b.add("03_ACTUATORS", b.cyl_x(a1, a2, p.ACTUATOR_DIAMETER / 2, HIP), f"ACTUATOR_HIP_{side}_AK45_10")
+        r1, r2 = span(48.0, 48.0 + p.REDUCTION_STAGE2_LENGTH)
+        b.add("03_ACTUATORS", b.cyl_x(r1, r2, p.REDUCTION_STAGE2_DIAMETER / 2, HIP),
+              f"REDUCTION_HIP_{side}_{int(p.REDUCTION_STAGE2_RATIO)}TO1")
+        s1, s2 = span(96.0, 148.0)
+        b.add("04_BEARINGS_SHAFTS", b.cyl_x(s1, s2, p.MAIN_SHAFT_DIAMETER / 2, HIP), f"SHAFT_HIP_{side}_D20")
+        o1, o2 = span(130.0, 138.0)
+        b.add("02_JOINTS", b.box(min(o1, o2), HIP - 55, -55.0, 8.0, 110.0, 110.0),
+              f"BEARING_CARRIER_HIP_{side}_OUTER")
+
+    # ---- equipment reservations ----------------------------------------
+    b.add("05_BATTERY", b.box(-95.0, 55.0, -105.0, 190.0, 150.0, 210.0), "BATTERY_KEEP_OUT")
+    b.add("06_COMPUTE", b.box(5.0, 230.0, -PANEL_IN, 85.0, 225.0, 210.0),
+          "MINISFORUM_AI_X1_PRO_SERVICE_KEEP_OUT")
+    b.add("06_COMPUTE", b.box(23.0, 245.0, -121.0, p.MINI_PC_DEPTH, p.MINI_PC_HEIGHT, p.MINI_PC_WIDTH),
+          "MINISFORUM_AI_X1_PRO_BODY")
+    b.add("07_GPU", b.box(-93.0, 220.0, -5.0, 90.0, 200.0, 50.0), "GPU_KEEP_OUT")
+    b.add("07_GPU", b.box(-84.0, 235.0, 3.0, 72.0, 170.0, 20.0), "GPU_CARD_RTX_2000_ADA")
+    b.add("08_ELECTRONICS", b.box(-35.0, 700.0, -HD, 70.0, 70.0, 50.0), "E_STOP_KEEP_OUT")
+    b.add("08_ELECTRONICS", b.box(-45.0, 505.0, -100.0, 90.0, 70.0, 30.0), "RUBIK_LINK_V3_KEEP_OUT")
+    b.add("10_SENSORS", b.box(-60.0, 290.0, 55.0, 40.0, 25.0, 40.0), "IMU_KEEP_OUT")
+
+    # ---- 11 bodywork: two front panels either side of the hip break -----
+    b.add("11_BODY_PANELS", b.box(-CHW, GAP / 2, PANEL_IN, CHW * 2, LOW_TOP - GAP, T), "PANEL_FRONT_LOWER")
+    front_upper = b.box(-CHW, UPP_BOT + GAP / 2, PANEL_IN, CHW * 2, (H - UPP_BOT) - GAP, T)
+    front_upper = b.cut(front_upper, b.box(-p.DISPLAY_ACTIVE_WIDTH / 2, p.DISPLAY_ORIGIN_Y, PANEL_IN - 1.0,
+                                           p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, T + 2))
+    b.add("11_BODY_PANELS", front_upper, "PANEL_FRONT_DISPLAY")
+    for name, y0, y1 in (("PANEL_REAR_BATTERY_ACCESS", 0.0, 160.0),
+                         ("PANEL_REAR_COMPUTE_ACCESS", 160.0, 410.0),
+                         ("PANEL_REAR_GPU_ACCESS", 410.0, LOW_TOP),
+                         ("PANEL_REAR_UPPER", UPP_BOT, H)):
+        b.add("11_BODY_PANELS", b.box(-CHW, y0 + GAP / 2, -HD, CHW * 2, (y1 - y0) - GAP, T), name)
+    for side, x in (("PORT", -CHW), ("STARBOARD", CHW - T)):
+        b.add("11_BODY_PANELS", b.box(x, 0, -HD, T, LOW_TOP, HD * 2), f"PANEL_SIDE_{side}_LOWER")
+        b.add("11_BODY_PANELS", b.box(x, UPP_BOT, -HD, T, H - UPP_BOT, HD * 2), f"PANEL_SIDE_{side}_UPPER")
+    b.add("11_BODY_PANELS", b.box(-CHW + T, H - T, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_TOP_LID")
+    b.add("11_BODY_PANELS", b.box(-CHW + T, 0, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_BOTTOM_LID")
+
+    # ---- 13 wiring ------------------------------------------------------
+    b.add("13_WIRING", b.box(-95.0, 210.0, -110.0, 20.0, 740.0, 20.0), "HARNESS_PORT_POWER_CAN")
+    b.add("13_WIRING", b.box(75.0, 210.0, 85.0, 20.0, 430.0, 20.0), "HARNESS_STARBOARD_POWER_CAN")
+
+    # ---- 14 arms: one rigid limb per side, rockered sole ----------------
+    # The gait is a compass walker, so the limb has no knee. Foot clearance
+    # comes from the rocker instead: R(1 - cos theta) at the swing angle.
+    R = p.FOOT_ROCKER_RADIUS
+    for side, x0 in (("PORT", -HW), ("STARBOARD", ARM_IN)):
+        limb = b.shell(x0, 0, -HD, ARM_W, H, HD * 2, T)
+        sole = b.box(x0 - 1, -1.0, -HD - 1, ARM_W + 2, 80.0, HD * 2 + 2)
+        b.cut(sole, b.cyl_x(x0 - 2, x0 + ARM_W + 2, R, R, 0.0))
+        b.add("14_ARMS", b.cut(limb, sole), f"ARM_{side}_RIGID_LIMB")
+
+    # ---- 15 display insert ---------------------------------------------
+    ap_w, ap_h, ap_y = p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, p.DISPLAY_ORIGIN_Y
+    doubler = b.box(-115.0, ap_y - 18.0, PANEL_IN - 2.0, 230.0, ap_h + 36.0, 2.0)
+    doubler = b.cut(doubler, b.box(-ap_w / 2, ap_y, PANEL_IN - 3.0, ap_w, ap_h, 4.0))
+    b.add("15_DISPLAY", doubler, "DISPLAY_APERTURE_DOUBLER")
+    b.add("15_DISPLAY", b.box(-93.0, ap_y - 6.0, PANEL_IN - 4.0, 186.0, ap_h + 12.0, p.DISPLAY_COVER_THICKNESS),
+          "DISPLAY_COVER_LENS")
+    b.add("15_DISPLAY", b.box(-p.DISPLAY_MODULE_WIDTH / 2,
+                              ap_y - (p.DISPLAY_MODULE_HEIGHT - ap_h) / 2,
+                              PANEL_IN - 4.0 - p.DISPLAY_MODULE_THICKNESS,
+                              p.DISPLAY_MODULE_WIDTH, p.DISPLAY_MODULE_HEIGHT,
+                              p.DISPLAY_MODULE_THICKNESS), "DISPLAY_TV_UNIT")
+
+    # ---- report ---------------------------------------------------------
+    r = design.rootComponent
+    mn, mx = [1e9] * 3, [-1e9] * 3
+    for occ in r.allOccurrences:
+        for body in occ.bRepBodies:
+            if body.name in ("EXTERNAL_REFERENCE_ENVELOPE", "CENTRAL_CHASSIS_REFERENCE"):
+                continue
+            bb = body.boundingBox
+            for k, v in enumerate((bb.minPoint.x, bb.minPoint.y, bb.minPoint.z)):
+                mn[k] = min(mn[k], v)
+            for k, v in enumerate((bb.maxPoint.x, bb.maxPoint.y, bb.maxPoint.z)):
+                mx[k] = max(mx[k], v)
+
+    return {
+        "document": document.name,
+        "components": sorted({o.component.name for o in r.occurrences}),
+        "bodies": sum(o.bRepBodies.count for o in r.allOccurrences),
+        "extent_mm": [round((mx[k] - mn[k]) * 10, 1) for k in range(3)],
+    }
