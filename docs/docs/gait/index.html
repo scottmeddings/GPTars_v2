@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-DrNNGO8w.css"/><title>Gait and locomotion — GP-TARS V2</title><meta name="description" content="GP-TARS V2 walks as a **compass walker**: two rigid limbs hinged at a common hip axis, swinging in the sagittal plane. Two actuators, two degrees of freedom, no knees."/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 05 of 10</p><h1>Gait and locomotion</h1><p class="subtitle">GP-TARS V2 walks as a **compass walker**: two rigid limbs hinged at a common hip axis, swinging in the sagittal plane. Two actuators, two degrees of freedom, no knees.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>11 Aug 2026</b></span><span>SOURCE <b>docs/gait.md</b></span><span>SECTIONS <b>5</b></span><span>WORDS <b>827</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#configuration">Configuration</a></li><li><a href="#step-geometry">Step geometry</a></li><li><a href="#foot-clearance-is-the-one-real-problem">Foot clearance is the one real problem</a></li><li><a href="#what-two-joints-will-not-do">What two joints will not do</a></li><li><a href="#open-items">Open items</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/gait.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed gait, revision Gait V1, 2026-08-11</div><div class="doc-prose"><p>GP-TARS V2 walks as a <strong>compass walker</strong>: two rigid limbs hinged at a common
+hip axis, swinging in the sagittal plane. Two actuators, two degrees of freedom,
+no knees.</p>
+<p>This is a deliberate simplification and a legitimate configuration. Compass
+walkers are the classic passive-dynamic form, and rigid slabs pivoting about a
+shared axis is closer to the screen robot&#39;s motion than a knee-jointed limb.
+Earlier revisions of this project assumed two degrees of freedom per limb after
+reading a mid-limb bend in reference footage of a fan-built replica; that replica
+carries more articulation than the gait requires.</p>
+<h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Actuated joints</td><td>2, one hip per side</td></tr><tr><td>Actuator</td><td>CubeMars AK45-10 V3.0 with a 24:1 second stage, 240:1 total</td></tr><tr><td>Joint torque</td><td>60 N·m continuous, 168 N·m peak</td></tr><tr><td>Limb</td><td>Rigid from hip to foot; no knee</td></tr><tr><td>Leg length</td><td>610.845 mm, equal to the hip axis height</td></tr><tr><td>Plane of motion</td><td>Sagittal only</td></tr></tbody></table></div>
+<p>The limbs must therefore be modelled as <strong>single rigid shells</strong>, not the shin,
+thigh and upper split currently in <code>14_ARMS</code>. Any knee line becomes a fabricated
+joint that is bolted solid, or is removed.</p>
+<h2 id="step-geometry"><a class="anchor" href="#step-geometry">Step geometry</a></h2>
+<p>Step length is <code>2 L sin θ</code> for a splay half-angle θ about a leg of length L.</p>
+<div class="table-wrap"><table><thead><tr><th>Splay half-angle</th><th>Step length</th><th>Swing time at 0.4 rad/s</th><th>Speed</th></tr></thead><tbody><tr><td>10°</td><td>212 mm</td><td>0.87 s</td><td>0.24 m/s</td></tr><tr><td>15°</td><td>316 mm</td><td>1.31 s</td><td>0.24 m/s</td></tr><tr><td>20°</td><td>418 mm</td><td>1.75 s</td><td>0.24 m/s</td></tr><tr><td>25°</td><td>516 mm</td><td>2.18 s</td><td>0.24 m/s</td></tr></tbody></table></div>
+<p>Speed is <strong>independent of splay angle</strong>, because step length and swing time both
+scale with θ. Walking speed is set purely by joint angular velocity, so it is a
+function of actuator speed and bus voltage, not of gait tuning.</p>
+<p>At the 12.8 V bus that is <strong>0.24 m/s</strong>, about 0.9 km/h. At the actuator&#39;s 24 V
+nominal it would be roughly 0.48 m/s. This is the clearest practical cost of the
+12.8 V decision recorded in <code>docs/design_assumptions.md</code>.</p>
+<p><strong>Working point: 20° splay, 418 mm step, 1.75 s per swing.</strong></p>
+<h2 id="foot-clearance-is-the-one-real-problem"><a class="anchor" href="#foot-clearance-is-the-one-real-problem">Foot clearance is the one real problem</a></h2>
+<p>A rigid leg of fixed length cannot swing past the stance leg without striking the
+ground. This is the defining constraint of a kneeless walker, and it must be
+solved mechanically because there is no joint available to solve it.</p>
+<p>The answer is a <strong>rockered foot</strong>. As the stance foot rolls forward on a curved
+sole the hip rises, peaking when the stance leg is vertical, which is exactly
+when the swing limb passes. Clearance is <code>R(1 - cos θ)</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Rocker radius</th><th>at 15°</th><th>at 20°</th><th>at 25°</th></tr></thead><tbody><tr><td>100 mm</td><td>3.4 mm</td><td>6.0 mm</td><td>9.4 mm</td></tr><tr><td>150 mm</td><td>5.1 mm</td><td>9.0 mm</td><td>14.1 mm</td></tr><tr><td><strong>200 mm</strong></td><td>6.8 mm</td><td><strong>12.1 mm</strong></td><td>18.7 mm</td></tr><tr><td>260 mm</td><td>8.9 mm</td><td>15.7 mm</td><td>24.4 mm</td></tr></tbody></table></div>
+<p><strong>Specify R = 200 mm at the working point</strong>, giving 12.1 mm of clearance. The
+limb slab is 259.867 mm deep, so a 200 mm radius forms naturally across the foot
+without adding depth.</p>
+<p>A rocker also reduces heel-strike impact, which matters because the landing case
+sizes the joint. Flat feet on rigid legs would both scuff and slam.</p>
+<h2 id="what-two-joints-will-not-do"><a class="anchor" href="#what-two-joints-will-not-do">What two joints will not do</a></h2>
+<p>The specification asks for behaviours this configuration cannot deliver:</p>
+<div class="table-wrap"><table><thead><tr><th>Requirement</th><th>With two hip joints</th></tr></thead><tbody><tr><td>Walk forward</td><td><strong>Yes</strong>, on flat ground</td></tr><tr><td>Turn left and right</td><td><strong>No.</strong> Both limbs swing in one plane; there is no yaw freedom</td></tr><tr><td>Controlled pivoting</td><td>Limited to asymmetric stepping at best</td></tr><tr><td>Recover to vertical</td><td><strong>No.</strong> Self-righting needs degrees of freedom this lacks</td></tr><tr><td>Step over obstacles</td><td><strong>No.</strong> Clearance is fixed by the rocker geometry</td></tr></tbody></table></div>
+<p>This is accepted for the current build, whose goal is forward walking. Turning
+and recovery require either additional joints or a different mechanism, and
+neither should be assumed to arrive by tuning software.</p>
+<h2 id="open-items"><a class="anchor" href="#open-items">Open items</a></h2>
+<ul>
+<li>Reduce <code>14_ARMS</code> from shin, thigh and upper to a single rigid shell per side.</li>
+<li>Model the 200 mm rockered foot and its contact pad material.</li>
+<li>Confirm lateral stability: the machine is 480 mm wide but only 259.9 mm deep,
+and nothing in this gait stabilises roll.</li>
+<li>Measure real joint speed on the bench before trusting the 0.24 m/s figure; it
+assumes 0.4 rad/s at the output, which is itself derived rather than measured.</li>
+<li>Decide whether turning is added later by a third joint, by asymmetric stepping,
+or not at all.</li>
+</ul>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/aluminium-architecture"><small>← PREVIOUS</small><b>Hybrid mechanical architecture</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/compute-hardware"><small>NEXT →</small><b>Compute hardware</b></a></nav></section><footer><span>GP‑TARS V2 · GAIT AND LOCOMOTION</span><span>RENDERED FROM docs/gait.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

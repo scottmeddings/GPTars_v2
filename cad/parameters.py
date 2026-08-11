@@ -232,3 +232,18 @@ ACTUATOR_BRAKES_REQUIRED = True
 # take the GPU and mini PC side by side.
 FRAME_RAIL_OUTBOARD_X = 118.8
 FRAME_CLEAR_SPAN = 197.6
+
+# Gait: compass walker, two rigid limbs on a shared hip axis. No knees.
+# See docs/gait.md. Speed is set by joint angular velocity alone, not by
+# splay angle, because step length and swing time both scale with it.
+GAIT_TYPE = "Compass walker, sagittal plane"
+GAIT_DOF = 2
+LIMB_RIGID = True
+LEG_LENGTH = AXLE_LOWER_MAIN_Y
+GAIT_SPLAY_HALF_ANGLE_DEG = 20.0
+GAIT_STEP_LENGTH = 418.0
+GAIT_SWING_TIME_S = 1.75
+GAIT_SPEED_MS = 0.24
+JOINT_ANGULAR_VELOCITY_RAD_S = 0.4
+FOOT_ROCKER_RADIUS = 200.0
+FOOT_SWING_CLEARANCE = 12.1
