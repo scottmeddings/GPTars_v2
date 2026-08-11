@@ -141,6 +141,7 @@ function init(container) {
   });
 
   // Per-group visibility toggles
+  const buttons = new Map();
   const legend = document.createElement("div");
   legend.className = "viewer-legend";
   models.forEach((model) => {
@@ -155,6 +156,7 @@ function init(container) {
       mesh.visible = !mesh.visible;
       button.classList.toggle("is-off", !mesh.visible);
     });
+    buttons.set(model.name, button);
     legend.appendChild(button);
   });
 
@@ -164,6 +166,44 @@ function init(container) {
   reset.textContent = "Reset view";
   reset.addEventListener("click", frameCamera);
   legend.appendChild(reset);
+
+  /** Show exactly the named groups; hide everything else. */
+  function showOnly(predicate) {
+    models.forEach((model) => {
+      const mesh = groups.get(model.name);
+      if (!mesh) return;
+      const visible = predicate(model);
+      mesh.visible = visible;
+      const button = buttons.get(model.name);
+      if (button) button.classList.toggle("is-off", !visible);
+    });
+  }
+
+  // Presets. "Skins off" is the one that matters: it strips the cosmetic
+  // bodywork so the subframe, drive and equipment are all visible at once.
+  const presets = document.createElement("div");
+  presets.className = "viewer-presets";
+  [
+    ["Everything", () => true],
+    ["Skins off", (m) => m.group !== "skin"],
+    ["Subframe only", (m) => m.group === "structure"],
+    ["Structure + drive", (m) => m.group === "structure" || m.group === "drive"],
+    ["Equipment", (m) => m.group === "equipment" || m.group === "structure"],
+  ].forEach(([label, predicate], index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "viewer-preset";
+    if (index === 0) button.classList.add("is-active");
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      showOnly(predicate);
+      presets.querySelectorAll(".viewer-preset").forEach((b) => b.classList.remove("is-active"));
+      button.classList.add("is-active");
+    });
+    presets.appendChild(button);
+  });
+
+  container.appendChild(presets);
   container.appendChild(legend);
 
   new ResizeObserver(() => {

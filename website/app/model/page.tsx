@@ -13,11 +13,24 @@ const value = (name: string): string => parameterMap.get(name)?.value ?? "—";
 
 // Loaded by the standalone viewer bundle. Paths are rewritten for the
 // GitHub Pages base path at export time.
+// group drives the presets: "skin" is everything the Skins off preset removes.
 const MODELS = [
-  { name: "panels", label: "Bodywork panels", url: "/models/gptars-panels.stl", color: "#9aa7b0" },
-  { name: "arms", label: "Leg-arm slabs", url: "/models/gptars-arms.stl", color: "#6c7a85" },
-  { name: "display", label: "Display insert", url: "/models/gptars-display.stl", color: "#6fb8dd" },
-  { name: "frame", label: "Internal frame", url: "/models/gptars-frame.stl", color: "#d97b19", hidden: true },
+  { name: "panels", label: "Bodywork panels", url: "/models/gptars-panels.stl", color: "#9aa7b0", group: "skin" },
+  { name: "arms", label: "Leg-arm slabs", url: "/models/gptars-arms.stl", color: "#6c7a85", group: "skin" },
+  { name: "display", label: "Display insert", url: "/models/gptars-display.stl", color: "#6fb8dd", group: "skin" },
+
+  { name: "frame", label: "Subframe", url: "/models/gptars-frame.stl", color: "#d97b19", group: "structure" },
+  { name: "joints", label: "Hip bulkheads", url: "/models/gptars-joints.stl", color: "#efa54f", group: "structure" },
+
+  { name: "drive", label: "Actuators + reduction", url: "/models/gptars-drive.stl", color: "#e36b56", group: "drive" },
+  { name: "shafts", label: "Shafts", url: "/models/gptars-shafts.stl", color: "#c3ccd2", group: "drive" },
+
+  { name: "battery", label: "Battery", url: "/models/gptars-battery.stl", color: "#58bd8c", group: "equipment" },
+  { name: "compute", label: "Mini PC", url: "/models/gptars-compute.stl", color: "#6fb8dd", group: "equipment" },
+  { name: "gpu", label: "RTX 2000 Ada", url: "/models/gptars-gpu.stl", color: "#8ad0a8", group: "equipment" },
+  { name: "electronics", label: "E-stop + CAN hub", url: "/models/gptars-electronics.stl", color: "#e88a7a", group: "equipment" },
+  { name: "sensors", label: "IMU", url: "/models/gptars-sensors.stl", color: "#b6a4d6", group: "equipment" },
+  { name: "wiring", label: "Harness", url: "/models/gptars-wiring.stl", color: "#d8c46a", group: "equipment" },
 ];
 
 export default function ModelPage() {
