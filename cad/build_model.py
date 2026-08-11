@@ -55,6 +55,13 @@ class Builder:
         self.tbm.booleanOperation(target, tool, adsk.fusion.BooleanTypes.DifferenceBooleanType)
         return target
 
+    def intersect(self, target, tool):
+        self.tbm.booleanOperation(target, tool, adsk.fusion.BooleanTypes.IntersectionBooleanType)
+        return target
+
+    def copy(self, body):
+        return self.tbm.copy(body)
+
     def shell(self, x0, y0, z0, dx, dy, dz, t):
         return self.cut(self.box(x0, y0, z0, dx, dy, dz),
                         self.box(x0 + t, y0 + t, z0 + t, dx - 2 * t, dy - 2 * t, dz - 2 * t))
@@ -195,15 +202,34 @@ def build(app, document=None):
     b.add("13_WIRING", b.box(-95.0, 210.0, -110.0, 20.0, 740.0, 20.0), "HARNESS_PORT_POWER_CAN")
     b.add("13_WIRING", b.box(75.0, 210.0, 85.0, 20.0, 430.0, 20.0), "HARNESS_STARBOARD_POWER_CAN")
 
-    # ---- 14 arms: one rigid limb per side, rockered sole ----------------
-    # The gait is a compass walker, so the limb has no knee. Foot clearance
-    # comes from the rocker instead: R(1 - cos theta) at the swing angle.
+    # ---- 14 arms and 16 feet -------------------------------------------
+    # The gait is a compass walker, so the limb is rigid and has no knee.
+    # Clearance comes from the rockered foot instead: R(1 - cos theta) at the
+    # swing angle. The foot is a separate part, not a curve cut into the shell,
+    # because it carries the whole landing load and wears out.
     R = p.FOOT_ROCKER_RADIUS
+    FOOT_H = p.FOOT_HEIGHT
+    PAD = p.FOOT_PAD_THICKNESS
     for side, x0 in (("PORT", -HW), ("STARBOARD", ARM_IN)):
-        limb = b.shell(x0, 0, -HD, ARM_W, H, HD * 2, T)
-        sole = b.box(x0 - 1, -1.0, -HD - 1, ARM_W + 2, 80.0, HD * 2 + 2)
-        b.cut(sole, b.cyl_x(x0 - 2, x0 + ARM_W + 2, R, R, 0.0))
-        b.add("14_ARMS", b.cut(limb, sole), f"ARM_{side}_RIGID_LIMB")
+        b.add("14_ARMS", b.shell(x0, FOOT_H, -HD, ARM_W, H - FOOT_H, HD * 2, T),
+              f"ARM_{side}_RIGID_LIMB")
+
+        blank = b.box(x0, 0, -HD, ARM_W, FOOT_H, HD * 2)
+        outer = b.intersect(b.copy(blank), b.cyl_x(x0 - 2, x0 + ARM_W + 2, R, R, 0.0))
+        shoe = b.intersect(b.copy(blank), b.cyl_x(x0 - 2, x0 + ARM_W + 2, R - PAD, R, 0.0))
+        pad = b.cut(b.copy(outer), b.copy(shoe))
+
+        # The shoe is a formed part, not billet. Left solid it weighs 4.75 kg a
+        # side; hollowed to plate it is a fraction of that and still carries the
+        # landing load through its rocker face and side walls.
+        W = p.FOOT_SHOE_WALL
+        void = b.intersect(
+            b.box(x0 + W, 0, -HD + W, ARM_W - 2 * W, FOOT_H, HD * 2 - 2 * W),
+            b.cyl_x(x0 - 2, x0 + ARM_W + 2, R - PAD - W, R, 0.0))
+        shoe = b.cut(shoe, void)
+
+        b.add("16_FEET", shoe, f"FOOT_{side}_SHOE")
+        b.add("16_FEET", pad, f"FOOT_{side}_CONTACT_PAD")
 
     # ---- 15 display insert ---------------------------------------------
     ap_w, ap_h, ap_y = p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, p.DISPLAY_ORIGIN_Y
@@ -250,6 +276,7 @@ STRUCTURAL_MATERIAL = {
     "04_BEARINGS_SHAFTS": "steel",
     "11_BODY_PANELS": "5052",
     "14_ARMS": "5052",
+    "16_FEET": "6061",
 }
 
 

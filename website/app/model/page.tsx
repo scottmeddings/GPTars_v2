@@ -19,6 +19,8 @@ const MODELS = [
   { name: "arms", label: "Leg-arm slabs", url: "/models/gptars-arms.stl", color: "#6c7a85", group: "skin" },
   { name: "display", label: "Display insert", url: "/models/gptars-display.stl", color: "#6fb8dd", group: "skin" },
 
+  { name: "feet", label: "Rockered feet", url: "/models/gptars-feet.stl", color: "#d8a0c0", group: "skin" },
+
   { name: "frame", label: "Subframe", url: "/models/gptars-frame.stl", color: "#d97b19", group: "structure" },
   { name: "joints", label: "Hip bulkheads", url: "/models/gptars-joints.stl", color: "#efa54f", group: "structure" },
 
