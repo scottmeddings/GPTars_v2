@@ -59,9 +59,39 @@ The complete robot will exceed the 12–25 kg target unless actuators, battery, 
 ## Joining and finish
 
 - Prefer bolted, riveted, or replaceable jointing around service areas.
-- Welding is acceptable for selected chassis modules but requires allowance for 6061 heat-affected-zone strength reduction and distortion.
+- The subframe is **TIG welded** from 6061-T6: 20 × 40 × 2.5 wall rails and 20 × 20 × 2.0 wall cross and depth members. See the welded-strength rule below.
 - Use structural adhesive only as a secondary load path unless specifically qualified.
 - Use anodising, powder coat, or conversion coating on the chassis and the exterior panels, selecting a finish system compatible with both alloys.
+
+## Welding the subframe
+
+The frame is TIG welded rather than bolted from T-slot profile. Three consequences follow, and the first is the one that governs the design.
+
+### Design to the welded allowable, not the T6 figure
+
+Welding anneals 6061-T6 locally. Yield in the heat-affected zone falls from about **276 MPa to roughly 145 MPa**, a **47 per cent** reduction, and the affected band reaches around 25 mm either side of a weld. On 20 mm members that means most of a joint region is softened.
+
+| Section | Area | Parent yield load | As-welded |
+|---|---:|---:|---:|
+| 20 × 40 × 2.5 rail | 275 mm² | 75.9 kN | **39.9 kN** |
+| 20 × 20 × 2.0 member | 144 mm² | 39.7 kN | **20.9 kN** |
+
+Full T6 recovery needs solution treatment near 530 °C, quench and artificial ageing. That is impractical for a one-metre welded frame and would distort it. Natural ageing recovers part of the loss over several weeks, to roughly T4, but the design must not depend on it.
+
+**No stress analysis has been performed on this frame.** Wall thicknesses were chosen to match commercial extrusion mass, not from load cases. Welding makes that gap more consequential, because the joints are now the weakest regions rather than the strongest.
+
+### Alloy note
+
+6061 is entirely weldable and is the usual choice for welded tube frames, but it is not the strongest choice *as welded*. The 5xxx series is work-hardened rather than heat-treated, so it has no comparable softening problem: 5083-H111 retains essentially its full strength through a weld, which lands it close to welded 6061 despite a lower parent figure. If sourcing allows, it is worth comparing before committing.
+
+### Practical requirements
+
+- **Machine the bearing bores after welding.** The hip bulkheads carry the joint bores, and welding rails to them puts a heat-affected zone directly at the bore. Boring afterwards is the only way to hold alignment.
+- **Build in a jig.** Twenty-eight members and thin walls distort readily; a fixture and a planned weld sequence are needed, not optional.
+- **Filler:** 4043 is more forgiving and less crack-prone; 5356 gives higher joint strength. Choose deliberately.
+- **2.0 mm wall is thin for TIG.** It welds, but burn-through at corners is a real risk and argues for a skilled hand or a thicker member at the most loaded joints.
+
+Welding does remove the corner brackets and T-nuts a bolted frame would need, which is a small mass saving not previously counted.
 
 ## Decals and markings
 

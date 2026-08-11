@@ -29,6 +29,19 @@ FRAME_PROFILE_LARGE_X = 20.0
 FRAME_PROFILE_LARGE_Y = 40.0
 STRUCTURAL_MATERIAL = "6061-T6 aluminium"
 FRAME_MATERIAL = "6061-T6 aluminium"
+FRAME_JOINING = "TIG welded"
+FRAME_SECTION_RAIL = "20 x 40 x 2.5 wall"
+FRAME_SECTION_MEMBER = "20 x 20 x 2.0 wall"
+# Welding anneals 6061-T6 locally. Design to the welded allowable, not the
+# parent T6 figure: yield falls from about 276 to 145 MPa in the heat-affected
+# zone, roughly 47 per cent. The HAZ reaches about 25 mm each side of a weld,
+# which on 20 mm members means most of a joint region is affected.
+FRAME_PARENT_YIELD_MPA = 276.0
+FRAME_WELDED_YIELD_MPA = 145.0
+FRAME_HAZ_EXTENT = 25.0
+FRAME_FILLER = "4043 or 5356; 5356 for higher joint strength"
+FRAME_JIG_REQUIRED = True
+BEARING_BORES_MACHINED_AFTER_WELD = True
 JOINT_BULKHEAD_MATERIAL = "6061-T6 aluminium plate"
 JOINT_BULKHEAD_THICKNESS = 8.0
 ACTUATOR_BRACKET_THICKNESS = 8.0
