@@ -27,6 +27,8 @@ carries more articulation than the gait requires.
 The limbs are modelled as **single rigid shells** in `14_ARMS`, with the rockered
 feet as separate parts in `16_FEET`.
 
+![GP-TARS V2 dimensioned front and side elevations, showing the hip axis, rockered feet and leg-arm slabs](/images/gptars-elevation.svg)
+
 ## Step geometry
 
 Step length is `2 L sin θ` for a splay half-angle θ about a leg of length L.

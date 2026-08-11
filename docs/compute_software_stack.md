@@ -133,7 +133,7 @@ The imported GPTARS assembly contains `Screen`, `Screen Protector` and a
 `Screen support` under `Chassis / Upper Lid`. A display is original design
 intent and V2 should scale that intent rather than invent a new location.
 
-![GP-TARS V2 front elevation showing the four-slab form, articulation axes, equipment reservations and the Upper Lid display](/images/gptars-elevation.svg)
+![GP-TARS V2 dimensioned front and side elevations at the 480 x 1000 x 259.9 mm build size](/images/gptars-elevation.svg)
 
 ### The constraint that sets the size
 
