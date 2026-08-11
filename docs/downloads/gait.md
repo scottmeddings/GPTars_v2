@@ -18,36 +18,36 @@ carries more articulation than the gait requires.
 | Item | Value |
 |---|---|
 | Actuated joints | 2, one hip per side |
-| Actuator | CubeMars AK45-10 V3.0 with a 24:1 second stage, 240:1 total |
-| Joint torque | 60 N·m continuous, 168 N·m peak |
+| Actuator | CubeMars AK45-10 V3.0 with a 32:1 second stage, 320:1 total |
+| Joint torque | 80 N·m continuous, 224 N·m peak; 68 and 190 after efficiency |
 | Limb | Rigid from hip to foot; no knee |
 | Leg length | 610.845 mm, equal to the hip axis height |
 | Plane of motion | Sagittal only |
 
-The limbs must therefore be modelled as **single rigid shells**, not the shin,
-thigh and upper split currently in `14_ARMS`. Any knee line becomes a fabricated
-joint that is bolted solid, or is removed.
+The limbs are modelled as **single rigid shells** in `14_ARMS`, with the rockered
+feet as separate parts in `16_FEET`.
 
 ## Step geometry
 
 Step length is `2 L sin θ` for a splay half-angle θ about a leg of length L.
 
-| Splay half-angle | Step length | Swing time at 0.4 rad/s | Speed |
+| Splay half-angle | Step length | Swing time at 0.6 rad/s | Speed |
 |---:|---:|---:|---:|
-| 10° | 212 mm | 0.87 s | 0.24 m/s |
-| 15° | 316 mm | 1.31 s | 0.24 m/s |
-| 20° | 418 mm | 1.75 s | 0.24 m/s |
-| 25° | 516 mm | 2.18 s | 0.24 m/s |
+| 10° | 212 mm | 0.58 s | 0.36 m/s |
+| 15° | 316 mm | 0.87 s | 0.36 m/s |
+| 20° | 418 mm | 1.16 s | 0.36 m/s |
+| 25° | 516 mm | 1.45 s | 0.36 m/s |
 
 Speed is **independent of splay angle**, because step length and swing time both
 scale with θ. Walking speed is set purely by joint angular velocity, so it is a
 function of actuator speed and bus voltage, not of gait tuning.
 
-At the 12.8 V bus that is **0.24 m/s**, about 0.9 km/h. At the actuator's 24 V
-nominal it would be roughly 0.48 m/s. This is the clearest practical cost of the
-12.8 V decision recorded in `docs/design_assumptions.md`.
+The actuators run at 24 V from a boost stage off the 12.8 V bus, so speed is
+**0.36 m/s**, about 1.3 km/h. The 32:1 second stage costs some of the 0.48 m/s
+the raw 24 V supply would give, and buys torque margin with it: 68 N·m against
+the 53.3 N·m needed to hold a 20° splay at 33 kg.
 
-**Working point: 20° splay, 418 mm step, 1.75 s per swing.**
+**Working point: 20° splay, 418 mm step, 1.16 s per swing.**
 
 ## Foot clearance is the one real problem
 
@@ -91,11 +91,12 @@ neither should be assumed to arrive by tuning software.
 
 ## Open items
 
-- Reduce `14_ARMS` from shin, thigh and upper to a single rigid shell per side.
-- Model the 200 mm rockered foot and its contact pad material.
 - Confirm lateral stability: the machine is 480 mm wide but only 259.9 mm deep,
   and nothing in this gait stabilises roll.
-- Measure real joint speed on the bench before trusting the 0.24 m/s figure; it
-  assumes 0.4 rad/s at the output, which is itself derived rather than measured.
+- Measure real joint speed on the bench before trusting the 0.36 m/s figure; it
+  assumes 0.6 rad/s at the output, which is derived rather than measured.
+- Verify the contact pad covers the working splay. It wraps the rocker from
+  ground level to 55.9 mm, which suits 20°; beyond that the foot lands on bare
+  aluminium.
 - Decide whether turning is added later by a third joint, by asymmetric stepping,
   or not at all.

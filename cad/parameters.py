@@ -45,6 +45,19 @@ SECONDARY_SHAFT_DIAMETER = 12.0
 ACTUATOR_MODEL = "CubeMars AK45-10 V3.0"
 ACTUATOR_COUNT_SELECTED = 2
 ACTUATOR_NOMINAL_V = 24.0
+
+# Actuators run at 24 V from a boost stage off the 12.8 V bus. Duty cycle is
+# low, so the conversion loss costs little energy, and it recovers the walking
+# speed the 12.8 V bus had halved.
+ACTUATOR_SUPPLY_VIA_BOOST = True
+BOOST_INPUT_V = 12.8
+BOOST_OUTPUT_V = 24.0
+BOOST_CONTINUOUS_W = 400.0
+BOOST_PEAK_W = 800.0
+BOOST_PEAK_INPUT_A = 69.0
+BOOST_BULK_CAPACITANCE_REQUIRED = True
+BRAKE_CHOPPER_REQUIRED = True
+BRAKE_CHOPPER_NOTE = "Gait is a controlled fall; a unidirectional boost gives regeneration no path back"
 ACTUATOR_RATED_TORQUE = 2.5
 ACTUATOR_PEAK_TORQUE = 7.0
 ACTUATOR_INTERNAL_RATIO = 10.0
@@ -52,9 +65,12 @@ ACTUATOR_DIAMETER = 53.0
 ACTUATOR_LENGTH = 43.0
 ACTUATOR_MASS_KG = 0.26
 
-# The actuator alone is 24x short of the hip requirement, so a second stage
-# sits between it and the joint. 24:1 restores both targets.
-REDUCTION_STAGE2_RATIO = 24.0
+# The actuator alone is far short of the hip requirement, so a second stage
+# sits between it and the joint. 32:1 gives 68 N*m after efficiency against
+# the 53.3 N*m needed to hold a 20 degree splay at 33 kg, a 28% margin.
+# A cycloidal drive changes ratio by lobe and pin count rather than size, so
+# this is the same envelope as the 24:1 it replaces.
+REDUCTION_STAGE2_RATIO = 32.0
 REDUCTION_TOTAL_RATIO = ACTUATOR_INTERNAL_RATIO * REDUCTION_STAGE2_RATIO
 REDUCTION_STAGE2_TYPE = "Cycloidal or two-stage planetary; partially backdrivable"
 REDUCTION_STAGE2_EFFICIENCY = 0.85
@@ -242,9 +258,9 @@ LIMB_RIGID = True
 LEG_LENGTH = AXLE_LOWER_MAIN_Y
 GAIT_SPLAY_HALF_ANGLE_DEG = 20.0
 GAIT_STEP_LENGTH = 418.0
-GAIT_SWING_TIME_S = 1.75
-GAIT_SPEED_MS = 0.24
-JOINT_ANGULAR_VELOCITY_RAD_S = 0.4
+GAIT_SWING_TIME_S = 1.16
+GAIT_SPEED_MS = 0.36
+JOINT_ANGULAR_VELOCITY_RAD_S = 0.6
 FOOT_ROCKER_RADIUS = 200.0
 FOOT_HEIGHT = 80.0
 FOOT_PAD_THICKNESS = 6.0

@@ -149,7 +149,8 @@ power state, in either direction. This follows the command boundary in
 | Cap the mini PC cTDP, 15–54 W configurable | 15–25 W | Selected |
 | Dim or blank the display when nobody is near | 10–18 W | Uses existing ToF and person detection |
 | Fans on a thermal control loop; LiDAR optional | 10–15 W | Selected |
-| 95% synchronous conversion; actuators native 24 V | ~15 W | Design rule |
+| 95% synchronous conversion throughout | ~15 W | Design rule |
+| Boost the actuator rail to 24 V rather than derating the drive | speed, not watts | Selected |
 
 The brake requirement deserves emphasis. The gait **stands splayed**, so without
 power-off brakes the robot burns holding current whenever it is upright, converts
@@ -185,14 +186,39 @@ propagates:
   continuous, and the cable cross-section rises accordingly.
 - Distribution losses scale with the square of current, so the same wiring loses
   four times as much power. Runs must be short and generously sized.
-- **Actuator choice narrows.** Integrated BLDC robotic actuators are commonly
-  24–48 V; at 12.8 V the same mechanical power needs twice the current, which
-  pushes up controller and winding losses. The specification's 24–48 V actuator
-  envelope is inconsistent with a 12.8 V bus and one of the two must give.
+- **Actuator choice narrows**, which is why the drive no longer runs off the bus
+  directly. See below.
 
-The alternative is a local boost stage feeding the actuators at 24 V or higher
-while the rest of the robot runs at 12.8 V. That adds a conversion stage and its
-losses, but keeps the actuator market open.
+### Resolved: the actuators run at 24 V
+
+The AK45-10 is 24 V nominal. Run from 12.8 V it delivers roughly half its speed,
+which held walking to 0.24 m/s, and the specification's 24–48 V actuator envelope
+contradicted the 12.8 V bus outright.
+
+A **boost stage** settles both: 12.8 V distribution, 24 V at the drive. Walking
+duty is low, so the conversion loss costs little in energy terms while recovering
+the speed the bus had halved.
+
+| Item | Value |
+|---|---|
+| Input | 12.8 V from the pack |
+| Output | 24 V to the actuators only |
+| Continuous | 400 W |
+| Peak | 800 W, two actuators at peak torque |
+| Peak input current | ~69 A at 90% efficiency |
+
+Two requirements come with it.
+
+**Bulk capacitance on the 24 V rail.** Landing transients should come out of
+capacitors rather than being pulled through the converter and the BMS. 69 A is
+inside a 100 A BMS but leaves little headroom.
+
+**A brake chopper and dump resistor.** This is the one most likely to be missed.
+The gait is a *controlled fall*, so the actuators absorb energy on the way down
+and act as generators. A boost converter is unidirectional, so that energy has no
+path back to the pack: it pumps the 24 V rail up until something trips or fails.
+Either fit a chopper across the rail or use a bidirectional converter. A chopper
+is cheap and is standard practice on any drive that decelerates a mass.
 
 Mixed duty is more useful than any single mode. At 70% attentive, 20%
 conversational and 10% walking the average is about 108 W, giving roughly
