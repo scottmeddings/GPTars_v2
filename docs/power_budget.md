@@ -167,7 +167,13 @@ the baseline pack at a **WattCycle 12.8 V 100 Ah Mini**, approximately
 | 0 — Deep sleep | 8 W | 0.6 A | **144 h, about 6 days** |
 | 1 — Attentive | 39 W | 3.0 A | 29.5 h |
 | 2 — Conversational | 160 W | 12.5 A | **7.2 h** |
-| 3 — Walking | 300 W | 23.4 A | 3.8 h |
+| 3 — Walking, at 20 kg | 300 W | 23.4 A | 3.8 h |
+| 3 — Walking, at 33 kg | ~450 W | 35.2 A | 2.6 h |
+
+Walking draw scales with mass, and the 33 kg figure is the one that matters now
+that the battery is selected. At 35 A continuous it consumes most of the 100 A
+BMS headroom before the GPU wakes, so conversation and walking together should
+be treated as the sizing case, not an edge case.
 
 ### The consequence of a 12.8 V bus
 
@@ -290,15 +296,52 @@ independently of the battery, and adding 5 to 15 kg of cells makes it certain.
 This needs resolving as a mass budget exercise, not absorbed silently into the
 battery choice.
 
-## Charging
+## The dock
 
-A dock is the intended recharge path, and it also allows the GPU to run from
-mains rather than the pack during long stationary sessions.
+![GP-TARS V2 seated on the charge and support dock](/images/gptars-dock-iso.png)
 
-At a 240 W charge rate the pack takes roughly five to six hours from empty.
-Requirements already recorded in the specification apply: accessible charging
-connector, fused main output, manual disconnect, and a battery management system
-appropriate to the chemistry.
+The dock is a **cradle the robot is placed into, not a station it returns to**.
+`docs/gait.md` records why: two hip joints give forward walking in one plane,
+with no turning, reversing or self-righting, so the machine cannot find a dock
+or align itself to one. Designing for autonomous docking would be designing for
+a capability this robot does not have.
+
+Accepting that lets one structure do three jobs.
+
+| Role | Detail |
+|---|---|
+| Charge | 30 A at 12.8 V is 384 W, about **3.3 hours** from empty |
+| Fall arrest | The gantry is the engineered restraint the specification requires before any unrestrained motion test |
+| Mains for the GPU | Docked, the RTX 2000 Ada runs from the wall instead of the pack, which is when long inference sessions happen anyway |
+
+### Geometry
+
+Modelled as `17_DOCK`: a base plate, a backboard, port and starboard funnel
+guides that centre the robot as it is lowered in, a contact block, and a gantry
+of two uprights and a crossbar for the fall-arrest tether. The robot carries a
+mating contact plate on its rear panel.
+
+Contacts sit at **Y=470**, above the mini PC service envelope which ends at 455
+and below the hip bulkhead which begins at 570. An earlier placement at Y=300
+fouled the PC envelope and sat on the compute access panel, which would have
+meant removing a service panel disconnected charging.
+
+### Two requirements that are not optional
+
+**Blade or brush contacts, not pogo pins.** Spring pins will not carry 30 A.
+
+**A detect pin must close the contactor only when the robot is seated.** At
+12.8 V and 30 A, exposed terminals bridged by a dropped tool or a pet are a fire
+risk. This is the same interlock principle as electric vehicle charging, and it
+is cheap to implement compared with the consequence of omitting it.
+
+The charge rate is a choice rather than a limit. LiFePO4 tolerates 0.5C, so 50 A
+would halve the time to about two hours, at the cost of heavier cable and
+contacts. 30 A is the sensible starting point.
+
+Requirements already recorded in the specification still apply: accessible
+charging connector, fused main output, manual disconnect, and a battery
+management system appropriate to the chemistry.
 
 ## Safety
 
