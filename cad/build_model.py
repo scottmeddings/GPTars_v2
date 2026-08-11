@@ -244,10 +244,35 @@ def build(app, document=None):
                               p.DISPLAY_MODULE_WIDTH, p.DISPLAY_MODULE_HEIGHT,
                               p.DISPLAY_MODULE_THICKNESS), "DISPLAY_TV_UNIT")
 
+    # ---- 17 dock --------------------------------------------------------
+    # A cradle the robot is placed into. It cannot dock itself: two hip joints
+    # give forward walking in one plane, with no turning or reversing. The
+    # structure doubles as the fall-arrest fixture the specification requires
+    # for early motion testing.
+    if getattr(p, "DOCK_PRESENT", False):
+        CY = p.DOCK_CONTACT_HEIGHT_Y
+        b.add("17_DOCK", b.box(-340.0, -20.0, -200.0, 680.0, 20.0, 360.0), "DOCK_BASE_PLATE")
+        b.add("17_DOCK", b.box(-200.0, 0.0, -180.0, 400.0, 900.0, 20.0), "DOCK_BACKBOARD")
+        for side, gx in (("PORT", -270.0), ("STARBOARD", 250.0)):
+            b.add("17_DOCK", b.box(gx, 0.0, -160.0, 20.0, 350.0, 260.0), f"DOCK_GUIDE_{side}")
+        # Contacts stand proud of the backboard to meet the robot's rear panel.
+        b.add("17_DOCK", b.box(-60.0, CY, -160.0, 120.0, 80.0, 32.0), "DOCK_CONTACT_BLOCK")
+        for side, ux in (("PORT", -340.0), ("STARBOARD", 300.0)):
+            b.add("17_DOCK", b.box(ux, 0.0, -180.0, 40.0, p.DOCK_GANTRY_HEIGHT, 40.0),
+                  f"DOCK_UPRIGHT_{side}")
+        b.add("17_DOCK", b.box(-340.0, p.DOCK_GANTRY_HEIGHT - 40.0, -180.0, 680.0, 40.0, 40.0),
+              "DOCK_GANTRY_CROSSBAR")
+        # Robot-side mating plate, on the rear panel.
+        b.add("08_ELECTRONICS", b.box(-60.0, CY, -HD, 120.0, 80.0, 4.0), "DOCK_CONTACT_PLATE")
+
     # ---- report ---------------------------------------------------------
     r = design.rootComponent
     mn, mx = [1e9] * 3, [-1e9] * 3
     for occ in r.allOccurrences:
+        # The dock is ground support equipment, not part of the robot, and the
+        # reference envelopes are transparent volumes rather than parts.
+        if occ.component.name == "17_DOCK":
+            continue
         for body in occ.bRepBodies:
             if body.name in ("EXTERNAL_REFERENCE_ENVELOPE", "CENTRAL_CHASSIS_REFERENCE"):
                 continue

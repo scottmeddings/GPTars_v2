@@ -184,11 +184,12 @@ function init(container) {
   const presets = document.createElement("div");
   presets.className = "viewer-presets";
   [
-    ["Everything", () => true],
-    ["Skins off", (m) => m.group !== "skin"],
+    ["Everything", (m) => m.group !== "dock"],
+    ["Skins off", (m) => m.group !== "skin" && m.group !== "dock"],
     ["Subframe only", (m) => m.group === "structure"],
     ["Structure + drive", (m) => m.group === "structure" || m.group === "drive"],
     ["Equipment", (m) => m.group === "equipment" || m.group === "structure"],
+    ["On the dock", (m) => m.group !== "structure" && m.group !== "equipment"],
   ].forEach(([label, predicate], index) => {
     const button = document.createElement("button");
     button.type = "button";

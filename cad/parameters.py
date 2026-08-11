@@ -252,3 +252,17 @@ FOOT_SHOE_WALL = 3.0
 FOOT_SHOE_MATERIAL = "6061-T6 aluminium"
 FOOT_PAD_MATERIAL = "Elastomer contact pad, replaceable"
 FOOT_SWING_CLEARANCE = 12.1
+
+# Charge and support dock. Two hip joints give forward walking only, so the
+# robot cannot turn, reverse or align itself: this is a cradle it is placed
+# into, not a station it returns to. See docs/power_budget.md.
+DOCK_PRESENT = True
+DOCK_AUTONOMOUS_DOCKING = False
+DOCK_CHARGE_CURRENT_A = 30.0
+DOCK_CHARGE_POWER_W = 384.0
+DOCK_CHARGE_TIME_H = 3.3
+DOCK_CONTACT_TYPE = "Blade or brush, 30 A rated; pogo pins will not carry it"
+DOCK_INTERLOCK = "Detect pin closes the contactor only when seated"
+DOCK_CONTACT_HEIGHT_Y = 470.0
+DOCK_GANTRY_HEIGHT = 1400.0
+DOCK_SERVES = "Charging, fall-arrest during motion testing, mains for the GPU"
