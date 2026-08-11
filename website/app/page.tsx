@@ -223,20 +223,20 @@ export default function Home() {
 
         <section id="drawings">
           <div className="section-heading">
-            <span>02</span><div><p>Fusion reference views</p><h2>CAD drawing gallery</h2></div>
+            <span>02</span><div><p>Generated from cad/build_model.py</p><h2>CAD drawing gallery</h2></div>
           </div>
           <div className="drawing-grid">
             <figure className="drawing drawing-main">
-              <img src="/images/gptars-shell-iso.png" alt="Current GP-TARS V2 narrow-body assembly" />
-              <figcaption><b>Current assembly.</b> Narrowed 480 mm body, four slabs, with the leg-arms split at hip and knee.</figcaption>
+              <img src="/images/gptars-elevation.svg" alt="Dimensioned front and side elevations of GP-TARS V2 at 480 by 1000 by 259.9 mm" />
+              <figcaption><b>General arrangement, R07.</b> Front and side elevations dimensioned: 480 × 1000 × 259.9 overall, 240 chassis, 116 leg-arm slabs, hip axis at 610.8, 174 × 310 display aperture and the 200 mm rockered sole.</figcaption>
             </figure>
             <figure className="drawing">
-              <img src="/images/gptars-shell-front.png" alt="GP-TARS V2 front elevation showing panel splits and the display aperture" />
-              <figcaption><b>Front elevation.</b> Panel splits, the rear-service layout and the 194 × 345 display aperture.</figcaption>
+              <img src="/images/gptars-shell-iso.png" alt="GP-TARS V2 assembled bodywork, leg-arm slabs and rockered feet" />
+              <figcaption><b>Assembly.</b> Formed 5052-H32 bodywork over the welded subframe, with the display high on the front face.</figcaption>
             </figure>
             <figure className="drawing">
-              <img src="/images/tars-original-reference.png" alt="Original imported TARS source geometry in Fusion" />
-              <figcaption><b>Source reference.</b> Original geometry retained for external proportion and datum extraction only.</figcaption>
+              <img src="/images/gptars-subframe-iso.png" alt="GP-TARS V2 with the skins removed, showing the welded subframe, drive train and equipment" />
+              <figcaption><b>Skins off.</b> TIG-welded 6061 subframe, machined hip bulkheads, the AK45-10 drive and the equipment stack.</figcaption>
             </figure>
           </div>
         </section>

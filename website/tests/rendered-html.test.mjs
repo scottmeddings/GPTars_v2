@@ -102,8 +102,9 @@ test("keeps the downloadable engineering files in the site bundle", async () => 
     "../public/downloads/GP_TARS_V2_R07.f3d",
     "../public/downloads/project_specification.md",
     "../public/downloads/software_architecture.md",
-    "../public/images/gptars-compute-v2.png",
-    "../public/images/gptars-aluminium-v1.png",
+    "../public/images/gptars-elevation.svg",
+    "../public/images/gptars-shell-iso.png",
+    "../public/images/gptars-subframe-iso.png",
   ];
 
   await Promise.all(requiredFiles.map((file) => access(new URL(file, import.meta.url))));
