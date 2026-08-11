@@ -41,15 +41,37 @@ ELECTRONICS_TRAY_THICKNESS = 2.0
 MAIN_SHAFT_DIAMETER = 20.0
 SECONDARY_SHAFT_DIAMETER = 12.0
 
-# Actuator design targets. Do not freeze until load cases are calculated.
-MAIN_ACTUATOR_DIAMETER_MIN = 80.0
-MAIN_ACTUATOR_DIAMETER_MAX = 120.0
-MAIN_ACTUATOR_LENGTH_MIN = 50.0
-MAIN_ACTUATOR_LENGTH_MAX = 100.0
+# Selected drive: CubeMars AK45-10 V3.0, two off, at the hips.
+ACTUATOR_MODEL = "CubeMars AK45-10 V3.0"
+ACTUATOR_COUNT_SELECTED = 2
+ACTUATOR_NOMINAL_V = 24.0
+ACTUATOR_RATED_TORQUE = 2.5
+ACTUATOR_PEAK_TORQUE = 7.0
+ACTUATOR_INTERNAL_RATIO = 10.0
+ACTUATOR_DIAMETER = 53.0
+ACTUATOR_LENGTH = 43.0
+ACTUATOR_MASS_KG = 0.26
+
+# The actuator alone is 24x short of the hip requirement, so a second stage
+# sits between it and the joint. 24:1 restores both targets.
+REDUCTION_STAGE2_RATIO = 24.0
+REDUCTION_TOTAL_RATIO = ACTUATOR_INTERNAL_RATIO * REDUCTION_STAGE2_RATIO
+REDUCTION_STAGE2_TYPE = "Cycloidal or two-stage planetary; partially backdrivable"
+REDUCTION_STAGE2_EFFICIENCY = 0.85
+REDUCTION_STAGE2_DIAMETER = 90.0
+REDUCTION_STAGE2_LENGTH = 50.0
+
+JOINT_CONTINUOUS_TORQUE = ACTUATOR_RATED_TORQUE * REDUCTION_STAGE2_RATIO
+JOINT_PEAK_TORQUE = ACTUATOR_PEAK_TORQUE * REDUCTION_STAGE2_RATIO
+
+# Retained as requirements, not selections.
 MAIN_ACTUATOR_CONTINUOUS_TORQUE_MIN = 60.0
 MAIN_ACTUATOR_PEAK_TORQUE_INITIAL_MIN = 100.0
-SECONDARY_ACTUATOR_TORQUE_MIN = 10.0
-SECONDARY_ACTUATOR_TORQUE_MAX = 25.0
+
+# CAN hub for the two actuators. Bench tool: see docs for why it must not
+# become the flight motion path.
+CAN_HUB_MODEL = "CubeMars Rubik Link V3.0"
+CAN_HUB_ROLE = "Bench bring-up only; flight CAN runs from the deterministic MCU"
 
 # Power and clearance
 BATTERY_VOLTAGE = 12.8   # 12.8 V LiFePO4 main bus, per docs/design_assumptions.md
