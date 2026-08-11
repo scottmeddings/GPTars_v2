@@ -59,6 +59,23 @@ class Builder:
         return self.cut(self.box(x0, y0, z0, dx, dy, dz),
                         self.box(x0 + t, y0 + t, z0 + t, dx - 2 * t, dy - 2 * t, dz - 2 * t))
 
+    def tube(self, x0, y0, z0, dx, dy, dz, wall, axis):
+        """Hollow section approximating T-slot extrusion.
+
+        Modelling profile as solid bar overstates frame mass by roughly three
+        times. A rectangular tube of the right wall thickness lands within a
+        few percent of real 20x40 and 20x20 profile, which keeps the mass
+        budget honest without modelling every slot.
+        """
+        outer = self.box(x0, y0, z0, dx, dy, dz)
+        if axis == "x":
+            inner = self.box(x0 - 1, y0 + wall, z0 + wall, dx + 2, dy - 2 * wall, dz - 2 * wall)
+        elif axis == "y":
+            inner = self.box(x0 + wall, y0 - 1, z0 + wall, dx - 2 * wall, dy + 2, dz - 2 * wall)
+        else:
+            inner = self.box(x0 + wall, y0 + wall, z0 - 1, dx - 2 * wall, dy - 2 * wall, dz + 2)
+        return self.cut(outer, inner)
+
     def component(self, name):
         if name not in self._components:
             occ = self.root.occurrences.addNewComponent(adsk.core.Matrix3D.create())
@@ -104,19 +121,31 @@ def build(app, document=None):
     b.add("00_MASTER_REFERENCE", b.box(-CHW, 0, -HD, CHW * 2, H, HD * 2), "CENTRAL_CHASSIS_REFERENCE")
 
     # ---- 01 frame: rails terminate into the hip bulkheads ---------------
+    # 20x40 profile at 2.5 mm wall lands near 0.74 kg/m; 20x20 at 2.0 mm near
+    # 0.39 kg/m. Both match commercial extrusion closely enough to budget from.
     for i, x0 in ((0, -RAIL_X - RAIL_W), (1, RAIL_X)):
         for j, z0 in ((0, -85.0), (1, 45.0)):
-            b.add("01_FRAME", b.box(x0, 30.0, z0, RAIL_W, BH_Y0 - 30.0, 40.0), f"RAIL_LOWER_{i}_{j}")
-            b.add("01_FRAME", b.box(x0, BH_Y1, z0, RAIL_W, 950.0 - BH_Y1, 40.0), f"RAIL_UPPER_{i}_{j}")
+            b.add("01_FRAME", b.tube(x0, 30.0, z0, RAIL_W, BH_Y0 - 30.0, 40.0, 2.5, "y"),
+                  f"RAIL_LOWER_{i}_{j}")
+            b.add("01_FRAME", b.tube(x0, BH_Y1, z0, RAIL_W, 950.0 - BH_Y1, 40.0, 2.5, "y"),
+                  f"RAIL_UPPER_{i}_{j}")
     for k, fy in enumerate((30.0, 205.0, 480.0, 660.0, 930.0)):
         for label, fz in (("FRONT", 65.0), ("REAR", -85.0)):
-            b.add("01_FRAME", b.box(-RAIL_X, fy, fz, RAIL_X * 2, 20.0, 20.0), f"CROSS_{k}_{label}")
+            b.add("01_FRAME", b.tube(-RAIL_X, fy, fz, RAIL_X * 2, 20.0, 20.0, 2.0, "x"),
+                  f"CROSS_{k}_{label}")
         for label, fx in (("PORT", -RAIL_X - RAIL_W), ("STBD", RAIL_X)):
-            b.add("01_FRAME", b.box(fx, fy, -85.0, RAIL_W, 20.0, 170.0), f"DEPTH_{k}_{label}")
+            b.add("01_FRAME", b.tube(fx, fy, -85.0, RAIL_W, 20.0, 170.0, 2.0, "z"),
+                  f"DEPTH_{k}_{label}")
 
     # ---- 02 joints: machined bulkhead carries the bearing and the drive --
+    # Pocketed and bored, as a machined part would be, rather than solid billet.
     for side, x0 in (("PORT", -RAIL_X - RAIL_W), ("STARBOARD", RAIL_X)):
-        b.add("02_JOINTS", b.box(x0, BH_Y0, -85.0, RAIL_W, BH_Y1 - BH_Y0, 170.0), f"HIP_BULKHEAD_{side}")
+        bulkhead = b.box(x0, BH_Y0, -85.0, RAIL_W, BH_Y1 - BH_Y0, 170.0)
+        bulkhead = b.cut(bulkhead, b.cyl_x(x0 - 1, x0 + RAIL_W + 1, 21.0, HIP))   # bearing bore
+        for z_pocket in (-80.0, 45.0):
+            bulkhead = b.cut(bulkhead, b.box(x0 + 5, BH_Y0 + 8, z_pocket, 10.0,
+                                             (BH_Y1 - BH_Y0) - 16, 35.0))
+        b.add("02_JOINTS", bulkhead, f"HIP_BULKHEAD_{side}")
 
     # ---- 03 drive, 04 shafts, outer carriers ----------------------------
     for side, s in (("PORT", -1.0), ("STARBOARD", 1.0)):
@@ -207,4 +236,59 @@ def build(app, document=None):
         "components": sorted({o.component.name for o in r.occurrences}),
         "bodies": sum(o.bRepBodies.count for o in r.allOccurrences),
         "extent_mm": [round((mx[k] - mn[k]) * 10, 1) for k in range(3)],
+        "mass": mass_report(design, p),
+    }
+
+
+# Densities in g/cm^3. Only fabricated structure is weighed from geometry;
+# purchased items carry their published mass instead, since their keep-outs are
+# reservations rather than parts.
+DENSITY = {"6061": 2.70, "5052": 2.68, "steel": 7.85}
+STRUCTURAL_MATERIAL = {
+    "01_FRAME": "6061",
+    "02_JOINTS": "6061",
+    "04_BEARINGS_SHAFTS": "steel",
+    "11_BODY_PANELS": "5052",
+    "14_ARMS": "5052",
+}
+
+
+def mass_report(design, p=None):
+    """Mass of the fabricated structure, computed from the solids."""
+    if p is None:
+        p = load_parameters()
+    r = design.rootComponent
+
+    structure = {}
+    for occ in r.occurrences:
+        material = STRUCTURAL_MATERIAL.get(occ.component.name)
+        if not material:
+            continue
+        kg = sum(body.volume * DENSITY[material] / 1000.0 for body in occ.component.bRepBodies)
+        structure[occ.component.name] = round(kg, 2)
+
+    purchased = {
+        "actuators": p.ACTUATOR_MASS_KG * p.ACTUATOR_COUNT_SELECTED,
+        "reductions": 1.2 * p.ACTUATOR_COUNT_SELECTED,
+        "mini_pc": p.MINI_PC_MASS_KG,
+        "gpu": 0.5,
+        "display": p.DISPLAY_MASS_ESTIMATE_KG,
+        "wiring_and_fasteners": 1.5,
+    }
+
+    structural = round(sum(structure.values()), 2)
+    purchased_total = round(sum(purchased.values()), 2)
+    dry = round(structural + purchased_total, 2)
+
+    return {
+        "structural_kg": structural,
+        "structuralByComponent": structure,
+        "purchased_kg": purchased_total,
+        "purchasedDetail": {k: round(v, 2) for k, v in purchased.items()},
+        "dryMass_kg": dry,
+        "withBattery": {
+            "LiFePO4_1280Wh": round(dry + 11.0, 1),
+            "NMC_1000Wh": round(dry + 5.0, 1),
+        },
+        "targetClass_kg": "12-25",
     }
