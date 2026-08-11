@@ -179,6 +179,14 @@ def build(app, document=None):
     b.add("07_GPU", b.box(-84.0, 235.0, 3.0, 72.0, 170.0, 20.0), "GPU_CARD_RTX_2000_ADA")
     b.add("08_ELECTRONICS", b.box(-35.0, 700.0, -HD, 70.0, 70.0, 50.0), "E_STOP_KEEP_OUT")
     b.add("08_ELECTRONICS", b.box(-45.0, 505.0, -100.0, 90.0, 70.0, 30.0), "RUBIK_LINK_V3_KEEP_OUT")
+    # Two 12.8 to 24 V boost modules, one per actuator, stacked in the band
+    # between the mini PC and the hip bulkhead. 128 mm each will not sit side by
+    # side inside the 197.6 mm clear span.
+    for i, by in enumerate((460.0, 510.0)):
+        b.add("08_ELECTRONICS",
+              b.box(-p.BOOST_MODULE_LENGTH / 2, by, -p.BOOST_MODULE_WIDTH / 2,
+                    p.BOOST_MODULE_LENGTH, p.BOOST_MODULE_HEIGHT, p.BOOST_MODULE_WIDTH),
+              f"BOOST_CONVERTER_{i}_24V_480W")
     b.add("10_SENSORS", b.box(-60.0, 290.0, 55.0, 40.0, 25.0, 40.0), "IMU_KEEP_OUT")
 
     # ---- 11 bodywork: two front panels either side of the hip break -----

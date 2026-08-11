@@ -199,13 +199,32 @@ A **boost stage** settles both: 12.8 V distribution, 24 V at the drive. Walking
 duty is low, so the conversion loss costs little in energy terms while recovering
 the speed the bus had halved.
 
+**Two modules, one per actuator**, rather than one shared supply. A converter
+fault then costs one leg rather than both, and each sees a simpler load.
+
 | Item | Value |
 |---|---|
+| Modules | 2 × 12 V to 24 V, 20 A, 480 W, IP68 |
 | Input | 12.8 V from the pack |
-| Output | 24 V to the actuators only |
-| Continuous | 400 W |
-| Peak | 800 W, two actuators at peak torque |
-| Peak input current | ~69 A at 90% efficiency |
+| Output | 24 V, one independent rail per actuator |
+| Input per module at full rating | 41.7 A at 90% efficiency |
+| Both at full rating | **83.3 A** |
+
+Ratings are comfortable against roughly 400 W peak per actuator. **The input
+current is not.** Both modules at full rating draw 83.3 A, and with the rest of
+the robot at about 12 A that is **95 A against a 100 A BMS** — under five amps of
+margin.
+
+In practice both actuators rarely peak together for long, but the landing case is
+exactly when they might. Bulk capacitance on each 24 V rail is what keeps that
+transient out of the BMS.
+
+**Do not parallel the outputs.** These modules have no current-sharing
+provision, so two independent rails is the correct arrangement, and it is what
+one-per-actuator gives. It does mean the regeneration problem doubles: **each
+rail needs its own brake chopper**. Feeding regenerated current back into a
+boost converter's output can damage it, so the chopper must clamp before the
+module's output rating is reached.
 
 Two requirements come with it.
 
