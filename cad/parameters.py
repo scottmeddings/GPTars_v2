@@ -286,13 +286,20 @@ GAIT_STEP_LENGTH = 418.0
 GAIT_SWING_TIME_S = 1.16
 GAIT_SPEED_MS = 0.36
 JOINT_ANGULAR_VELOCITY_RAD_S = 0.6
-FOOT_ROCKER_RADIUS = 200.0
+# Rocker radius must exceed the centre-of-mass height or the robot is a rocking
+# chair: mass above the centre of curvature tips rather than self-rights.
+# Clearance is (LEG_LENGTH - R)(1 - cos theta), so a larger radius buys
+# stability at the cost of swing clearance. 400 sits just above the estimated
+# 381 mm centre of mass.
+FOOT_ROCKER_RADIUS = 400.0
+CENTRE_OF_MASS_HEIGHT_EST = 381.0
 FOOT_HEIGHT = 80.0
 FOOT_PAD_THICKNESS = 6.0
 FOOT_SHOE_WALL = 3.0
 FOOT_SHOE_MATERIAL = "6061-T6 aluminium"
 FOOT_PAD_MATERIAL = "Elastomer contact pad, replaceable"
-FOOT_SWING_CLEARANCE = 12.1
+FOOT_SWING_CLEARANCE = 12.7
+FOOT_ROCKER_SAGITTA = 21.7
 
 # Charge and support dock. Two hip joints give forward walking only, so the
 # robot cannot turn, reverse or align itself: this is a cradle it is placed

@@ -12,7 +12,7 @@
   </defs>
 
   <g font-size="15" fill="#9cabb4">
-    <text x="60" y="42" font-size="26" font-weight="800" fill="#9aa7b0">GP-TARS V2 1000 · R07 · GENERAL ARRANGEMENT</text>
+    <text x="60" y="42" font-size="26" font-weight="800" fill="#9aa7b0">GP-TARS V2 1000 · R08 · GENERAL ARRANGEMENT</text>
     <text x="60" y="66" font-size="15">Front and side elevations · dimensions in millimetres · generated from cad/parameters.py</text>
   </g>
   <line x1="60" y1="82" x2="1180" y2="82" stroke="#9aa7b0" stroke-width="1.5"/>
@@ -54,8 +54,8 @@
     <text x="390" y="352" font-size="14" fill="#efa54f" text-anchor="middle">174 × 310</text>
 
     <!-- rockered feet -->
-    <path d="M150,1070 L266,1070 L266,1140 Q208,1160 150,1140 Z" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
-    <path d="M514,1070 L630,1070 L630,1140 Q572,1160 514,1140 Z" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
+    <rect x="150" y="1070" width="116" height="80" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
+    <rect x="514" y="1070" width="116" height="80" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
 
     <!-- hip axis -->
     <line x1="120" y1="539.2" x2="700" y2="539.2" stroke="#e36b56" stroke-width="2" stroke-dasharray="16 6 4 6"/>
@@ -97,6 +97,7 @@
     <text x="390" y="1189" font-weight="700" text-anchor="middle">240 CHASSIS</text>
     <line x1="150" y1="1195" x2="266" y2="1195" stroke-width="1.4" marker-start="url(#al)" marker-end="url(#ar)"/>
     <text x="208" y="1189" text-anchor="middle">116</text>
+    <text x="208" y="1055" font-size="12" fill="#d8a0c0" text-anchor="middle">SOLE FLAT ACROSS WIDTH</text>
     <line x1="514" y1="1195" x2="630" y2="1195" stroke-width="1.4" marker-start="url(#al)" marker-end="url(#ar)"/>
     <text x="572" y="1189" text-anchor="middle">116</text>
     <text x="268" y="1290" font-size="13" text-anchor="middle">4 clr</text>
@@ -124,8 +125,8 @@
     <line x1="750" y1="539.2" x2="1070" y2="539.2" stroke="#e36b56" stroke-width="2" stroke-dasharray="16 6 4 6"/>
     <circle cx="910" cy="539.2" r="7" fill="none" stroke="#e36b56" stroke-width="2.5"/>
     <!-- rockered sole, R200 -->
-    <path d="M780,1070 L1040,1070 L1040,1132 Q910,1174 780,1132 Z" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
-    <text x="910" y="1200" font-size="13" font-weight="700" fill="#d8a0c0" text-anchor="middle">ROCKER R200 · 12.1 CLEARANCE AT 20°</text>
+    <path d="M780,1070 L1040,1070 L1040,1128.3 Q910,1171.7 780,1128.3 Z" fill="#d8a0c0" fill-opacity="0.30" stroke="#d8a0c0" stroke-width="2"/>
+    <text x="910" y="1200" font-size="13" font-weight="700" fill="#d8a0c0" text-anchor="middle">ROCKER R400 FORE-AFT ONLY · 21.7 SAGITTA · 12.7 CLEARANCE AT 20°</text>
     <line x1="750" y1="1150" x2="1090" y2="1150" stroke="#9aa7b0" stroke-width="2.5"/>
   </g>
 

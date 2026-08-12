@@ -57,23 +57,51 @@ A rigid leg of fixed length cannot swing past the stance leg without striking th
 ground. This is the defining constraint of a kneeless walker, and it must be
 solved mechanically because there is no joint available to solve it.
 
-The answer is a **rockered foot**. As the stance foot rolls forward on a curved
-sole the hip rises, peaking when the stance leg is vertical, which is exactly
-when the swing limb passes. Clearance is `R(1 - cos θ)`.
+The answer is a **rockered sole, curved fore and aft only**. The sole is flat
+across the limb's width; the rocker acts in the plane the limb swings in.
 
-| Rocker radius | at 15° | at 20° | at 25° |
-|---:|---:|---:|---:|
-| 100 mm | 3.4 mm | 6.0 mm | 9.4 mm |
-| 150 mm | 5.1 mm | 9.0 mm | 14.1 mm |
-| **200 mm** | 6.8 mm | **12.1 mm** | 18.7 mm |
-| 260 mm | 8.9 mm | 15.7 mm | 24.4 mm |
+As the stance foot rolls, the arc centre stays at height R and the hip rides
+highest when the leg is vertical, which is exactly when the swing limb passes.
+Clearance is
 
-**Specify R = 200 mm at the working point**, giving 12.1 mm of clearance. The
-limb slab is 259.867 mm deep, so a 200 mm radius forms naturally across the foot
-without adding depth.
+```text
+clearance = (L - R)(1 - cos θ)      L = 610.845 mm, the hip height
+```
+
+**not** `R(1 - cos θ)`. The distinction matters and inverts the intuition: a
+larger radius raises the arc centre, shortens the effective pendulum and gives
+**less** clearance, not more.
+
+| Rocker radius | at 15° | at 20° | Sagitta over 259.9 | Stands unaided |
+|---:|---:|---:|---:|---|
+| 0, a sharp edge | 20.8 mm | 36.8 mm | — | No |
+| 200 mm | 14.0 mm | 24.8 mm | 48.0 mm | No |
+| 300 mm | 10.6 mm | 18.7 mm | 29.6 mm | No |
+| **400 mm** | 7.2 mm | **12.7 mm** | **21.7 mm** | **Yes** |
+| 500 mm | 3.8 mm | 6.7 mm | 17.2 mm | Yes |
+
+### Radius is set by standing, not by clearance
+
+A body rocking on a curved sole is stable only while its centre of mass sits
+**below** the centre of curvature. Above it, the sole behaves like a rocking
+chair and the machine tips instead of self-righting.
+
+The estimated centre of mass is **381 mm** above ground. Any radius below that
+leaves the robot unable to stand still without continuous active balancing,
+which would defeat the power-off holding brakes the power budget depends on, in
+the mode the robot spends most of its life in.
+
+**Specify R = 400 mm**, which puts the arc centre 19 mm above the estimated
+centre of mass and still yields 12.7 mm of swing clearance. The resulting sole
+is far shallower than a small rocker: 21.7 mm of curvature across the 259.9 mm
+depth rather than 48 mm.
+
+The margin is thin and rests on an estimated centre of mass. **Compute the real
+figure before the feet are made**, and re-check the radius against it; the
+battery dominates that number and its final mounting height is not fixed.
 
 A rocker also reduces heel-strike impact, which matters because the landing case
-sizes the joint. Flat feet on rigid legs would both scuff and slam.
+sizes the joint.
 
 ## What two joints will not do
 
@@ -97,8 +125,9 @@ neither should be assumed to arrive by tuning software.
   and nothing in this gait stabilises roll.
 - Measure real joint speed on the bench before trusting the 0.36 m/s figure; it
   assumes 0.6 rad/s at the output, which is derived rather than measured.
-- Verify the contact pad covers the working splay. It wraps the rocker from
-  ground level to 55.9 mm, which suits 20°; beyond that the foot lands on bare
-  aluminium.
+- Compute the real centre of mass and re-check the 400 mm rocker radius against
+  it. The 19 mm stability margin rests on a 381 mm estimate.
+- Verify the contact pad covers the working splay. It wraps the sole from ground
+  level to 28 mm; beyond that the foot lands on bare aluminium.
 - Decide whether turning is added later by a third joint, by asymmetric stepping,
   or not at all.
