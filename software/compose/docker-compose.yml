@@ -1,0 +1,217 @@
+name: gptars
+
+x-common: &common
+  restart: unless-stopped
+  networks:
+    - gptars
+  labels:
+    - com.centurylinklabs.watchtower.enable=true
+
+x-python-service: &python-service
+  <<: *common
+  environment:
+    TARS_EVENT_BUS: nats://nats:4222
+    TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
+  depends_on:
+    nats:
+      condition: service_started
+    tars-memory:
+      condition: service_healthy
+
+services:
+  nats:
+    image: nats:2-alpine
+    <<: *common
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "127.0.0.1:8222:8222"
+    volumes:
+      - ${GPTARS_DATA}/nats:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  tars-memory:
+    image: pgvector/pgvector:pg16
+    <<: *common
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${GPTARS_DATA}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  tars-core:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-core:${GPTARS_TAG}
+    environment:
+      TARS_EVENT_BUS: nats://nats:4222
+      TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
+      TARS_LLM_URL: http://tars-llm:8080
+      TARS_API_URL: http://tars-api:8080
+      TARS_ROS_URL: http://tars-ros:8080
+      TARS_PERSONALITY_PROFILE: TARS
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  tars-api:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-api:${GPTARS_TAG}
+    ports:
+      - "${TARS_API_PORT}:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=2)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  tars-display:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-display:${GPTARS_TAG}
+    ports:
+      - "127.0.0.1:${TARS_DISPLAY_PORT}:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=2)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  tars-tts:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-tts:${GPTARS_TAG}
+    volumes:
+      - ${GPTARS_DATA}/models:/models:ro
+      - ${GPTARS_DATA}/audio:/audio
+
+  tars-stt:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-stt:${GPTARS_TAG}
+    volumes:
+      - ${GPTARS_DATA}/models:/models:ro
+      - ${GPTARS_DATA}/audio:/audio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  tars-vision:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-vision:${GPTARS_TAG}
+    volumes:
+      - ${GPTARS_DATA}/models:/models:ro
+      - ${GPTARS_DATA}/recordings:/recordings
+    devices:
+      - /dev/video0:/dev/video0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  tars-llm:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    <<: *common
+    command:
+      - -m
+      - ${TARS_MODEL_FILE}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - -ngl
+      - "99"
+    volumes:
+      - ${GPTARS_DATA}/models:/models:ro
+    ports:
+      - "127.0.0.1:${TARS_LLM_PORT}:8080"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  tars-ros:
+    <<: *common
+    image: ${GHCR_NAMESPACE}/tars-ros:${GPTARS_TAG}
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: 42
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    volumes:
+      - ${GPTARS_CONFIG}/ros:/config:ro
+      - /dev:/dev
+    privileged: true
+
+  tars-motion:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-motion:${GPTARS_TAG}
+    environment:
+      TARS_EVENT_BUS: nats://nats:4222
+      TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
+      TARS_MOTION_ENABLED: "false"
+
+  tars-can:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-can:${GPTARS_TAG}
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev:/dev
+    environment:
+      TARS_CAN_INTERFACE: can0
+      TARS_MOTION_ENABLED: "false"
+
+  tars-telemetry:
+    <<: *python-service
+    image: ${GHCR_NAMESPACE}/tars-telemetry:${GPTARS_TAG}
+    volumes:
+      - ${GPTARS_DATA}/telemetry:/telemetry
+
+  watchtower:
+    image: containrrr/watchtower:1.7.1
+    restart: unless-stopped
+    command:
+      - --label-enable
+      - --cleanup
+      - --rolling-restart
+      - --interval
+      - ${WATCHTOWER_POLL_INTERVAL}
+    environment:
+      WATCHTOWER_INCLUDE_RESTARTING: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.docker/config.json:/config.json:ro
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+networks:
+  gptars:
+    driver: bridge
