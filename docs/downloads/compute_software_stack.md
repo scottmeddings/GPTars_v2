@@ -428,7 +428,7 @@ endurance matters more than peak sequential speed on the data drive.
 
 Two constraints from existing documents tighten as a direct result of this stack.
 
-**Power.** `docs/compute_hardware.md` selects 24 V to a 100 W USB-C PD source
+**Power.** `docs/compute_hardware.md` selects a 100 W USB-C PD source, now fed from the 12.8 V bus,
 feeding the rear USB4 input, against an internal supply rated 134.9 W, and
 already flags that sustained performance must be tested at that ceiling. This
 specification adds 64 GB of DDR5, two or three NVMe drives at 5–8 W each under

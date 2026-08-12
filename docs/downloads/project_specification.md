@@ -126,7 +126,7 @@ MAIN_ACTUATOR_PEAK_TORQUE = 100 Nm minimum initial design target
 
 SECONDARY_ACTUATOR_TORQUE = 10–25 Nm
 
-BATTERY_VOLTAGE = 24 V
+BATTERY_VOLTAGE = 12.8 V   (LiFePO4 main bus)
 
 GROUND_CLEARANCE_TARGET = 10–25 mm
 
@@ -247,8 +247,12 @@ Peak torque:
 >= 100 Nm preferred
 
 Supply:
-24–48 V compatible
+24 V at the actuator, from a step-up stage off the 12.8 V bus
 ```
+
+The distribution bus is 12.8 V LiFePO4. Actuators are fed 24 V through
+per-actuator boost modules, so the 24–48 V actuator market stays open without
+running the whole robot at that voltage. See `docs/power_budget.md`.
 
 Use placeholder actuator geometry initially so actuator brands can later be swapped.
 
