@@ -200,8 +200,8 @@ export default function Home() {
             </div>
           </div>
           <figure className="hero-figure">
-            <img src="/images/gptars-shell-iso.png" alt="Fusion view of the 480 mm GP-TARS V2 aluminium shell, service panels and leg-arm slabs" />
-            <figcaption>NARROW 480 · 480 × 1000 × 260 mm · Fusion assembly</figcaption>
+            <img src="/images/gptars-hero-decals.svg" alt="Three-quarter view of GP-TARS V2 with its decals applied: rotated orange TARS wordmark and dot matrix below the display, hazard stripes on the hip gap and limb leading edges, crush and starts-without-warning triangles, and panel index marks" />
+            <figcaption>DECALS APPLIED · 480 × 1000 × 260 mm · generated from parameters.py</figcaption>
           </figure>
         </section>
 

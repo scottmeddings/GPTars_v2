@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1360" width="1400" height="1360" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace">
+<title>GP-TARS V2 with applied decals, three-quarter view</title>
+<desc>Three-quarter view of the 480 x 1000 x 260 mm GP-TARS V2 showing the applied decal set: rotated TARS wordmark with dot matrix, hip and limb pinch stripes, crush and starts-without-warning hazard triangles, display surround and panel index marks. Generated from cad/parameters.py.</desc>
+<defs><pattern id="hz" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="16" fill="#f2c200"/><rect x="8" width="8" height="16" fill="#1a1a1a"/></pattern><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#161c22"/><stop offset="1" stop-color="#0e1319"/></linearGradient><pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse"><path d="M46 0H0V46" fill="none" stroke="#28323a" stroke-width="1"/></pattern><radialGradient id="shadow"><stop offset="0" stop-color="#000" stop-opacity="0.55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16202a"/><stop offset="1" stop-color="#0a0e12"/></linearGradient></defs>
+<rect width="1400" height="1360" fill="url(#bg)"/>
+<rect width="1400" height="1360" fill="url(#grid)" opacity="0.5"/>
+<ellipse cx="702.7" cy="1216.6" rx="450.9" ry="179.9" fill="url(#shadow)"/>
+<g stroke="#79858e" stroke-width="1.5" stroke-linejoin="round">
+<polygon points="397.54,129.55 847.37,152.69 1002.46,133.88 565.13,113.00" fill="#68737b"/>
+<polygon points="847.37,152.69 1002.46,133.88 989.90,1126.57 840.88,1196.50" fill="#525c64"/>
+<polygon points="840.88,1196.50 989.90,1126.57 988.86,1209.04 840.35,1283.00" fill="#454e55"/>
+<polygon points="397.54,129.55 504.53,135.05 513.21,1213.66 410.81,1191.96" fill="#3c444b"/>
+<polygon points="504.53,135.05 729.26,146.62 727.85,1232.59 513.00,1187.88" fill="#3c444b"/>
+<polygon points="729.26,146.62 847.37,152.69 840.35,1283.00 727.82,1259.15" fill="#3c444b"/>
+</g>
+<g fill="none" stroke="#232a30" stroke-width="2.2" stroke-linecap="round">
+<line x1="504.5" y1="135.1" x2="513.2" y2="1213.7"/>
+<line x1="729.3" y1="146.6" x2="727.8" y2="1259.1"/>
+<line x1="402.8" y1="551.2" x2="844.6" y2="602.1"/>
+<line x1="844.6" y1="602.1" x2="997.1" y2="560.8"/>
+<line x1="409.8" y1="1110.4" x2="512.5" y2="1130.9"/>
+<line x1="727.9" y1="1173.9" x2="840.9" y2="1196.5"/>
+</g>
+<polygon points="534.83,176.23 697.47,185.56 697.48,539.04 537.18,521.64" fill="url(#glass)" stroke="#0a0e12" stroke-width="2"/>
+<polygon points="528.39,167.96 704.18,177.83 704.09,547.63 530.94,528.64" fill="none" stroke="#d97b19" stroke-width="2.6" opacity="0.92"/>
+<polygon points="507.87,550.28 728.70,575.30 728.68,591.04 507.99,565.54" fill="url(#hz)"/>
+<polygon points="404.97,586.80 417.06,588.26 423.31,1113.13 411.47,1110.77" fill="url(#hz)"/>
+<polygon points="828.69,637.89 842.38,639.54 838.97,1196.12 825.61,1193.45" fill="url(#hz)"/>
+<g transform="matrix(0.89926,0.12374,0.00641,1.08276,559.102,720.514)"><text x="0" y="0" transform="rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="46" font-weight="700" letter-spacing="9" fill="#d97b19">TARS</text></g>
+<g transform="matrix(0.91195,0.11303,0.00489,1.09665,592.987,632.343)" fill="#d97b19"><circle cx="0.0" cy="200.0" r="3.1"/><circle cx="11.0" cy="200.0" r="3.1"/><circle cx="22.0" cy="200.0" r="3.1"/><circle cx="0.0" cy="181.0" r="3.1"/><circle cx="22.0" cy="181.0" r="3.1"/><circle cx="0.0" cy="162.0" r="3.1"/><circle cx="11.0" cy="162.0" r="3.1"/><circle cx="22.0" cy="162.0" r="3.1"/><circle cx="11.0" cy="143.0" r="3.1"/><circle cx="0.0" cy="124.0" r="3.1"/><circle cx="11.0" cy="124.0" r="3.1"/><circle cx="22.0" cy="124.0" r="3.1"/><circle cx="11.0" cy="105.0" r="3.1"/><circle cx="22.0" cy="105.0" r="3.1"/><circle cx="0.0" cy="86.0" r="3.1"/><circle cx="11.0" cy="86.0" r="3.1"/><circle cx="0.0" cy="67.0" r="3.1"/><circle cx="11.0" cy="67.0" r="3.1"/><circle cx="22.0" cy="67.0" r="3.1"/><circle cx="0.0" cy="48.0" r="3.1"/><circle cx="22.0" cy="48.0" r="3.1"/><circle cx="0.0" cy="29.0" r="3.1"/><circle cx="11.0" cy="29.0" r="3.1"/><circle cx="22.0" cy="29.0" r="3.1"/><circle cx="11.0" cy="10.0" r="3.1"/></g>
+<g transform="matrix(0.87761,0.08882,0.01175,1.08719,441.718,462.491)"><path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/><rect x="16" y="14" width="12" height="3.4" fill="#1a1a1a"/><rect x="16" y="24" width="12" height="3.4" fill="#1a1a1a"/></g>
+<g transform="matrix(0.91059,0.16628,0.00235,1.06754,647.109,1040.975)"><path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/><rect x="14" y="20" width="7" height="13" fill="#1a1a1a"/><rect x="23" y="20" width="7" height="13" fill="#1a1a1a"/><path d="M12,17 h20" stroke="#1a1a1a" stroke-width="2.2"/></g>
+<g transform="matrix(0.91444,0.17692,0.00117,1.06439,672.748,1120.425)"><rect width="26" height="26" fill="#9aa7b0" fill-opacity="0.62"/><text x="13" y="18" font-size="12" font-weight="700" fill="#161c22" text-anchor="middle">P1</text></g>
+<g transform="matrix(0.85439,0.16530,0.01137,1.03087,443.234,1076.019)"><rect width="26" height="26" fill="#9aa7b0" fill-opacity="0.62"/><text x="13" y="18" font-size="12" font-weight="700" fill="#161c22" text-anchor="middle">P2</text></g>
+<polygon points="845.58,639.43 854.19,636.98 850.51,1191.99 842.09,1195.94" fill="url(#hz)"/>
+<g transform="matrix(0.56844,-0.25852,-0.01060,1.05878,929.171,1112.978)"><rect width="26" height="26" fill="#9aa7b0" fill-opacity="0.62"/><text x="13" y="18" font-size="12" font-weight="700" fill="#161c22" text-anchor="middle">P4</text></g>
+<g transform="matrix(0.59230,-0.20179,-0.00913,1.10425,891.540,793.823)"><rect width="120" height="52" fill="#12171c" stroke="#2c353c" stroke-width="1"/><text x="8" y="16" font-size="10.5" font-weight="700" fill="#cfd6da">GP-TARS V2 1000</text><line x1="8" y1="21" x2="112" y2="21" stroke="#d97b19" stroke-width="0.9"/><text x="8" y="34" font-size="8" fill="#8b98a2">BUS</text><text x="58" y="34" font-size="8" fill="#cfd6da">12.8 V DC</text><text x="8" y="45" font-size="8" fill="#8b98a2">UNIT</text><text x="58" y="45" font-size="8" fill="#cfd6da">001</text></g>
+<g font-size="15" fill="#7d8992"><text x="34" y="1314" font-weight="700" fill="#9aa7b0">GP-TARS V2 · DECALS APPLIED</text><text x="34" y="1336">480 × 1000 × 260 mm · decal positions per docs/aluminium_architecture.md · generated from cad/parameters.py</text></g>
+</svg>

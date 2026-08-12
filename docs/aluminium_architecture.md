@@ -99,6 +99,12 @@ Printed vinyl decals carry the identity and, more importantly, the safety markin
 
 ![GP-TARS V2 decal sheet](/images/gptars-decal-sheet.svg)
 
+Applied, in three-quarter view. The camera and every decal position are
+projected from `cad/parameters.py` by `cad/render_hero.py`, so this cannot drift
+from the model:
+
+![GP-TARS V2 with its decals applied](/images/gptars-hero-decals.svg)
+
 Placement on the robot, front and rear:
 
 ![GP-TARS V2 decal placement on the front and rear elevations](/images/gptars-decal-placement.svg)
