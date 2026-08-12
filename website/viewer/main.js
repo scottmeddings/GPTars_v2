@@ -103,7 +103,172 @@ function init(container) {
     controls.update();
   }
 
+  // ---- decals ---------------------------------------------------------
+  // Printed vinyl, so they live on the bodywork and must disappear with it.
+  // STL carries no UVs or materials, so each decal is a textured plane sitting
+  // 0.5 mm proud of the panel it is applied to, positioned in the same
+  // millimetres as the decal schedule.
+  let decals = [];
+  try {
+    decals = JSON.parse(container.dataset.decals || "[]");
+  } catch {
+    decals = [];
+  }
+
+  const ORANGE = "#d97b19";
+  const YELLOW = "#f2c200";
+  const INK = "#141414";
+
+  function texture(w, h, draw) {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    draw(canvas.getContext("2d"), w, h);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return tex;
+  }
+
+  function hazardTexture(repeats) {
+    const tex = texture(64, 64, (g) => {
+      g.fillStyle = YELLOW;
+      g.fillRect(0, 0, 64, 64);
+      g.strokeStyle = INK;
+      g.lineWidth = 22;
+      for (let i = -64; i < 128; i += 44) {
+        g.beginPath();
+        g.moveTo(i, -10);
+        g.lineTo(i + 74, 74);
+        g.stroke();
+      }
+    });
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, repeats);
+    return tex;
+  }
+
+  function triangleTexture(kind) {
+    return texture(220, 200, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      g.beginPath();
+      g.moveTo(w / 2, 6);
+      g.lineTo(w - 6, h - 8);
+      g.lineTo(6, h - 8);
+      g.closePath();
+      g.fillStyle = YELLOW;
+      g.fill();
+      g.strokeStyle = INK;
+      g.lineWidth = 9;
+      g.stroke();
+      g.fillStyle = INK;
+      if (kind === "crush") {
+        g.fillRect(w / 2 - 30, h / 2 - 22, 60, 17);
+        g.fillRect(w / 2 - 30, h / 2 + 28, 60, 17);
+      } else {
+        g.fillRect(w / 2 - 34, h / 2 + 4, 30, 58);
+        g.fillRect(w / 2 + 4, h / 2 + 4, 30, 58);
+        g.fillRect(w / 2 - 42, h / 2 - 12, 84, 11);
+      }
+    });
+  }
+
+  const DECAL_ART = {
+    hazard: (d) => hazardTexture(Math.max(1, Math.round(d.h / d.w))),
+    crush: () => triangleTexture("crush"),
+    starts: () => triangleTexture("starts"),
+    wordmark: () =>
+      texture(208, 1000, (g, w, h) => {
+        g.clearRect(0, 0, w, h);
+        g.save();
+        g.translate(w / 2, h / 2);
+        g.rotate(-Math.PI / 2);
+        g.fillStyle = ORANGE;
+        g.font = "700 150px ui-monospace, Menlo, monospace";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText("TARS", 0, 0);
+        g.restore();
+      }),
+    dots: () =>
+      texture(144, 800, (g, w, h) => {
+        g.clearRect(0, 0, w, h);
+        g.fillStyle = ORANGE;
+        const rows = ["111", "101", "111", "010", "111", "011", "110", "111", "101", "111", "010"];
+        rows.forEach((bits, r) => {
+          bits.split("").forEach((bit, c) => {
+            if (bit !== "1") return;
+            g.beginPath();
+            g.arc(28 + c * 44, h - 40 - r * ((h - 80) / (rows.length - 1)), 13, 0, Math.PI * 2);
+            g.fill();
+          });
+        });
+      }),
+    index: (d) =>
+      texture(128, 128, (g, w, h) => {
+        g.fillStyle = "rgba(154,167,176,0.85)";
+        g.fillRect(0, 0, w, h);
+        g.fillStyle = "#12171c";
+        g.font = "700 54px ui-monospace, Menlo, monospace";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText(d.label || "P", w / 2, h / 2 + 2);
+      }),
+    plate: (d) =>
+      texture(480, 208, (g, w, h) => {
+        g.fillStyle = "#12171c";
+        g.fillRect(0, 0, w, h);
+        g.strokeStyle = "#2c353c";
+        g.lineWidth = 4;
+        g.strokeRect(2, 2, w - 4, h - 4);
+        g.fillStyle = "#cfd6da";
+        g.font = "700 34px ui-monospace, Menlo, monospace";
+        g.fillText("GP-TARS V2 1000", 24, 52);
+        g.strokeStyle = ORANGE;
+        g.lineWidth = 3;
+        g.beginPath();
+        g.moveTo(24, 68);
+        g.lineTo(w - 24, 68);
+        g.stroke();
+        g.font = "26px ui-monospace, Menlo, monospace";
+        (d.lines || []).forEach((line, i) => {
+          g.fillStyle = "#8b98a2";
+          g.fillText(line[0], 24, 112 + i * 40);
+          g.fillStyle = "#cfd6da";
+          g.fillText(line[1], 200, 112 + i * 40);
+        });
+      }),
+  };
+
+  const decalGroup = new THREE.Group();
+  scene.add(decalGroup);
+  decals.forEach((d) => {
+    const art = DECAL_ART[d.kind];
+    if (!art) return;
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(d.w, d.h),
+      new THREE.MeshBasicMaterial({
+        map: art(d),
+        transparent: true,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    // 0.5 mm proud of the surface, which is about what laminated vinyl stands.
+    if (d.face === "starboard") {
+      mesh.rotation.y = Math.PI / 2;
+      mesh.position.set(d.at + 0.5, d.y, d.x);
+    } else if (d.face === "port") {
+      mesh.rotation.y = -Math.PI / 2;
+      mesh.position.set(d.at - 0.5, d.y, d.x);
+    } else {
+      mesh.position.set(d.x, d.y, d.at + 0.5);
+    }
+    mesh.renderOrder = 2;
+    decalGroup.add(mesh);
+  });
+
   const loader = new STLLoader();
+  const stlCount = models.length;
   models.forEach((model) => {
     loader.load(
       model.url,
@@ -127,7 +292,7 @@ function init(container) {
 
         bounds.expandByObject(mesh);
         loaded += 1;
-        if (loaded === models.length) {
+        if (loaded === stlCount) {
           frameCamera();
           container.classList.add("is-ready");
         }
@@ -135,7 +300,7 @@ function init(container) {
       undefined,
       () => {
         loaded += 1;
-        if (loaded === models.length) frameCamera();
+        if (loaded === stlCount) frameCamera();
       },
     );
   });
@@ -160,6 +325,19 @@ function init(container) {
     legend.appendChild(button);
   });
 
+  // Decals get their own switch, but they are bodywork: every preset that
+  // strips the skins strips them too.
+  const decalButton = document.createElement("button");
+  decalButton.type = "button";
+  decalButton.className = "viewer-toggle";
+  decalButton.innerHTML = `<i style="background:${ORANGE}"></i>Decals`;
+  function setDecals(visible) {
+    decalGroup.visible = visible;
+    decalButton.classList.toggle("is-off", !visible);
+  }
+  decalButton.addEventListener("click", () => setDecals(!decalGroup.visible));
+  if (decals.length) legend.appendChild(decalButton);
+
   const reset = document.createElement("button");
   reset.type = "button";
   reset.className = "viewer-toggle viewer-reset";
@@ -169,6 +347,7 @@ function init(container) {
 
   /** Show exactly the named groups; hide everything else. */
   function showOnly(predicate) {
+    setDecals(predicate({ name: "decals", group: "skin" }));
     models.forEach((model) => {
       const mesh = groups.get(model.name);
       if (!mesh) return;

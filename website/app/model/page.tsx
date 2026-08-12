@@ -37,6 +37,56 @@ const MODELS = [
   { name: "dock", label: "Charge dock", url: "/models/gptars-dock.stl", color: "#7f8c94", group: "dock", hidden: true },
 ];
 
+// Decal placement, in the model's own millimetres: X across with 0 on the
+// centreline, Y up from the floor, Z depth with the front face positive. Sizes
+// and positions come from the schedule in docs/aluminium_architecture.md.
+// Decals are printed vinyl on the bodywork, so the viewer hides them whenever
+// the skins come off.
+const num = (name: string, fallback: number): number => {
+  const raw = parameterMap.get(name)?.value;
+  const parsed = raw === undefined ? NaN : Number.parseFloat(String(raw).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const HALF_WIDTH = num("ROBOT_WIDTH", 480) / 2;
+const HALF_CHASSIS = num("CENTRAL_CHASSIS_WIDTH", 240) / 2;
+const FRONT_Z = num("ROBOT_DEPTH_REFERENCE", 259.867) / 2;
+const HIP_Y = num("AXLE_LOWER_MAIN_Y", 610.84);
+const FOOT_TOP = num("FOOT_HEIGHT", 80);
+const WORDMARK_Y = num("DECAL_WORDMARK_ORIGIN_Y", 350);
+const STRIPE = 14;
+
+const DECALS = [
+  // Identity, on the lower chassis below the display.
+  { kind: "wordmark", x: -64, y: WORDMARK_Y + 125, w: 52, h: 250, at: FRONT_Z, face: "front" },
+  { kind: "dots", x: -10, y: WORDMARK_Y + 105, w: 36, h: 200, at: FRONT_Z, face: "front" },
+
+  // Pinch stripes: the hip gap, and the leading edge of each limb.
+  { kind: "hazard", x: 0, y: HIP_Y + 8, w: HALF_CHASSIS * 2, h: STRIPE, at: FRONT_Z, face: "front" },
+  {
+    kind: "hazard", x: -HALF_WIDTH + 9, y: (FOOT_TOP + HIP_Y - 30) / 2,
+    w: STRIPE, h: HIP_Y - 30 - FOOT_TOP, at: FRONT_Z, face: "front",
+  },
+  {
+    kind: "hazard", x: HALF_WIDTH - 9, y: (FOOT_TOP + HIP_Y - 30) / 2,
+    w: STRIPE, h: HIP_Y - 30 - FOOT_TOP, at: FRONT_Z, face: "front",
+  },
+
+  // Hazards, each at the hazard it warns about.
+  { kind: "crush", x: -172, y: 680, w: 44, h: 40, at: FRONT_Z, face: "front" },
+  { kind: "starts", x: 54, y: 170, w: 44, h: 40, at: FRONT_Z, face: "front" },
+
+  // Panel index marks: return each panel to the opening it came from.
+  { kind: "index", label: "P1", x: 73, y: 107, w: 26, h: 26, at: FRONT_Z, face: "front" },
+  { kind: "index", label: "P2", x: -187, y: 107, w: 26, h: 26, at: FRONT_Z, face: "front" },
+
+  // Build stamp on the starboard limb. x is depth on a side face.
+  {
+    kind: "plate", x: -20, y: 456, w: 120, h: 52, at: HALF_WIDTH, face: "starboard",
+    lines: [["BUS", `${parameterMap.get("BATTERY_VOLTAGE")?.value ?? "12.8"} V DC`], ["UNIT", "001"]],
+  },
+];
+
 export default function ModelPage() {
   return (
     <main className="page-shell">
@@ -47,7 +97,9 @@ export default function ModelPage() {
             <h1>3D model</h1>
             <p className="subtitle">
               The formed aluminium bodywork, leg-arm slabs and internal frame, exported directly from the Fusion
-              assembly. Drag to orbit, scroll to zoom, and use the keys below to isolate a group.
+              assembly, wearing its printed decals. Drag to orbit and scroll to zoom. <b>Skins off</b> strips the
+              bodywork to expose the welded subframe and the equipment inside it, and <b>Subframe only</b> leaves the
+              bare 6061 cage. Decals are vinyl on the panels, so they come away with them.
             </p>
           </div>
           <div className="revision-stamp" aria-label="Model status">
@@ -81,6 +133,7 @@ export default function ModelPage() {
             className="stl-viewer"
             data-stl-viewer
             data-models={JSON.stringify(MODELS)}
+            data-decals={JSON.stringify(DECALS)}
             suppressHydrationWarning
             dangerouslySetInnerHTML={{ __html: "" }}
           />
