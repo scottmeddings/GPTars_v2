@@ -231,8 +231,8 @@ export default function Home() {
               <figcaption><b>General arrangement, R09.</b> Front and side elevations dimensioned: 480 × 1000 × 259.9 overall, 240 chassis, 116 leg-arm slabs, hip axis at 610.8, 174 × 310 display aperture and the 200 mm rockered sole.</figcaption>
             </figure>
             <figure className="drawing">
-              <img src="/images/gptars-shell-iso.png" alt="GP-TARS V2 assembled bodywork, leg-arm slabs and rockered feet" />
-              <figcaption><b>Assembly.</b> Formed 5052-H32 bodywork over the welded subframe, with the display high on the front face.</figcaption>
+              <img src="/images/gptars-decal-placement.svg" alt="Front and rear elevations of GP-TARS V2 showing where each decal is applied" />
+              <figcaption><b>Decal placement.</b> Wordmark and hazard markings on the front; E-stop surround, service labels and data plate on the rear panels.</figcaption>
             </figure>
             <figure className="drawing">
               <img src="/images/gptars-subframe-iso.png" alt="GP-TARS V2 with the skins removed, showing the welded subframe, drive train and equipment" />

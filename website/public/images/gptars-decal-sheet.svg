@@ -14,18 +14,13 @@
   <!-- ============ TARS VERTICAL WORDMARK, PORT AND STARBOARD ============ -->
   <g>
     <rect x="16" y="46" width="52" height="250" fill="none" stroke="#888888" stroke-width="0.4" stroke-dasharray="3 2"/>
-    <text x="42" y="94" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">T</text>
-    <text x="42" y="152" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">A</text>
-    <text x="42" y="210" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">R</text>
-    <text x="42" y="268" font-size="46" font-weight="700" fill="#1a1a1a" text-anchor="middle" letter-spacing="1">S</text>
-    <text x="42" y="303" font-size="4" fill="#555555" text-anchor="middle">WORDMARK · 52 × 250 · ×2</text>
+    <text x="42" y="180" font-size="44" font-weight="700" fill="#d97b19" text-anchor="middle" letter-spacing="7" transform="rotate(-90 42 180)">TARS</text>
+    <text x="42" y="303" font-size="4" fill="#555555" text-anchor="middle">WORDMARK · 52 × 250 · rotated</text>
 
     <rect x="78" y="46" width="52" height="250" fill="none" stroke="#888888" stroke-width="0.4" stroke-dasharray="3 2"/>
-    <text x="104" y="94" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">T</text>
-    <text x="104" y="152" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">A</text>
-    <text x="104" y="210" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">R</text>
-    <text x="104" y="268" font-size="46" font-weight="700" fill="#c8a11a" text-anchor="middle" letter-spacing="1">S</text>
-    <text x="104" y="303" font-size="4" fill="#555555" text-anchor="middle">ALT COLOURWAY</text>
+    <text x="98" y="180" font-size="44" font-weight="700" fill="#d97b19" text-anchor="middle" letter-spacing="7" transform="rotate(-90 98 180)">TARS</text>
+    <circle cx="116" cy="92" r="2.1" fill="#d97b19"/><circle cx="134" cy="92" r="2.1" fill="#d97b19"/><circle cx="125" cy="101" r="2.1" fill="#d97b19"/><circle cx="116" cy="110" r="2.1" fill="#d97b19"/><circle cx="134" cy="110" r="2.1" fill="#d97b19"/><circle cx="125" cy="119" r="2.1" fill="#d97b19"/><circle cx="116" cy="128" r="2.1" fill="#d97b19"/><circle cx="134" cy="128" r="2.1" fill="#d97b19"/><circle cx="125" cy="137" r="2.1" fill="#d97b19"/><circle cx="116" cy="146" r="2.1" fill="#d97b19"/><circle cx="134" cy="146" r="2.1" fill="#d97b19"/>
+    <text x="104" y="303" font-size="4" fill="#555555" text-anchor="middle">WITH DOT MATRIX</text>
   </g>
 
   <!-- ============ DATA PLATE ============ -->
@@ -37,7 +32,7 @@
       <text x="154" y="71">BUILD</text><text x="212" y="71" fill="#ffffff">CONCEPT</text>
       <text x="154" y="79">HEIGHT</text><text x="212" y="79" fill="#ffffff">1000 mm</text>
       <text x="154" y="87">MASS CLASS</text><text x="212" y="87" fill="#ffffff">12–25 kg</text>
-      <text x="154" y="95">BUS</text><text x="212" y="95" fill="#ffffff">24 V DC</text>
+      <text x="154" y="95">BUS</text><text x="212" y="95" fill="#ffffff">12.8 V DC</text>
       <text x="154" y="103">STRUCTURE</text><text x="212" y="103" fill="#ffffff">6061-T6 / 5052-H32</text>
       <text x="154" y="111">UNIT</text><text x="212" y="111" fill="#ffffff">001</text>
     </g>
@@ -58,7 +53,7 @@
     <g transform="translate(200,136)">
       <path d="M22,0 L44,40 L0,40 Z" fill="#f2c200" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M25,13 l-8,13 h6 l-3,10 9,-14 h-6 z" fill="#1a1a1a"/>
-      <text x="22" y="47" font-size="4.4" font-weight="700" fill="#1a1a1a" text-anchor="middle">24 V DC LIVE</text>
+      <text x="22" y="47" font-size="4.4" font-weight="700" fill="#1a1a1a" text-anchor="middle">12.8 V LIVE</text>
     </g>
     <!-- hot surface -->
     <g transform="translate(254,136)">

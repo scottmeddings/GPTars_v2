@@ -213,6 +213,11 @@ ARM_SLAB_WIDTH = 116.0
 # Onboard display, on the main front face of the lower chassis rather than the
 # Upper Lid. The lid offers only 110 mm of height; the front face below the hip
 # axis offers roughly 600 mm, which admits a full portrait panel.
+DECAL_WORDMARK_COLOUR = "#d97b19 orange"
+DECAL_WORDMARK_ORIENTATION = "Rotated 90 degrees, reading up the panel"
+DECAL_WORDMARK_SIZE = "52 x 250"
+DECAL_WORDMARK_ORIGIN_Y = 350.0
+
 DISPLAY_PRESENT = True
 DISPLAY_LOCATION = "Chassis / upper front face, above the hip axis"
 DISPLAY_CLASS = "14 inch portrait TFT-LED, 12 V"

@@ -8,11 +8,12 @@ export const metadata: Metadata = {
 };
 
 const SHEET = "/images/gptars-decal-sheet.svg";
+const PLACEMENT = "/images/gptars-decal-placement.svg";
 
 const decals = [
   ["TARS vertical wordmark", "52 × 250", "×2", "Port and starboard identity, two colourways"],
   ["Data plate", "120 × 72", "×1", "Build, height, mass class, bus voltage, alloys, unit number"],
-  ["Hazard triangles", "44 × 40", "×4", "Crush · 24 V live · hot surface · starts without warning"],
+  ["Hazard triangles", "44 × 40", "×4", "Crush · 12.8 V live · hot surface · starts without warning"],
   ["E-stop surround", "Ø70", "×1", "Centre cut out for the mushroom head"],
   ["Service labels", "130 × 16", "×4", "Compute, GPU and battery access, plus isolate before opening"],
   ["Pinch-point stripes", "344 × 14", "×2", "Limb leading edges and the hip gap"],
@@ -69,7 +70,19 @@ export default function DecalsPage() {
             <figcaption>A2 at 1:1 · dashed rules are cut lines and do not print</figcaption>
           </figure>
 
+          <figure className="decal-sheet">
+            <img src={PLACEMENT} alt="Front and rear elevations of GP-TARS V2 showing where each decal is applied" />
+            <figcaption>Placement · front and rear · positions in millimetres above ground</figcaption>
+          </figure>
+
           <div className="download-list">
+            <a href={PLACEMENT} download>
+              <span>
+                <b>Placement drawing</b>
+                <small>SVG · where each decal goes</small>
+              </span>
+              <i>DOWNLOAD ↓</i>
+            </a>
             <a href={SHEET} download>
               <span>
                 <b>Decal sheet, revision A</b>

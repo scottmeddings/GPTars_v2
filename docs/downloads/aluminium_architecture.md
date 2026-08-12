@@ -99,6 +99,10 @@ Printed vinyl decals carry the identity and, more importantly, the safety markin
 
 ![GP-TARS V2 decal sheet](/images/gptars-decal-sheet.svg)
 
+Placement on the robot, front and rear:
+
+![GP-TARS V2 decal placement on the front and rear elevations](/images/gptars-decal-placement.svg)
+
 | Decal | Size (mm) | Purpose |
 |---|---|---|
 | TARS vertical wordmark | 52 × 250, ×2 | Port and starboard identity, two colourways |
