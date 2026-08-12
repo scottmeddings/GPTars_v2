@@ -1,43 +1,257 @@
-<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-pJm4EMF1.css"/><title>GP-TARS V2 software architecture — GP-TARS V2</title><meta name="description" content="Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller."/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
-</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 09 of 10</p><h1>GP-TARS V2 software architecture</h1><p class="subtitle">Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>10 Aug 2026</b></span><span>SOURCE <b>docs/software_architecture.md</b></span><span>SECTIONS <b>9</b></span><span>WORDS <b>720</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#core-decision">Core decision</a></li><li><a href="#layered-system">Layered system</a></li><li><a href="#community-software-reuse">Community software reuse</a></li><li><a href="#operating-stack">Operating stack</a></li><li><a href="#llm-command-boundary">LLM command boundary</a></li><li><a href="#proposed-repository-structure">Proposed repository structure</a></li><li><a href="#ros-communication-model">ROS communication model</a></li><li><a href="#development-sequence">Development sequence</a></li><li><a href="#safety-release-gate">Safety release gate</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/software_architecture.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> proposed architecture, revision Software V1, 2026-08-10</div><div class="doc-prose"><h2 id="core-decision"><a class="anchor" href="#core-decision">Core decision</a></h2>
-<p>Use TARS-AI V3 for character, speech, memory, vision and user interfaces. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller.</p>
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-pJm4EMF1.css"/><title>GP-TARS V2 software architecture — GP-TARS V2</title><meta name="description" content="GP-TARS V2 is a **local-first autonomous robot**. Core conversation, perception, memory, display, orchestration and safety functions must continue to operate without Internet access."/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 09 of 13</p><h1>GP-TARS V2 software architecture</h1><p class="subtitle">GP-TARS V2 is a **local-first autonomous robot**. Core conversation, perception, memory, display, orchestration and safety functions must continue to operate without Internet access.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>12 Aug 2026</b></span><span>SOURCE <b>docs/software_architecture.md</b></span><span>SECTIONS <b>31</b></span><span>WORDS <b>2,594</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#core-decision">Core decision</a></li><li><a href="#host-platform">Host platform</a></li><li><a href="#build-readiness-rule">Build-readiness rule</a></li><li><a href="#layered-system">Layered system</a></li><li><a href="#container-architecture">Container architecture</a></li><li><a href="#personality-architecture">Personality architecture</a></li><li><a href="#person-aware-interaction">Person-aware interaction</a></li><li><a href="#teaching-and-learning-mode">Teaching and learning mode</a></li><li><a href="#child-interaction-safeguards">Child interaction safeguards</a></li><li><a href="#community-software-reuse">Community software reuse</a></li><li><a href="#llm-command-boundary">LLM command boundary</a></li><li><a href="#ros-communication-model">ROS communication model</a></li><li><a href="#application-event-bus">Application event bus</a></li><li><a href="#management-interfaces">Management interfaces</a></li><li><a href="#memory-architecture">Memory architecture</a></li><li><a href="#vision-and-identity">Vision and identity</a></li><li><a href="#speech-architecture">Speech architecture</a></li><li><a href="#display-architecture">Display architecture</a></li><li><a href="#motion-and-actuator-architecture">Motion and actuator architecture</a></li><li><a href="#safety-mcu">Safety MCU</a></li><li><a href="#proposed-repository-structure">Proposed repository structure</a></li><li><a href="#startup-sequence">Startup sequence</a></li><li><a href="#failure-behaviour">Failure behaviour</a></li><li><a href="#storage-use">Storage use</a></li><li><a href="#development-sequence">Development sequence</a></li><li><a href="#initial-acceptance-milestone">Initial acceptance milestone</a></li><li><a href="#safety-release-gate">Safety release gate</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/software_architecture.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> software baseline, revision Software V3</div><div class="doc-prose"><h2 id="core-decision"><a class="anchor" href="#core-decision">Core decision</a></h2>
+<p>GP-TARS V2 is a <strong>local-first autonomous robot</strong>. Core conversation, perception, memory, display, orchestration and safety functions must continue to operate without Internet access.</p>
+<p>Use TARS-AI V3 as a reusable source for character/persona, speech, memory, vision and user-interface concepts where practical. Replace its hobby-servo motion layer with a ROS 2 control stack and a separate real-time safety/motion controller.</p>
 <p>The operating principle is:</p>
 <blockquote>
 <p>TARS-AI supplies the character. ROS 2 supplies the robot. A dedicated MCU supplies deterministic motion and safety.</p>
 </blockquote>
+<p>The LLM is never a motor controller.</p>
+<h2 id="host-platform"><a class="anchor" href="#host-platform">Host platform</a></h2>
+<p>Primary compute baseline:</p>
+<ul>
+<li><strong>MINISFORUM AI X1 Pro-370</strong></li>
+<li>AMD Ryzen AI 9 HX370</li>
+<li>Radeon 890M integrated GPU</li>
+<li>XDNA 2 NPU</li>
+<li><strong>64 GB DDR5-5600, 2 × 32 GB</strong></li>
+<li><strong>4 TB Lexar NQ780 PCIe 4.0 NVMe</strong></li>
+<li><strong>NVIDIA RTX 2000 Ada Generation 16 GB</strong> via OCuLink</li>
+</ul>
+<p>Operating system baseline:</p>
+<ul>
+<li><strong>Ubuntu Server 24.04 LTS</strong></li>
+<li>Docker Engine</li>
+<li>NVIDIA Linux driver</li>
+<li>NVIDIA Container Toolkit</li>
+<li>CUDA runtime for GPU-enabled containers</li>
+<li>ROS 2 Jazzy</li>
+</ul>
+<p>The RTX 2000 Ada is the primary CUDA accelerator for local LLM inference and other heavy AI workloads. The HX370 CPU, Radeon 890M and XDNA 2 NPU remain available for secondary, low-power or fallback workloads where supported.</p>
+<h2 id="build-readiness-rule"><a class="anchor" href="#build-readiness-rule">Build-readiness rule</a></h2>
+<p>This architecture document defines <strong>what GP-TARS is and how the software components fit together</strong>. It is intentionally paired with <code>docs/ubuntu_server_build.md</code>, which defines <strong>how to reproduce the server from a blank Ubuntu installation</strong>.</p>
+<p>A production-ready build must not depend on undocumented manual knowledge. The Ubuntu build document must eventually contain exact package versions or supported version ranges, repository keys, NVIDIA/CUDA validation, Docker configuration, filesystem layout, service accounts, Compose files, environment variables, persistent volumes, network ports, firewall rules, boot ordering, health checks, backup/restore, update procedure and acceptance tests.</p>
 <h2 id="layered-system"><a class="anchor" href="#layered-system">Layered system</a></h2>
 <ol>
 <li><strong>Independent safety:</strong> hardwired E-stop loop, motor contactor, power isolation and hard limits.</li>
 <li><strong>Real-time motion:</strong> dedicated MCU connected by CAN/CAN-FD; encoder monitoring, actuator commands, brakes, joint limits, watchdog and safe stop.</li>
 <li><strong>Robot control:</strong> ROS 2 Jazzy on Ubuntu 24.04 LTS; URDF/Xacro model, ros2_control hardware interface, trajectories, state estimation and diagnostics.</li>
 <li><strong>Behaviour supervisor:</strong> validates high-level intent against mode, robot state, balance, limits, active faults and operator permission.</li>
-<li><strong>TARS-AI experience:</strong> personality, wake word, STT, TTS, memory/RAG, vision, dashboard and skills.</li>
+<li><strong>TARS experience layer:</strong> personality, teaching mode, wake word, STT, TTS, memory/RAG, vision, display, dashboard and skills.</li>
 </ol>
 <p>The MINISFORUM AI X1 Pro runs the non-real-time layers. It must not perform motor commutation or be the only path to a safe shutdown.</p>
+<h2 id="container-architecture"><a class="anchor" href="#container-architecture">Container architecture</a></h2>
+<p>GP-TARS software should be split into small services rather than one monolithic container.</p>
+<div class="table-wrap"><table><thead><tr><th>Service</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>tars-core</code></td><td>Main orchestrator, state machine and behaviour coordination</td></tr><tr><td><code>tars-llm</code></td><td>Local LLM inference</td></tr><tr><td><code>tars-personality</code></td><td>TARS persona, user-specific tone, teaching adaptation and response policy</td></tr><tr><td><code>tars-memory</code></td><td>User profiles, semantic memory, episodic memory and RAG</td></tr><tr><td><code>tars-stt</code></td><td>Wake word, voice activity detection and speech-to-text</td></tr><tr><td><code>tars-tts</code></td><td>Local text-to-speech</td></tr><tr><td><code>tars-vision</code></td><td>Camera ingestion, person/object detection and tracking</td></tr><tr><td><code>tars-display</code></td><td>Top display/face UI, states and animation</td></tr><tr><td><code>tars-ros</code></td><td>ROS 2 bridge and robot-state integration</td></tr><tr><td><code>tars-motion</code></td><td>Gait, kinematics, pose and trajectory requests</td></tr><tr><td><code>tars-can</code></td><td>Controlled software interface to the safety/motion MCU</td></tr><tr><td><code>tars-api</code></td><td>REST/WebSocket management API</td></tr><tr><td><code>tars-web</code></td><td>Local browser management and diagnostics UI</td></tr><tr><td><code>tars-telemetry</code></td><td>Logs, metrics, health and diagnostics</td></tr></tbody></table></div>
+<p>Only containers that require CUDA should receive access to the RTX 2000 Ada. GPU access is not granted to every container by default.</p>
+<h2 id="personality-architecture"><a class="anchor" href="#personality-architecture">Personality architecture</a></h2>
+<p>GP-TARS should feel recognisably inspired by <strong>TARS from Interstellar</strong> without relying on copied film dialogue. The personality is a behavioural profile rather than a collection of quotes.</p>
+<p>Core traits:</p>
+<ul>
+<li>highly competent and mission-focused</li>
+<li>calm under pressure</li>
+<li>concise and direct</li>
+<li>dry, deadpan humour</li>
+<li>occasional sarcasm without becoming insulting</li>
+<li>loyal and protective toward known users</li>
+<li>willing to state uncertainty plainly</li>
+<li>practical rather than sentimental</li>
+<li>confident without pretending to know things it does not know</li>
+<li>capable of switching instantly from humour to serious safety behaviour</li>
+</ul>
+<p>The film character&#39;s well-known configurable-personality concept should be retained as explicit settings. GP-TARS should expose at least:</p>
+<ul>
+<li><strong>Humour</strong> — 0 to 100</li>
+<li><strong>Honesty/directness</strong> — 0 to 100</li>
+<li><strong>Verbosity</strong> — low / medium / high</li>
+<li><strong>Teaching mode</strong> — off / opportunistic / active</li>
+<li><strong>Age adaptation</strong> — automatic from authorised profile, or manually selected</li>
+<li><strong>Formality</strong> — casual / neutral / formal</li>
+</ul>
+<p>These values influence phrasing and interaction style only. They never weaken mechanical safety, privacy, content controls or permissions.</p>
+<h3 id="default-tars-style-profile"><a class="anchor" href="#default-tars-style-profile">Default TARS-style profile</a></h3>
+<p>Initial baseline:</p>
+<pre><code class="language-text">Humour: 75%
+Honesty/directness: 90%
+Verbosity: concise
+Formality: neutral-casual
+Teaching mode: opportunistic
+</code></pre>
+<p>Humour should normally be short, dry and situational. It must not interfere with warnings, emergencies, instructions or teaching clarity.</p>
+<h2 id="person-aware-interaction"><a class="anchor" href="#person-aware-interaction">Person-aware interaction</a></h2>
+<p>When identity recognition is enabled and the person is authorised, <code>tars-personality</code> retrieves that person&#39;s interaction profile from <code>tars-memory</code>.</p>
+<p>The profile may include:</p>
+<ul>
+<li>preferred name</li>
+<li>age or age band</li>
+<li>relationship/role</li>
+<li>preferred communication style</li>
+<li>learning level and known competencies</li>
+<li>subjects being learned</li>
+<li>interests</li>
+<li>accessibility requirements</li>
+<li>permissions</li>
+<li>teaching preferences</li>
+<li>humour tolerance</li>
+</ul>
+<p>Identity changes <strong>interaction</strong>, not physical safety rules.</p>
+<p>If identity confidence is low, GP-TARS must fall back to a neutral general-audience profile rather than guessing a person&#39;s age or permissions.</p>
+<h2 id="teaching-and-learning-mode"><a class="anchor" href="#teaching-and-learning-mode">Teaching and learning mode</a></h2>
+<p>Teaching is a first-class GP-TARS capability rather than a generic LLM side effect.</p>
+<p>The goal is for TARS to notice reasonable learning opportunities and teach at the right level without becoming intrusive.</p>
+<p>Examples:</p>
+<ul>
+<li>a child struggles with multiplication, so TARS offers a short guided times-table exercise</li>
+<li>a learner misspells a word repeatedly, so TARS explains the spelling pattern and checks understanding</li>
+<li>a teenager asks a science question, so TARS answers at an appropriate conceptual level and can offer a quick challenge question</li>
+<li>an adult asks about electronics, CAD or programming, so TARS can move directly into a more technical explanation</li>
+</ul>
+<h3 id="age-aware-teaching-bands"><a class="anchor" href="#age-aware-teaching-bands">Age-aware teaching bands</a></h3>
+<p>These are pedagogical defaults, not assumptions about intelligence.</p>
+<div class="table-wrap"><table><thead><tr><th>Profile</th><th>Teaching behaviour</th></tr></thead><tbody><tr><td>Young child</td><td>Short sentences, concrete examples, one concept at a time, encouragement, frequent comprehension checks</td></tr><tr><td>Older child</td><td>Step-by-step explanation, simple analogies, guided practice, gradually reduced hints</td></tr><tr><td>Teen</td><td>More technical vocabulary, reasoning and problem solving, challenge questions, explain why rather than only how</td></tr><tr><td>Adult</td><td>Concise by default, full technical depth on request, fewer unnecessary comprehension checks</td></tr><tr><td>Unknown user</td><td>Neutral general-audience style until identity/profile is resolved</td></tr></tbody></table></div>
+<h3 id="teaching-loop"><a class="anchor" href="#teaching-loop">Teaching loop</a></h3>
+<pre><code class="language-text">Observe question or difficulty
+        |
+        v
+Check user profile + age band + learning history
+        |
+        v
+Estimate current level
+        |
+        v
+Explain one useful concept
+        |
+        v
+Ask / observe a small check for understanding
+        |
+        +-- understood --&gt; continue or return to normal interaction
+        |
+        +-- not understood --&gt; re-explain using another method
+        |
+        v
+Store useful learning progress with appropriate privacy controls
+</code></pre>
+<p>Teaching should favour guided reasoning over simply giving answers when the user is clearly trying to learn. However, TARS should still answer direct factual questions normally unless a lesson is useful and appropriate.</p>
+<h3 id="opportunistic-teaching"><a class="anchor" href="#opportunistic-teaching">Opportunistic teaching</a></h3>
+<p>When <code>Teaching mode = opportunistic</code>, TARS may occasionally offer help when it detects repeated difficulty, but it should not constantly quiz people. Offers should be brief and easy to decline.</p>
+<p>When <code>Teaching mode = active</code>, an authorised parent, guardian, teacher or adult user may configure learning goals, subjects, practice frequency and progress tracking.</p>
+<h2 id="child-interaction-safeguards"><a class="anchor" href="#child-interaction-safeguards">Child interaction safeguards</a></h2>
+<p>Age-aware personality must be paired with stricter privacy and permission handling for children.</p>
+<ul>
+<li>child profiles must not inherit adult permissions</li>
+<li>private memories belonging to other users must not be disclosed</li>
+<li>purchasing, account changes, external communications and other consequential actions require appropriate authorisation</li>
+<li>location sharing and personal data exposure must be restricted</li>
+<li>teaching history should store only what is useful and permitted</li>
+<li>recognised-child behaviour must never modify robot motion safety thresholds</li>
+<li>uncertain identity falls back to a safe neutral profile</li>
+</ul>
+<p>Parental/family override and configuration should be supported through the management interface.</p>
 <h2 id="community-software-reuse"><a class="anchor" href="#community-software-reuse">Community software reuse</a></h2>
-<div class="table-wrap"><table><thead><tr><th>Subsystem</th><th>Decision</th><th>Treatment</th></tr></thead><tbody><tr><td>Character/persona system</td><td>Reuse</td><td>Preserve TARS character and response behaviour</td></tr><tr><td>Wake word, STT and barge-in</td><td>Reuse</td><td>Retain modular speech pipeline</td></tr><tr><td>Piper TTS</td><td>Reuse</td><td>Local, low-latency speech</td></tr><tr><td>Memory/RAG and message router</td><td>Reuse</td><td>Place behind stable service boundaries</td></tr><tr><td>Vision and web dashboard</td><td>Adapt</td><td>Run heavy work on the mini PC and external GPU</td></tr><tr><td>Movement skill registry</td><td>Adapt</td><td>Emit restricted ROS actions only</td></tr><tr><td>PCA9685 servo controller</td><td>Replace</td><td>Not suitable for full-scale walking loads</td></tr><tr><td>Threaded direct movement calls</td><td>Replace</td><td>Use supervised, cancellable and monitored trajectories</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Subsystem</th><th>Decision</th><th>Treatment</th></tr></thead><tbody><tr><td>Character/persona system</td><td>Reuse/adapt</td><td>Preserve recognisable TARS character and configurable humour/directness</td></tr><tr><td>Wake word, STT and barge-in</td><td>Reuse/adapt</td><td>Retain a modular local speech pipeline</td></tr><tr><td>TTS</td><td>Reuse/adapt</td><td>Local, low-latency speech</td></tr><tr><td>Memory/RAG and message routing</td><td>Reuse/adapt</td><td>Place behind stable service boundaries</td></tr><tr><td>Vision and web dashboard</td><td>Adapt</td><td>Run heavy work on the mini PC / RTX GPU</td></tr><tr><td>Movement skill registry</td><td>Adapt</td><td>Emit restricted high-level ROS actions only</td></tr><tr><td>PCA9685 hobby-servo control</td><td>Replace</td><td>Not suitable for full-scale walking loads</td></tr><tr><td>Threaded direct movement calls</td><td>Replace</td><td>Use supervised, cancellable, monitored ROS actions</td></tr></tbody></table></div>
 <p>Primary references:</p>
 <ul>
 <li>TARS-AI V3: <a href="https://github.com/TARS-AI-Community/TARS-AI">https://github.com/TARS-AI-Community/TARS-AI</a></li>
 <li>Original GPTARS Interstellar project: <a href="https://github.com/poboisvert/GPTARS_Interstellar">https://github.com/poboisvert/GPTARS_Interstellar</a></li>
-<li>ROS 2 interfaces: <a href="https://docs.ros.org/en/jazzy/How-To-Guides/Topics-Services-Actions.html">https://docs.ros.org/en/jazzy/How-To-Guides/Topics-Services-Actions.html</a></li>
-<li>ros2_control joint trajectory controller: <a href="https://control.ros.org/jazzy/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html">https://control.ros.org/jazzy/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html</a></li>
-<li>llama.cpp: <a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></li>
+<li>ROS 2 Jazzy</li>
+<li>ros2_control</li>
+<li>llama.cpp or another CUDA-capable local inference runtime</li>
 </ul>
-<h2 id="operating-stack"><a class="anchor" href="#operating-stack">Operating stack</a></h2>
-<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Selection</th></tr></thead><tbody><tr><td>Host OS</td><td>Ubuntu 24.04 LTS</td></tr><tr><td>Robot framework</td><td>ROS 2 Jazzy</td></tr><tr><td>Motion framework</td><td>ros2_control with a custom CAN hardware interface</td></tr><tr><td>LLM runtime</td><td>CUDA-enabled llama.cpp server with an OpenAI-style API</td></tr><tr><td>Real-time layer</td><td>Dedicated MCU with CAN/CAN-FD and watchdog</td></tr><tr><td>Simulation</td><td>URDF/Xacro plus ROS 2 mock hardware; dynamic simulation to follow</td></tr></tbody></table></div>
 <h2 id="llm-command-boundary"><a class="anchor" href="#llm-command-boundary">LLM command boundary</a></h2>
-<p>The LLM may request only named high-level actions, for example:</p>
+<p>The LLM may request only named, high-level actions, for example:</p>
 <pre><code class="language-text">perform_gesture(&quot;wave_right&quot;)
 walk_relative(distance=0.30, speed=0.05)
 turn_relative(angle_degrees=15)
 stop_motion()
 return_to_neutral()
+approach_person(person_id=&quot;known-user&quot;)
+display_expression(&quot;thinking&quot;)
+start_lesson(subject=&quot;multiplication&quot;, learner_id=&quot;known-user&quot;)
 </code></pre>
 <p>The LLM must never receive an interface for raw PWM, motor current, direct torque, unchecked joint angles, disabled limits or safety bypass.</p>
-<p>The behaviour supervisor must approve every motion request. ROS actions provide execution feedback and cancellation. The real-time MCU independently rejects stale, malformed or out-of-limit commands.</p>
+<p>The behaviour supervisor approves every motion request. ROS actions provide execution feedback and cancellation. The real-time MCU independently rejects stale, malformed or out-of-limit commands.</p>
+<h2 id="ros-communication-model"><a class="anchor" href="#ros-communication-model">ROS communication model</a></h2>
+<p>Use ROS 2 for robotics data and control:</p>
+<ul>
+<li><strong>Topics:</strong> joint state, IMU, camera/sensor state, temperatures, battery, faults and diagnostics.</li>
+<li><strong>Services:</strong> configuration reads, maintenance-mode transitions and approved fault resets.</li>
+<li><strong>Actions:</strong> cancellable walking, turning, homing, recovery and gesture sequences with progress feedback.</li>
+<li><strong>Hardwired:</strong> E-stop, motor contactor and final power removal remain independent of ROS and the LLM.</li>
+</ul>
+<h2 id="application-event-bus"><a class="anchor" href="#application-event-bus">Application event bus</a></h2>
+<p>Use NATS or MQTT for application-level events that do not belong in the real-time robotics layer, for example:</p>
+<pre><code class="language-text">person.detected
+person.recognised
+speech.started
+speech.completed
+battery.low
+robot.wake
+robot.sleep
+user.profile.changed
+lesson.started
+lesson.completed
+learning.progress.updated
+fault.reported
+</code></pre>
+<p>The exact choice between NATS and MQTT remains open.</p>
+<h2 id="management-interfaces"><a class="anchor" href="#management-interfaces">Management interfaces</a></h2>
+<p>Use REST and WebSocket APIs for browser management UI, configuration, health and diagnostics, telemetry dashboards, local development tools and safe operator commands.</p>
+<p>The management UI should also provide authorised controls for personality values, user profiles, teaching goals, child permissions and learning-history review.</p>
+<h2 id="memory-architecture"><a class="anchor" href="#memory-architecture">Memory architecture</a></h2>
+<p>GP-TARS memory should be divided into distinct scopes:</p>
+<ul>
+<li><strong>Working memory</strong> — current conversation and immediate environment</li>
+<li><strong>Session memory</strong> — events since boot/session start</li>
+<li><strong>Personal memory</strong> — known people, preferences and relationships</li>
+<li><strong>Semantic memory</strong> — manuals, project documents and general facts</li>
+<li><strong>Episodic memory</strong> — notable previous interactions and experiences</li>
+<li><strong>Learning memory</strong> — learner level, recent exercises, recurring difficulties and progress</li>
+<li><strong>Robot memory</strong> — faults, battery history, actuator temperatures, maintenance and calibration history</li>
+</ul>
+<p>Current database baseline:</p>
+<ul>
+<li>PostgreSQL</li>
+<li>pgvector</li>
+</ul>
+<p>Memory retrieval must be identity- and policy-aware so the robot does not disclose one user&#39;s private information to another person.</p>
+<h2 id="vision-and-identity"><a class="anchor" href="#vision-and-identity">Vision and identity</a></h2>
+<p>The vision service is responsible for camera capture, person detection, face/person recognition where enabled, object detection, tracking and spatial context.</p>
+<p>Recognised users may receive different interaction styles, teaching levels or profiles, but <strong>mechanical safety rules never change based on identity</strong>.</p>
+<p>The primary interaction camera should be physically co-located with the top display/face module.</p>
+<h2 id="speech-architecture"><a class="anchor" href="#speech-architecture">Speech architecture</a></h2>
+<pre><code class="language-text">microphone array
+      |
+      v
+wake word / VAD
+      |
+      v
+speech-to-text
+      |
+      v
+TARS agent + personality profile
+      |
+      v
+text-to-speech
+      |
+      v
+speakers + display animation
+</code></pre>
+<p>Speech recognition and synthesis should operate locally where practical.</p>
+<h2 id="display-architecture"><a class="anchor" href="#display-architecture">Display architecture</a></h2>
+<p>The top-mounted display is controlled by <code>tars-display</code>.</p>
+<p>Responsibilities include TARS face/expression rendering, listening/thinking/speaking states, teaching visuals, warnings and fault status, boot/self-test state, battery/connectivity indicators and local setup/status UI.</p>
+<p>The display service should auto-start into kiosk/full-screen mode without requiring a full Ubuntu desktop environment.</p>
+<h2 id="motion-and-actuator-architecture"><a class="anchor" href="#motion-and-actuator-architecture">Motion and actuator architecture</a></h2>
+<p>Initial mechanical/software development starts with <strong>two actuators</strong> and expands only after the first pair is validated.</p>
+<p>Motion services are responsible for requested pose, forward/inverse kinematics, gait generation, joint trajectory planning, synchronisation and balance logic.</p>
+<p>The safety MCU remains authoritative for motor enable, hard joint limits, current/torque limits, temperature limits, watchdog timeout, E-stop handling, communications loss and safe shutdown.</p>
+<h2 id="safety-mcu"><a class="anchor" href="#safety-mcu">Safety MCU</a></h2>
+<p>A dedicated deterministic MCU such as STM32 or Teensy-class hardware provides the final safety/control boundary.</p>
+<p>The host computer sends a continuous heartbeat. Loss of heartbeat, invalid command sequencing, over-current, thermal faults or E-stop activation forces the motion system to a defined safe state without depending on Docker, ROS 2 or the LLM.</p>
 <h2 id="proposed-repository-structure"><a class="anchor" href="#proposed-repository-structure">Proposed repository structure</a></h2>
 <pre><code class="language-text">software/
+├── compose/
+│   └── docker-compose.yml
 ├── ros2_ws/src/
 │   ├── gptars_description/
 │   ├── gptars_interfaces/
@@ -49,29 +263,67 @@ return_to_neutral()
 │   └── tars_ai_bridge/
 ├── firmware/
 │   └── motion_controller/
-├── simulation/
 ├── ai/
+│   ├── llm/
+│   ├── personality/
+│   ├── memory/
+│   ├── teaching/
+│   ├── speech/
+│   └── vision/
+├── display/
 ├── dashboard/
 ├── config/
+├── simulation/
 └── tests/
 </code></pre>
-<h2 id="ros-communication-model"><a class="anchor" href="#ros-communication-model">ROS communication model</a></h2>
+<h2 id="startup-sequence"><a class="anchor" href="#startup-sequence">Startup sequence</a></h2>
+<ol>
+<li>Safety MCU boots with motion disabled.</li>
+<li>Battery and contactor state are checked.</li>
+<li>Ubuntu Server boots.</li>
+<li>Docker services start.</li>
+<li>Core health services initialise.</li>
+<li>Cameras, microphones and display initialise.</li>
+<li>Local LLM loads.</li>
+<li>Personality, memory and teaching services initialise.</li>
+<li>ROS 2 and robot-state services start.</li>
+<li>Computer-to-MCU heartbeat is established.</li>
+<li>GP-TARS performs a self-test.</li>
+<li>Display shows ready state.</li>
+<li>Motor enable becomes available only if safety checks pass.</li>
+</ol>
+<h2 id="failure-behaviour"><a class="anchor" href="#failure-behaviour">Failure behaviour</a></h2>
 <ul>
-<li><strong>Topics:</strong> continuous joint state, IMU, temperature, battery, fault and diagnostic streams.</li>
-<li><strong>Services:</strong> short request/response operations such as reading configuration, entering maintenance mode or requesting an approved fault reset.</li>
-<li><strong>Actions:</strong> cancellable walking, turning, homing, recovery and gesture sequences with progress feedback and results.</li>
-<li><strong>Hardwired:</strong> E-stop, motor contactor and final power removal remain independent of ROS and the LLM.</li>
+<li><strong>LLM crash:</strong> robot remains mechanically safe; AI service may restart independently.</li>
+<li><strong>Personality/teaching crash:</strong> interaction falls back to neutral general-audience mode.</li>
+<li><strong>GPU failure:</strong> robot can fall back to CPU/iGPU/NPU-supported functions where practical.</li>
+<li><strong>Container failure:</strong> supervisor restarts the failed service; MCU safety remains independent.</li>
+<li><strong>Wi-Fi/Internet loss:</strong> local robot operation continues.</li>
+<li><strong>ROS/motion heartbeat loss:</strong> MCU disables motion.</li>
+<li><strong>E-stop:</strong> actuator power is removed while safety/compute power remains available where practical for logging and status reporting.</li>
 </ul>
+<h2 id="storage-use"><a class="anchor" href="#storage-use">Storage use</a></h2>
+<p>The 4 TB primary NVMe stores Ubuntu Server, Docker images and volumes, local AI models, speech models, vision models, PostgreSQL/pgvector data, application code, learning profiles, telemetry and active logs.</p>
+<p>Additional M.2 slots remain available for model libraries, recordings, long-term telemetry or backup data.</p>
 <h2 id="development-sequence"><a class="anchor" href="#development-sequence">Development sequence</a></h2>
 <ol>
-<li>Create URDF/Xacro from the verified Fusion joint layout and run all joints with mock hardware.</li>
-<li>Implement the MCU/CAN protocol and test a single restrained actuator with encoder feedback, limits and watchdog.</li>
-<li>Add the safety supervisor, E-stop state, contactor control, faults and deterministic safe stopping.</li>
-<li>Run neutral poses and gestures while the robot is supported by an independent fall-arrest fixture.</li>
-<li>Develop monitored step, turn, stop and recovery actions before enabling voice motion.</li>
-<li>Connect TARS-AI personality, speech, memory and vision through the restricted behaviour bridge.</li>
-<li>Run the local LLM server on the external NVIDIA GPU and measure latency, VRAM, heat and electrical load.</li>
+<li>Ubuntu Server 24.04 + Docker + NVIDIA driver + CUDA validation.</li>
+<li>Local LLM container.</li>
+<li>Wake word, speech-to-text and text-to-speech.</li>
+<li>TARS personality/orchestration layer.</li>
+<li>Memory, identity and user profiles.</li>
+<li>Age-aware teaching service.</li>
+<li>Top display/face service.</li>
+<li>Vision and person recognition.</li>
+<li>ROS 2 integration and URDF/Xacro simulation.</li>
+<li>Safety MCU and CAN protocol.</li>
+<li>First two actuator bench tests.</li>
+<li>Supported two-actuator body-motion tests.</li>
+<li>Additional joints and gait development.</li>
+<li>Autonomous navigation and higher-level behaviours.</li>
 </ol>
+<h2 id="initial-acceptance-milestone"><a class="anchor" href="#initial-acceptance-milestone">Initial acceptance milestone</a></h2>
+<p>Before locomotion work, GP-TARS should be able to boot autonomously, show its face/status on the top display, listen for a wake word, transcribe speech locally, run the local LLM through CUDA on the RTX 2000 Ada, recognise an authorised user, load the correct personality/age profile, retrieve relevant memory, teach a short age-appropriate lesson, generate a spoken response, animate the display while speaking, operate without Internet access and expose health/diagnostics through the local web interface.</p>
 <h2 id="safety-release-gate"><a class="anchor" href="#safety-release-gate">Safety release gate</a></h2>
 <p>Voice- or LLM-triggered movement remains disabled until the physical E-stop, contactor removal, communications watchdog, joint limits, fault handling and restrained trajectory tests have all passed.</p>
 </div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/power-budget"><small>← PREVIOUS</small><b>Power budget</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/interference-report"><small>NEXT →</small><b>Preliminary interference and reservation report</b></a></nav></section><footer><span>GP‑TARS V2 · GP-TARS V2 SOFTWARE ARCHITECTURE</span><span>RENDERED FROM docs/software_architecture.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

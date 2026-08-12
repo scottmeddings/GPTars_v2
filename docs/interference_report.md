@@ -39,7 +39,56 @@ Joint sweeps, cable bends, GPU dock and supply, connector protrusion, airflow, p
 
 ---
 
-Latest concept model checked: `cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d`.
+Latest concept model checked: `cad/output/GP_TARS_V2_R10.f3d`, 90 bodies.
+
+## R10 interference run
+
+Run in Fusion over all 80 robot bodies, with the dock and the two transparent
+reference envelopes excluded. Coincident faces were not counted.
+
+- **47 interference pairs, all of them assembly contact**, and **zero
+  non-assembly interference**. Assembly contact means a welded frame joint where
+  a rail meets a depth member, a shaft through the carrier holding it, a keep-out
+  against the part it reserves room for, a folded panel corner lap, or the dock
+  contact plate against the panel it mounts to.
+- The run caught three real clashes that reading the drawing would not have.
+  Dropping the display to clear the camera brought the display module's lower
+  edge onto the starboard power/CAN harness twice, and the camera's cassette
+  plate landed on the front crossmember at Y=930–950. The harness now finishes
+  at 615, still reaching the hip at 610.8, which is all it feeds; the plate now
+  starts at 951, above the crossmember.
+
+## Sensor provisions
+
+Selected hardware, reserved at envelope size. Both reservations remain marked
+for verification against the purchased units before any panel is cut.
+
+| Provision | Envelope (mm) | Height above ground | Notes |
+|---|---:|---:|---|
+| Luxonis OAK-D Pro W USB | 160 x 45 x 45 | 945-990 | RGB and stereo depth in one module, covering both cameras the specification lists separately |
+| Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array | 90 x 35 x 20 | 978.8-998.8 | 4 channels under the top lid, ported up through it |
+| Sensor cassette plate | 170 x 45 x 3 | 951-996 | Camera and microphones withdraw together |
+| Time-of-flight, x2 | 26 x 26 x 18 | 317-343 | Step edges and near obstacles below the camera's field of view |
+| LiDAR mount pad | 80 x 3 x 80 | 995.8-998.8 | Pad only. A 360 degree scanner stands proud of the lid and takes fitted height to 1042 mm |
+| Foot contact, x2 | 24 cube | 54-78 | Inside each shoe's hollow |
+| IMU | 40 x 25 x 40 | 290-315 | Unchanged |
+
+Speakers are deliberately absent: the display module carries its own pair
+(Two 32 mm, driven over HDMI audio), so reserving separate drivers would hold space for
+hardware the robot already has.
+
+### Why the cassette order changed
+
+The upper front face between the hip break and the lid is **384.2 mm**. Camera
+45 plus its 10 mm top margin, display module 328 and microphone 35 need
+**418 mm**: 33.8 mm over, and still 23.8 mm over with every margin zeroed. The
+microphones cannot stay on the front face, so they mount under the lid.
+
+That resolved, the rest follows arithmetically. The camera occupies
+945-990 mm, so the 328 mm display module must finish by 944, which sets
+`DISPLAY_ORIGIN_Y` to 625. The aperture doubler's flange drops from 18 mm to
+10 mm so it clears the hip break at 613.8 mm. Clearances are small:
+1.41 mm under the display module and 1 mm between module and camera.
 
 ## Reserved equipment envelopes
 

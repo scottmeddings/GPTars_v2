@@ -111,6 +111,31 @@ When the RTX 2000 Ada is added, heavier face, pose, scene-understanding or multi
 - Final mounting holes and connector cut-outs must be based on the purchased camera or authoritative mechanical drawing.
 - Provide at least 10 mm service/cable clearance around connector faces until final CAD is verified.
 
+**Now in the CAD, and the stack had to change to fit.** Camera, microphones,
+their cassette plate, a ToF pair, a LiDAR pad and a contact sensor in each shoe
+are modelled in `10_SENSORS` as reserved volumes.
+
+The cassette as originally ordered — camera above the display, microphones below
+it, all on the upper front face — does not fit. The camera's 45 mm reservation
+plus its 10 mm top margin, the 328 mm display module and the 35 mm microphone
+reservation need 418 mm. The upper front face between the hip break and the lid
+is 384.2 mm. That is 33.8 mm over, and still 23.8 mm over with every margin set
+to zero.
+
+The microphones therefore mount under the top lid, behind the camera, ported up
+through it. That fits, and it is the better position anyway: further from the
+display's heat, and a far-field array on the lid beats one on a front panel that
+drums. The remaining stack sets the display: the camera occupies 945–990 mm, so
+the display module has to finish by 944, which puts `DISPLAY_ORIGIN_Y` at 625.
+The aperture doubler's flange drops from 18 mm to 10 mm so it clears the hip
+break at 613.8 mm.
+
+Both reservations are still marked for verification against purchased hardware
+before any panel is cut. See `docs/interference_report.md` for the envelope
+table and the interference run.
+
+The display module must not become a primary structural load path. Walking and impact loads pass through the internal aluminium chassis.
+
 ### ReSpeaker USB 4 Mic Array
 
 The ReSpeaker USB 4 Mic Array remains the preferred initial far-field microphone system.

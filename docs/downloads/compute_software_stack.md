@@ -242,7 +242,7 @@ risk, and that it must not be frozen without proper simulation.
 ### As modelled
 
 The bodywork and leg-arm slabs exist in
-`cad/output/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d` as 20 bodies across
+`cad/output/GP_TARS_V2_R10.f3d` as 90 bodies across
 `11_BODY_PANELS` (14) and `14_ARMS` (6):
 
 ![Fusion view of the GP-TARS V2 aluminium shell, service panels and leg-arm slabs](/images/gptars-shell-iso.png)

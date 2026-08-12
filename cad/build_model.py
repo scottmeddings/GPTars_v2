@@ -190,11 +190,78 @@ def build(app, document=None):
               f"BOOST_CONVERTER_{i}_24V_480W")
     b.add("10_SENSORS", b.box(-60.0, 290.0, 55.0, 40.0, 25.0, 40.0), "IMU_KEEP_OUT")
 
+    # ---- 10 sensors: head cassette, ranging, ground contact ---------------
+    # The specification asks for reserved provisions on replaceable plates
+    # rather than chosen parts, so these are keep-out volumes. Sizes accept the
+    # candidates named in cad/parameters.py.
+    #
+    # One RGB-D bar covers both the "front RGB camera" and "depth camera" the
+    # specification lists separately; a second RGB head would duplicate a sensor
+    # this module already carries.
+    CAM_H, CAM_W, CAM_D = (p.CAMERA_HEIGHT_RESERVATION, p.CAMERA_WIDTH_RESERVATION,
+                           p.CAMERA_DEPTH_RESERVATION)
+    CAM_Y0 = p.CAMERA_CENTRE_Y - CAM_H / 2
+    CAM_Z1 = PANEL_IN - 2.7                    # clear of the aperture doubler
+    CAM_Z0 = CAM_Z1 - CAM_D
+    b.add("10_SENSORS", b.box(-CAM_W / 2, CAM_Y0, CAM_Z0, CAM_W, CAM_H, CAM_D),
+          "CAMERA_OAK_D_PRO_W_KEEP_OUT")
+
+    # Microphones sit behind the camera and port up through the lid, which keeps
+    # them off the display's heat and away from the front panel's drum surface.
+    MIC_Z0 = p.MIC_LID_Z0
+    MIC_Y0 = (H - T) - p.MIC_DEPTH_RESERVATION
+    b.add("10_SENSORS", b.box(-p.MIC_WIDTH_RESERVATION / 2, MIC_Y0, MIC_Z0,
+                              p.MIC_WIDTH_RESERVATION, p.MIC_DEPTH_RESERVATION,
+                              p.MIC_HEIGHT_RESERVATION),
+          "MIC_RESPEAKER_XVF3800_KEEP_OUT")
+
+    # Both come out together as one service cassette, so they share a plate.
+    # Starts at 951 rather than backing the whole camera: the front crossmember
+    # at Y=930-950 occupies the space behind the camera's lower edge.
+    b.add("10_SENSORS", b.box(-CAM_W / 2 - 5.0, CAM_Y0 + 6.0,
+                              CAM_Z0 - 5.0 - p.SENSOR_PLATE_THICKNESS,
+                              CAM_W + 10.0, CAM_H, p.SENSOR_PLATE_THICKNESS),
+          "SENSOR_CASSETTE_PLATE")
+
+    # Time-of-flight pair, below the camera's field of view, watching for step
+    # edges and near obstacles the gait state machine has to stop for.
+    for side, sx in (("PORT", -p.TOF_SPACING_X / 2), ("STARBOARD", p.TOF_SPACING_X / 2)):
+        b.add("10_SENSORS",
+              b.box(sx - p.TOF_MODULE_SIZE / 2, p.TOF_CENTRE_Y - p.TOF_MODULE_SIZE / 2,
+                    PANEL_IN - p.TOF_MODULE_DEPTH,
+                    p.TOF_MODULE_SIZE, p.TOF_MODULE_SIZE, p.TOF_MODULE_DEPTH),
+              f"TOF_{side}_KEEP_OUT")
+
+    # Optional LiDAR. Only the mounting pad is modelled: a 360 degree scanner has
+    # to sit proud of the lid, and modelling the unit itself would silently push
+    # the recorded envelope past 1000 mm. Fitted height is LIDAR_FITTED_HEIGHT_Y.
+    b.add("10_SENSORS", b.box(-40.0, (H - T) - p.SENSOR_PLATE_THICKNESS, -80.0,
+                              80.0, p.SENSOR_PLATE_THICKNESS, 80.0),
+          "LIDAR_MOUNT_PAD_OPTIONAL")
+
+    # Ground contact confirmation, inside the hollow of each shoe.
+    S = p.FOOT_CONTACT_SENSOR_SIZE
+    for side, sx in (("PORT", -(ARM_IN + ARM_W / 2)), ("STARBOARD", ARM_IN + ARM_W / 2)):
+        b.add("10_SENSORS", b.box(sx - S / 2, p.FOOT_HEIGHT - S - 2.0, -S / 2, S, S, S),
+              f"FOOT_CONTACT_SENSOR_{side}_KEEP_OUT")
+
     # ---- 11 bodywork: two front panels either side of the hip break -----
-    b.add("11_BODY_PANELS", b.box(-CHW, CGC + GAP / 2, PANEL_IN, CHW * 2, LOW_TOP - CGC - GAP, T), "PANEL_FRONT_LOWER")
+    # The lower front panel carries the two ToF windows.
+    front_lower = b.box(-CHW, CGC + GAP / 2, PANEL_IN, CHW * 2, LOW_TOP - CGC - GAP, T)
+    for sx in (-p.TOF_SPACING_X / 2, p.TOF_SPACING_X / 2):
+        front_lower = b.cut(front_lower, b.box(sx - 10.0, p.TOF_CENTRE_Y - 10.0, PANEL_IN - 1.0,
+                                               20.0, 20.0, T + 2))
+    b.add("11_BODY_PANELS", front_lower, "PANEL_FRONT_LOWER")
+
     front_upper = b.box(-CHW, UPP_BOT + GAP / 2, PANEL_IN, CHW * 2, (H - UPP_BOT) - GAP, T)
     front_upper = b.cut(front_upper, b.box(-p.DISPLAY_ACTIVE_WIDTH / 2, p.DISPLAY_ORIGIN_Y, PANEL_IN - 1.0,
                                            p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, T + 2))
+    # Camera window, above the display and clear of the aperture doubler.
+    front_upper = b.cut(front_upper, b.box(-p.CAMERA_APERTURE_WIDTH / 2,
+                                           p.CAMERA_CENTRE_Y - p.CAMERA_APERTURE_HEIGHT / 2,
+                                           PANEL_IN - 1.0,
+                                           p.CAMERA_APERTURE_WIDTH,
+                                           p.CAMERA_APERTURE_HEIGHT, T + 2))
     b.add("11_BODY_PANELS", front_upper, "PANEL_FRONT_DISPLAY")
     for name, y0, y1 in (("PANEL_REAR_BATTERY_ACCESS", CGC, 160.0),
                          ("PANEL_REAR_COMPUTE_ACCESS", 160.0, 410.0),
@@ -204,12 +271,22 @@ def build(app, document=None):
     for side, x in (("PORT", -CHW), ("STARBOARD", CHW - T)):
         b.add("11_BODY_PANELS", b.box(x, CGC, -HD, T, LOW_TOP - CGC, HD * 2), f"PANEL_SIDE_{side}_LOWER")
         b.add("11_BODY_PANELS", b.box(x, UPP_BOT, -HD, T, H - UPP_BOT, HD * 2), f"PANEL_SIDE_{side}_UPPER")
-    b.add("11_BODY_PANELS", b.box(-CHW + T, H - T, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_TOP_LID")
+    # The top lid is ported over the microphone array.
+    top_lid = b.box(-CHW + T, H - T, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T)
+    for i in range(p.MIC_ARRAY_CHANNELS):
+        px = -33.0 + i * 22.0
+        top_lid = b.cut(top_lid, b.box(px - p.MIC_PORT_DIAMETER / 2, H - T - 1.0,
+                                       p.MIC_LID_Z0 + 8.0,
+                                       p.MIC_PORT_DIAMETER, T + 2, p.MIC_PORT_DIAMETER))
+    b.add("11_BODY_PANELS", top_lid, "PANEL_TOP_LID")
     b.add("11_BODY_PANELS", b.box(-CHW + T, CGC, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_BOTTOM_LID")
 
     # ---- 13 wiring ------------------------------------------------------
     b.add("13_WIRING", b.box(-95.0, 210.0, -110.0, 20.0, 740.0, 20.0), "HARNESS_PORT_POWER_CAN")
-    b.add("13_WIRING", b.box(75.0, 210.0, 85.0, 20.0, 430.0, 20.0), "HARNESS_STARBOARD_POWER_CAN")
+    # Stops at 615, below the display module's 616 bottom edge. Dropping the
+    # display to clear the camera brought the module down onto this run; it
+    # still reaches the hip at 610.8, which is all it feeds.
+    b.add("13_WIRING", b.box(75.0, 210.0, 85.0, 20.0, 405.0, 20.0), "HARNESS_STARBOARD_POWER_CAN")
 
     # ---- 14 arms and 16 feet -------------------------------------------
     # The gait is a compass walker, so the limb is rigid and has no knee.
@@ -242,7 +319,8 @@ def build(app, document=None):
 
     # ---- 15 display insert ---------------------------------------------
     ap_w, ap_h, ap_y = p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, p.DISPLAY_ORIGIN_Y
-    doubler = b.box(-115.0, ap_y - 18.0, PANEL_IN - 2.0, 230.0, ap_h + 36.0, 2.0)
+    FL = p.DISPLAY_DOUBLER_FLANGE
+    doubler = b.box(-115.0, ap_y - FL, PANEL_IN - 2.0, 230.0, ap_h + 2 * FL, 2.0)
     doubler = b.cut(doubler, b.box(-ap_w / 2, ap_y, PANEL_IN - 3.0, ap_w, ap_h, 4.0))
     b.add("15_DISPLAY", doubler, "DISPLAY_APERTURE_DOUBLER")
     b.add("15_DISPLAY", b.box(-93.0, ap_y - 6.0, PANEL_IN - 4.0, 186.0, ap_h + 12.0, p.DISPLAY_COVER_THICKNESS),
@@ -335,6 +413,7 @@ def mass_report(design, p=None):
         "gpu": 0.5,
         "display": p.DISPLAY_MASS_ESTIMATE_KG,
         "wiring_and_fasteners": 1.5,
+        "sensors": p.SENSOR_MASS_ESTIMATE_KG,
     }
 
     structural = round(sum(structure.values()), 2)

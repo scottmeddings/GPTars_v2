@@ -176,7 +176,7 @@ DECAL_WORDMARK_ORIGIN_Y = 350.0
 # Camera/microphone mechanical envelopes are reservations only until purchased
 # hardware is measured or authoritative mechanical drawings are locked.
 SENSOR_CASSETTE_PRESENT = True
-SENSOR_CASSETTE_ORDER_TOP_TO_BOTTOM = ("OAK-D Pro W USB", "Display", "ReSpeaker XVF3800")
+SENSOR_CASSETTE_ORDER_TOP_TO_BOTTOM = ("OAK-D Pro W USB", "Display", "ReSpeaker XVF3800 under the lid")
 CAMERA_MODEL = "Luxonis OAK-D Pro W USB"
 CAMERA_LOCATION = "Upper front face, centred above display"
 CAMERA_INTERFACE = "USB 3"
@@ -187,7 +187,7 @@ CAMERA_TOP_MARGIN = 10.0
 CAMERA_SERVICE_CLEARANCE = 10.0
 CAMERA_DIMENSIONS_STATUS = "RESERVATION - verify exact purchased SKU before cutting panel"
 MIC_MODEL = "Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array"
-MIC_LOCATION = "Upper front face, centred below display"
+MIC_LOCATION = "Under the top lid, behind the camera; the front face cannot hold it"
 MIC_INTERFACE = "USB"
 MIC_WIDTH_RESERVATION = 90.0
 MIC_HEIGHT_RESERVATION = 35.0
@@ -201,9 +201,12 @@ DISPLAY_LOCATION = "Upper front face, between camera and microphone"
 DISPLAY_CLASS = "14 inch portrait TFT-LED, 12 V"
 DISPLAY_ACTIVE_WIDTH = 174.0
 DISPLAY_ACTIVE_HEIGHT = 310.0
-DISPLAY_ORIGIN_Y = 655.0
+# Lowered from 655 to clear the camera above it. See the cassette fit note
+# below: the camera occupies 945-990 mm, so the 328 mm display module has to
+# finish by 944. 625 is what that leaves.
+DISPLAY_ORIGIN_Y = 625.0
 DISPLAY_MARGIN_PER_SIDE = 33.0
-DISPLAY_CENTRE_Y = 810.0
+DISPLAY_CENTRE_Y = 780.0
 UPPER_CHASSIS_ASSUMED_RIGID = True
 DISPLAY_DEPTH_RESERVATION = 35.0
 DISPLAY_MODULE_WIDTH = 215.0
@@ -224,7 +227,65 @@ DISPLAY_MASS_ESTIMATE_KG = 0.8
 DISPLAY_LINK = "Direct HDMI from the mini PC; nothing crosses a moving joint"
 PANEL_HIP_BREAK_GAP = 6.0
 
-# Compute stack
+# Geometry for the cassette above. The selections and reservations are recorded
+# with the sensor block higher up; these are the positions the CAD builds from.
+#
+# The stack as first written does not fit. Camera 45 + top margin 10, display
+# module 328 and microphone 35 need 418 mm of upper front face, and the face
+# between the hip break and the lid is 384.2 mm. That is 33.8 mm over, and still
+# 23.8 mm over with every margin set to zero. So the microphones come off the
+# front face and mount under the top lid, which fits, puts them further from the
+# display's heat, and gives a far-field array a better acoustic position than a
+# panel that drums. SENSOR_CASSETTE_ORDER_TOP_TO_BOTTOM is updated to match.
+SENSOR_CASSETTE_ORDER_ACTUAL = ("OAK-D Pro W USB", "Display", "ReSpeaker XVF3800 on the top lid")
+SENSOR_CASSETTE_FIT_NOTE = "Front-face stack was 33.8 mm over; microphones relocated to the lid"
+SENSOR_PLATE_THICKNESS = 3.0
+SENSOR_CASSETTE_REMOVABLE = True
+
+# Camera sits hard against the top margin, and the display drops to clear it.
+CAMERA_CENTRE_Y = ROBOT_HEIGHT - CAMERA_TOP_MARGIN - CAMERA_HEIGHT_RESERVATION / 2
+CAMERA_EYELINE_Y = CAMERA_CENTRE_Y
+CAMERA_APERTURE_WIDTH = 110.0
+CAMERA_APERTURE_HEIGHT = 26.0
+CAMERA_PROVIDES = "RGB and stereo depth in one module, covering both cameras the specification lists separately"
+
+# Under the lid, behind the camera, ported up through it.
+MIC_MOUNTING = "Under the top lid, behind the camera"
+MIC_ARRAY_CHANNELS = 4
+MIC_LID_Z0 = 30.0
+MIC_PORT_DIAMETER = 5.0
+
+# The aperture doubler's flange drops from 18 mm to 10 mm. At 18 it reaches
+# below the hip break once the display moves down; 10 mm is still a normal
+# flange around a display cut-out.
+DISPLAY_DOUBLER_FLANGE = 10.0
+
+# Speakers stay the display module's own pair, DISPLAY_SPEAKERS. Reserving
+# separate drivers would hold space for hardware the robot already carries.
+SPEAKERS_SEPARATE_REQUIRED = False
+
+TOF_COUNT = 2
+TOF_MODULE_SIZE = 26.0
+TOF_MODULE_DEPTH = 18.0
+TOF_CENTRE_Y = 330.0
+TOF_SPACING_X = 150.0
+TOF_PURPOSE = "Step edges and near obstacles below the camera's field of view"
+
+LIDAR_OPTIONAL = True
+LIDAR_DIAMETER = 72.0
+LIDAR_HEIGHT = 42.0
+LIDAR_CANDIDATE = "RPLIDAR C1 class, mounted on the top lid when fitted"
+# A 360 degree scanner must stand proud of the lid, so fitting one takes the
+# robot above its 1000 mm envelope. Only the mounting pad is modelled.
+LIDAR_FITTED_HEIGHT_Y = ROBOT_HEIGHT + LIDAR_HEIGHT
+
+FOOT_CONTACT_SENSOR_PER_FOOT = 1
+FOOT_CONTACT_SENSOR_SIZE = 24.0
+FOOT_CONTACT_SENSOR_PURPOSE = "Ground-contact confirmation for the gait state machine"
+
+SENSOR_MASS_ESTIMATE_KG = 0.25
+
+# Compute stack. Units here are GB and counts, not millimetres.
 HOST_OS = "Ubuntu 24.04 LTS"
 ROS_DISTRO = "Jazzy"
 CONTAINER_COUNT = 13

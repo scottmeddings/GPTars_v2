@@ -31,7 +31,7 @@ const MODELS = [
   { name: "compute", label: "Mini PC", url: "/models/gptars-compute.stl", color: "#6fb8dd", group: "equipment" },
   { name: "gpu", label: "RTX 2000 Ada", url: "/models/gptars-gpu.stl", color: "#8ad0a8", group: "equipment" },
   { name: "electronics", label: "E-stop + CAN hub", url: "/models/gptars-electronics.stl", color: "#e88a7a", group: "equipment" },
-  { name: "sensors", label: "IMU", url: "/models/gptars-sensors.stl", color: "#b6a4d6", group: "equipment" },
+  { name: "sensors", label: "Sensors", url: "/models/gptars-sensors.stl", color: "#b6a4d6", group: "equipment" },
   { name: "wiring", label: "Harness", url: "/models/gptars-wiring.stl", color: "#d8c46a", group: "equipment" },
 
   { name: "dock", label: "Charge dock", url: "/models/gptars-dock.stl", color: "#7f8c94", group: "dock", hidden: true },
@@ -53,7 +53,7 @@ export default function ModelPage() {
           <div className="revision-stamp" aria-label="Model status">
             <span>HEIGHT <b>{value("ROBOT_HEIGHT")} mm</b></span>
             <span>SHELL <b>{value("SHELL_WALL")} mm</b></span>
-            <span>SOURCE <b>R09</b></span>
+            <span>SOURCE <b>R10</b></span>
             <span>STATUS <b>CONCEPT</b></span>
           </div>
         </header>

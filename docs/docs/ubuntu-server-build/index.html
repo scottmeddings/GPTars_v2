@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-pJm4EMF1.css"/><title>GP-TARS V2 Ubuntu Server build specification — GP-TARS V2</title><meta name="description" content="This document turns the software architecture into a reproducible host build. It is not yet an install script; it is the checklist and source of truth that the future install script and Ansible/automa"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 13 of 13</p><h1>GP-TARS V2 Ubuntu Server build specification</h1><p class="subtitle">This document turns the software architecture into a reproducible host build. It is not yet an install script; it is the checklist and source of truth that the future install script and Ansible/automation should implement.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>12 Aug 2026</b></span><span>SOURCE <b>docs/ubuntu_server_build.md</b></span><span>SECTIONS <b>36</b></span><span>WORDS <b>1,767</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#goal">Goal</a></li><li><a href="#required-end-state">Required end state</a></li><li><a href="#installation-phases">Installation phases</a></li><li><a href="#gp-tars-container-groups">GP-TARS container groups</a></li><li><a href="#container-startup-dependencies">Container startup dependencies</a></li><li><a href="#ros-2-jazzy">ROS 2 Jazzy</a></li><li><a href="#database-and-memory">Database and memory</a></li><li><a href="#personality-and-teaching-configuration">Personality and teaching configuration</a></li><li><a href="#networking">Networking</a></li><li><a href="#secrets">Secrets</a></li><li><a href="#display-startup">Display startup</a></li><li><a href="#audio">Audio</a></li><li><a href="#cameras">Cameras</a></li><li><a href="#can-and-mcu">CAN and MCU</a></li><li><a href="#systemd-services">systemd services</a></li><li><a href="#logging-and-telemetry">Logging and telemetry</a></li><li><a href="#backup-and-restore">Backup and restore</a></li><li><a href="#updates">Updates</a></li><li><a href="#security-baseline">Security baseline</a></li><li><a href="#validation-suite">Validation suite</a></li><li><a href="#automation-target">Automation target</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/ubuntu_server_build.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="notice"><b>Status:</b> build blueprint, revision Server V1</div><div class="doc-prose"><p>This document turns the software architecture into a reproducible host build. It is not yet an install script; it is the checklist and source of truth that the future install script and Ansible/automation should implement.</p>
+<h2 id="goal"><a class="anchor" href="#goal">Goal</a></h2>
+<p>Starting from a blank MINISFORUM AI X1 Pro-370, another person should be able to build the GP-TARS host without relying on undocumented decisions.</p>
+<p>Target host:</p>
+<ul>
+<li>MINISFORUM AI X1 Pro-370</li>
+<li>AMD Ryzen AI 9 HX370</li>
+<li>64 GB DDR5-5600</li>
+<li>4 TB Lexar NQ780 NVMe</li>
+<li>NVIDIA RTX 2000 Ada 16 GB over OCuLink</li>
+<li>Ubuntu Server 24.04 LTS</li>
+<li>Docker Engine</li>
+<li>NVIDIA Container Toolkit / CUDA</li>
+<li>ROS 2 Jazzy</li>
+</ul>
+<h2 id="required-end-state"><a class="anchor" href="#required-end-state">Required end state</a></h2>
+<p>The completed host must:</p>
+<ol>
+<li>boot headless without a desktop dependency</li>
+<li>obtain network connectivity</li>
+<li>expose only approved management ports</li>
+<li>detect the RTX 2000 Ada with <code>nvidia-smi</code></li>
+<li>run a CUDA workload inside Docker</li>
+<li>run GP-TARS Compose services automatically after boot</li>
+<li>mount persistent data from stable host directories</li>
+<li>start the top display service automatically</li>
+<li>establish the host-to-safety-MCU heartbeat</li>
+<li>keep motion disabled until safety readiness is confirmed</li>
+<li>retain local conversation, speech, memory and vision when Internet access is unavailable</li>
+<li>provide health, logs and diagnostics through the local management interface</li>
+</ol>
+<h2 id="installation-phases"><a class="anchor" href="#installation-phases">Installation phases</a></h2>
+<h3 id="phase-1-firmware-and-hardware-verification"><a class="anchor" href="#phase-1-firmware-and-hardware-verification">Phase 1 — firmware and hardware verification</a></h3>
+<p>Before installing Ubuntu:</p>
+<ul>
+<li>update X1 Pro firmware/BIOS to an approved stable release</li>
+<li>confirm 64 GB RAM is detected</li>
+<li>confirm 4 TB NVMe is detected</li>
+<li>confirm OCuLink is enabled and RTX 2000 Ada is visible</li>
+<li>disable unnecessary automatic boot options that conflict with unattended robot startup</li>
+<li>record BIOS settings in the repository</li>
+</ul>
+<h3 id="phase-2-ubuntu-server"><a class="anchor" href="#phase-2-ubuntu-server">Phase 2 — Ubuntu Server</a></h3>
+<p>Install Ubuntu Server 24.04 LTS using a minimal/headless profile.</p>
+<p>Baseline decisions:</p>
+<ul>
+<li>hostname: <code>gptars</code></li>
+<li>system timezone: configurable; record deployed timezone</li>
+<li>SSH enabled using key authentication</li>
+<li>no public password SSH login in production</li>
+<li>automatic security updates enabled with a controlled reboot policy</li>
+<li>full disk encryption decision remains open because unattended robot boot and encryption-key handling must be reconciled</li>
+</ul>
+<p>Partition/layout target:</p>
+<pre><code class="language-text">/                  OS and packages
+/var/lib/docker    Docker images/containers/volumes
+/opt/gptars        deployed application/configuration
+/srv/gptars        persistent robot data
+/srv/gptars/models AI model library
+/srv/gptars/db     database storage/backup staging
+/srv/gptars/logs   durable robot logs
+</code></pre>
+<p>Final filesystem and partition sizes should be set before implementation. A single 4 TB filesystem is acceptable for early development provided backups and Docker growth limits are enforced.</p>
+<h3 id="phase-3-base-packages"><a class="anchor" href="#phase-3-base-packages">Phase 3 — base packages</a></h3>
+<p>Install and record exact package versions or supported version ranges for:</p>
+<ul>
+<li>Git</li>
+<li>curl/wget</li>
+<li>build-essential</li>
+<li>Python 3 tooling</li>
+<li>chrony or system time synchronisation</li>
+<li>network diagnostic tools</li>
+<li>CAN utilities</li>
+<li>USB/serial utilities</li>
+<li>hardware monitoring tools</li>
+<li>NVMe health tools</li>
+<li>firewall tooling</li>
+</ul>
+<p>Do not rely on manually installed packages that are absent from this document or the provisioning scripts.</p>
+<h3 id="phase-4-nvidia-and-cuda"><a class="anchor" href="#phase-4-nvidia-and-cuda">Phase 4 — NVIDIA and CUDA</a></h3>
+<p>Install an NVIDIA Linux driver supported by the RTX 2000 Ada and Ubuntu 24.04.</p>
+<p>Acceptance check:</p>
+<pre><code class="language-bash">nvidia-smi
+</code></pre>
+<p>Must report the RTX 2000 Ada without driver errors.</p>
+<p>Install NVIDIA Container Toolkit and configure Docker GPU support.</p>
+<p>Container acceptance check must run a supported NVIDIA CUDA image and execute <code>nvidia-smi</code> inside the container.</p>
+<p>CUDA toolkit installation on the host is optional if all CUDA applications run in containers. Prefer container-specific CUDA runtimes to reduce host coupling unless host-side development requires the toolkit.</p>
+<h3 id="phase-5-docker-engine"><a class="anchor" href="#phase-5-docker-engine">Phase 5 — Docker Engine</a></h3>
+<p>Install Docker Engine from the supported Docker repository rather than an ad-hoc desktop package.</p>
+<p>Configuration requirements:</p>
+<ul>
+<li>Docker starts at boot</li>
+<li>GP-TARS service account has only the permissions it needs</li>
+<li>log rotation configured</li>
+<li>Docker data growth monitored</li>
+<li>NVIDIA runtime available</li>
+<li>restart policies defined in Compose</li>
+<li>container health checks defined for critical services</li>
+</ul>
+<p>Primary Compose project:</p>
+<pre><code class="language-text">/opt/gptars/software/compose/docker-compose.yml
+</code></pre>
+<h2 id="gp-tars-container-groups"><a class="anchor" href="#gp-tars-container-groups">GP-TARS container groups</a></h2>
+<h3 id="core-group"><a class="anchor" href="#core-group">Core group</a></h3>
+<ul>
+<li><code>tars-core</code></li>
+<li><code>tars-personality</code></li>
+<li><code>tars-memory</code></li>
+<li><code>tars-api</code></li>
+<li><code>tars-telemetry</code></li>
+</ul>
+<h3 id="ai-group"><a class="anchor" href="#ai-group">AI group</a></h3>
+<ul>
+<li><code>tars-llm</code></li>
+<li><code>tars-stt</code></li>
+<li><code>tars-tts</code></li>
+<li><code>tars-vision</code></li>
+</ul>
+<p>Only required AI containers receive GPU access.</p>
+<h3 id="user-experience-group"><a class="anchor" href="#user-experience-group">User experience group</a></h3>
+<ul>
+<li><code>tars-display</code></li>
+<li><code>tars-web</code></li>
+</ul>
+<h3 id="robot-group"><a class="anchor" href="#robot-group">Robot group</a></h3>
+<ul>
+<li><code>tars-ros</code></li>
+<li><code>tars-motion</code></li>
+<li><code>tars-can</code></li>
+</ul>
+<p>Robot motion remains unavailable until the safety MCU and behaviour supervisor report ready.</p>
+<h2 id="container-startup-dependencies"><a class="anchor" href="#container-startup-dependencies">Container startup dependencies</a></h2>
+<p>Logical startup order:</p>
+<pre><code class="language-text">telemetry/database
+        |
+        v
+memory + personality
+        |
+        v
+LLM + STT + TTS + vision
+        |
+        v
+TARS core
+        |
+        +--&gt; display / web
+        |
+        +--&gt; ROS 2 bridge
+                 |
+                 v
+        safety MCU heartbeat
+                 |
+                 v
+        motion availability
+</code></pre>
+<p>Docker startup order alone must not be treated as proof that a dependency is ready. Use health checks and application-level readiness probes.</p>
+<h2 id="ros-2-jazzy"><a class="anchor" href="#ros-2-jazzy">ROS 2 Jazzy</a></h2>
+<p>Install ROS 2 Jazzy using the official Ubuntu packages or a controlled container strategy.</p>
+<p>Current preference: ROS 2 core host/container arrangement remains to be finalised after CAN and hardware-interface testing.</p>
+<p>Required ROS packages will include:</p>
+<ul>
+<li>robot description / URDF tooling</li>
+<li>ros2_control</li>
+<li>controller manager</li>
+<li>joint state broadcaster</li>
+<li>trajectory controllers where appropriate</li>
+<li>diagnostics</li>
+<li>custom GP-TARS message/action packages</li>
+</ul>
+<p>DDS implementation and network configuration remain open until latency and container networking are tested.</p>
+<h2 id="database-and-memory"><a class="anchor" href="#database-and-memory">Database and memory</a></h2>
+<p>Baseline:</p>
+<ul>
+<li>PostgreSQL</li>
+<li>pgvector</li>
+</ul>
+<p>Persistent database data must not live only inside an ephemeral container layer.</p>
+<p>Required data classes:</p>
+<ul>
+<li>user/person profiles</li>
+<li>personality settings</li>
+<li>permissions</li>
+<li>memory records</li>
+<li>learning progress</li>
+<li>semantic embeddings</li>
+<li>robot maintenance history</li>
+<li>faults and diagnostics references</li>
+</ul>
+<p>Backups must be encrypted when they contain personal information.</p>
+<h2 id="personality-and-teaching-configuration"><a class="anchor" href="#personality-and-teaching-configuration">Personality and teaching configuration</a></h2>
+<p>The server must persist authorised user profiles and personality settings.</p>
+<p>Baseline configurable settings:</p>
+<pre><code class="language-text">Humour: 0-100
+Honesty/directness: 0-100
+Verbosity: low/medium/high
+Formality: casual/neutral/formal
+Teaching mode: off/opportunistic/active
+Age adaptation: automatic/manual
+</code></pre>
+<p>The personality service selects an age-appropriate interaction profile after identity resolution. If identity is uncertain it uses the neutral general-audience profile.</p>
+<p>Learning progress must be stored separately from general conversational memory so it can be reviewed, reset or deleted independently.</p>
+<h2 id="networking"><a class="anchor" href="#networking">Networking</a></h2>
+<p>Default policy: local-first and deny unnecessary inbound access.</p>
+<p>Expected interfaces may include:</p>
+<ul>
+<li>SSH for administration</li>
+<li>local HTTPS management UI</li>
+<li>WebSocket management/telemetry</li>
+<li>ROS 2/DDS internal networking</li>
+<li>NATS or MQTT internal event bus</li>
+</ul>
+<p>Exact ports must be documented before firewall rules are frozen.</p>
+<p>Cloud APIs are optional enhancements and must not be required for normal local conversation, vision, memory or robot safety.</p>
+<h2 id="secrets"><a class="anchor" href="#secrets">Secrets</a></h2>
+<p>Secrets must not be committed to GitHub.</p>
+<p>Use environment files or a secrets manager for:</p>
+<ul>
+<li>API keys</li>
+<li>database passwords</li>
+<li>encryption keys</li>
+<li>external-service credentials</li>
+<li>administrator bootstrap credentials</li>
+</ul>
+<p>Provide <code>.env.example</code> files containing names and safe defaults only.</p>
+<h2 id="display-startup"><a class="anchor" href="#display-startup">Display startup</a></h2>
+<p>Ubuntu Server remains headless, but the physical TARS display needs a lightweight graphics session.</p>
+<p>The display build must define:</p>
+<ul>
+<li>graphics driver</li>
+<li>compositor/window system</li>
+<li>kiosk browser or native renderer</li>
+<li>display resolution/orientation</li>
+<li>auto-login/service strategy where required</li>
+<li>crash restart behaviour</li>
+<li>boot/self-test screen</li>
+</ul>
+<p>The display process should be independently restartable without restarting the AI stack.</p>
+<h2 id="audio"><a class="anchor" href="#audio">Audio</a></h2>
+<p>The deployment must enumerate and lock stable audio device names for:</p>
+<ul>
+<li>microphone array</li>
+<li>speakers/amplifier</li>
+</ul>
+<p>Container/device permissions must be explicit. Do not rely on whichever ALSA/Pulse/PipeWire device happens to become <code>default</code> after a reboot.</p>
+<h2 id="cameras"><a class="anchor" href="#cameras">Cameras</a></h2>
+<p>Camera devices must use stable udev names or IDs. Record:</p>
+<ul>
+<li>model</li>
+<li>USB path/device ID</li>
+<li>supported resolution/frame rate</li>
+<li>which service owns the camera</li>
+</ul>
+<p>Vision should continue in a degraded mode if an optional camera is unavailable.</p>
+<h2 id="can-and-mcu"><a class="anchor" href="#can-and-mcu">CAN and MCU</a></h2>
+<p>The Ubuntu host does not directly provide the final safety authority.</p>
+<p>Server setup must define:</p>
+<ul>
+<li>CAN interface hardware</li>
+<li>stable interface name, ideally <code>can0</code></li>
+<li>bitrate/CAN-FD settings</li>
+<li>udev/systemd configuration</li>
+<li>host-to-MCU heartbeat protocol</li>
+<li>diagnostics tooling</li>
+</ul>
+<p>Loss of host software must cause the MCU to place motion in the defined safe state.</p>
+<h2 id="systemd-services"><a class="anchor" href="#systemd-services">systemd services</a></h2>
+<p>Even though application workloads run in Docker, systemd should supervise host-level dependencies such as:</p>
+<ul>
+<li>CAN interface setup</li>
+<li>display session prerequisites</li>
+<li>GP-TARS Compose project startup</li>
+<li>hardware readiness checks where appropriate</li>
+</ul>
+<p>Do not hide important boot dependencies inside shell profile scripts.</p>
+<h2 id="logging-and-telemetry"><a class="anchor" href="#logging-and-telemetry">Logging and telemetry</a></h2>
+<p>Record at least:</p>
+<ul>
+<li>boot/session ID</li>
+<li>container health/restarts</li>
+<li>CPU/GPU temperatures</li>
+<li>GPU utilisation and VRAM</li>
+<li>RAM usage</li>
+<li>NVMe health/temperature</li>
+<li>battery state</li>
+<li>actuator state/faults</li>
+<li>MCU heartbeat</li>
+<li>software version/commit</li>
+</ul>
+<p>Define retention limits so logs cannot fill the 4 TB SSD indefinitely.</p>
+<h2 id="backup-and-restore"><a class="anchor" href="#backup-and-restore">Backup and restore</a></h2>
+<p>Back up:</p>
+<ul>
+<li>PostgreSQL data</li>
+<li>user/profile configuration</li>
+<li>personality settings</li>
+<li>learning progress</li>
+<li>calibration</li>
+<li>robot configuration</li>
+<li>selected long-term memories</li>
+</ul>
+<p>Do not back up Docker image layers if they can be reproduced from versioned Compose/Dockerfiles.</p>
+<p>A restore test is part of release validation.</p>
+<h2 id="updates"><a class="anchor" href="#updates">Updates</a></h2>
+<p>Application updates should be versioned and rollback-capable.</p>
+<p>Preferred flow:</p>
+<pre><code class="language-text">pull approved release
+build/pull container images
+run configuration validation
+stop affected services safely
+apply database migrations
+start new services
+run health checks
+rollback if acceptance fails
+</code></pre>
+<p>Motion must remain disabled during updates that touch ROS, CAN, motion, safety coordination or the behaviour supervisor.</p>
+<h2 id="security-baseline"><a class="anchor" href="#security-baseline">Security baseline</a></h2>
+<ul>
+<li>SSH keys, not routine password login</li>
+<li>firewall enabled</li>
+<li>minimum exposed ports</li>
+<li>no secrets in Git</li>
+<li>containers run non-root where practical</li>
+<li>minimum device access per container</li>
+<li>GPU access only for required services</li>
+<li>read-only filesystem mounts where practical</li>
+<li>regular security updates</li>
+<li>management UI authentication</li>
+<li>per-user/role permissions</li>
+</ul>
+<h2 id="validation-suite"><a class="anchor" href="#validation-suite">Validation suite</a></h2>
+<p>The automated build is not complete until these tests pass:</p>
+<h3 id="host"><a class="anchor" href="#host">Host</a></h3>
+<ul>
+<li>boot without keyboard/monitor</li>
+<li>network reachable</li>
+<li>correct storage mounted</li>
+<li>system clock valid</li>
+</ul>
+<h3 id="nvidia"><a class="anchor" href="#nvidia">NVIDIA</a></h3>
+<ul>
+<li><code>nvidia-smi</code> succeeds</li>
+<li>CUDA Docker container succeeds</li>
+</ul>
+<h3 id="docker"><a class="anchor" href="#docker">Docker</a></h3>
+<ul>
+<li>all required containers healthy</li>
+<li>critical containers restart after forced failure</li>
+<li>persistent data survives container recreation</li>
+</ul>
+<h3 id="ai"><a class="anchor" href="#ai">AI</a></h3>
+<ul>
+<li>local LLM responds</li>
+<li>STT transcribes test audio</li>
+<li>TTS generates speech</li>
+<li>vision receives a camera frame</li>
+<li>memory store/retrieve succeeds</li>
+<li>personality settings alter response style</li>
+<li>teaching profile changes explanation depth appropriately</li>
+</ul>
+<h3 id="robot-boundary"><a class="anchor" href="#robot-boundary">Robot boundary</a></h3>
+<ul>
+<li>MCU heartbeat established</li>
+<li>motion remains disabled before readiness</li>
+<li>simulated heartbeat loss disables motion</li>
+<li>E-stop state is visible to host software</li>
+</ul>
+<h3 id="offline"><a class="anchor" href="#offline">Offline</a></h3>
+<p>Disconnect Internet access and verify local wake word, STT, LLM, memory, TTS, display and local management continue operating.</p>
+<h2 id="automation-target"><a class="anchor" href="#automation-target">Automation target</a></h2>
+<p>The eventual production build should be reproducible through a combination of:</p>
+<ul>
+<li>one documented Ubuntu installation baseline</li>
+<li>provisioning script or Ansible playbook</li>
+<li>versioned Dockerfiles</li>
+<li>versioned Compose files</li>
+<li>versioned configuration templates</li>
+<li>automated acceptance tests</li>
+</ul>
+<p>The goal is that rebuilding the GP-TARS computer becomes a controlled deployment task rather than a one-off workshop setup.</p>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/tars-ai-v3-reuse"><small>← PREVIOUS</small><b>TARS-AI V3 reuse strategy</b></a><span></span></nav></section><footer><span>GP‑TARS V2 · GP-TARS V2 UBUNTU SERVER BUILD SPECIFICATION</span><span>RENDERED FROM docs/ubuntu_server_build.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/GPTars_v2/assets/index-pJm4EMF1.css"/><title>GP-TARS V2 deployment and update architecture — GP-TARS V2</title><meta name="description" content="A clean Ubuntu Server host should be able to deploy GP-TARS from GitHub with a small, repeatable set of commands. Updates should be delivered from GitHub without SSHing into individual containers or e"/><meta property="og:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta property="og:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta property="og:type" content="website"/><meta property="og:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="GP-TARS V2 autonomous walking robot engineering concept"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="GP-TARS V2 — Autonomous walking TARS"/><meta name="twitter:description" content="An all-metal one-metre robot with closed-loop walking, ROS 2 control, vision, speech and local AI."/><meta name="twitter:image" content="https://scottmeddings.github.io/GPTars_v2/og-project-summary-v2.png"/><meta name="color-scheme" content="dark light"/>
+</head><body><main class="page-shell"><article class="drawing-sheet"><header class="title-block" id="top"><div><p class="eyebrow">GP-TARS V2 · document 11 of 13</p><h1>GP-TARS V2 deployment and update architecture</h1><p class="subtitle">A clean Ubuntu Server host should be able to deploy GP-TARS from GitHub with a small, repeatable set of commands. Updates should be delivered from GitHub without SSHing into individual containers or editing running containers by hand.</p></div><div class="revision-stamp" aria-label="Document revision"><span>REVISED <b>12 Aug 2026</b></span><span>SOURCE <b>docs/software_deployment.md</b></span><span>SECTIONS <b>14</b></span><span>WORDS <b>668</b></span></div></header><nav class="section-nav" aria-label="Site sections"><a href="/GPTars_v2/">Overview</a><a href="/GPTars_v2/model">3D model</a><a href="/GPTars_v2/decals">Decals</a><a href="/GPTars_v2/docs">Documents</a><a href="/GPTars_v2/parameters">Parameters</a><button type="button" aria-label="Toggle colour theme">Light sheet</button></nav><section class="doc-section"><div class="doc-layout"><aside class="doc-toc" aria-label="Document contents"><p class="subheading">On this page</p><ol><li><a href="#goal">Goal</a></li><li><a href="#source-of-truth">Source of truth</a></li><li><a href="#update-pipeline">Update pipeline</a></li><li><a href="#why-this-design">Why this design</a></li><li><a href="#release-modes">Release modes</a></li><li><a href="#motion-update-safety">Motion-update safety</a></li><li><a href="#ghcr-authentication">GHCR authentication</a></li><li><a href="#persistent-directories">Persistent directories</a></li><li><a href="#initial-deployment">Initial deployment</a></li><li><a href="#validation">Validation</a></li><li><a href="#rollback">Rollback</a></li><li><a href="#future-hardening">Future hardening</a></li></ol><a class="button doc-download" href="/GPTars_v2/downloads/software_deployment.md" download="">Download markdown ↓</a></aside><div class="doc-body"><div class="doc-prose"><h2 id="goal"><a class="anchor" href="#goal">Goal</a></h2>
+<p>A clean Ubuntu Server host should be able to deploy GP-TARS from GitHub with a small, repeatable set of commands. Updates should be delivered from GitHub without SSHing into individual containers or editing running containers by hand.</p>
+<h2 id="source-of-truth"><a class="anchor" href="#source-of-truth">Source of truth</a></h2>
+<p>GitHub repository:</p>
+<ul>
+<li><code>scottmeddings/GPTars_v2</code></li>
+</ul>
+<p>Runtime artifacts:</p>
+<ul>
+<li>source code: GitHub</li>
+<li>built images: GitHub Container Registry (GHCR)</li>
+<li>deployment definition: <code>software/compose/docker-compose.yml</code></li>
+<li>host configuration: <code>/opt/gptars/config</code></li>
+<li>persistent state: <code>/opt/gptars/data</code></li>
+</ul>
+<h2 id="update-pipeline"><a class="anchor" href="#update-pipeline">Update pipeline</a></h2>
+<pre><code class="language-text">GitHub source commit
+        |
+        v
+GitHub Actions
+        |
+        +-- build service image
+        +-- run future tests
+        +-- tag :main
+        +-- tag :&lt;commit-sha&gt;
+        |
+        v
+GitHub Container Registry
+        |
+        v
+GP-TARS Watchtower service
+        |
+        +-- detect changed approved images
+        +-- pull image
+        +-- rolling restart changed service
+        +-- remove obsolete image
+</code></pre>
+<p>Application containers do not execute <code>git pull</code>. They are disposable runtime instances created from immutable images.</p>
+<h2 id="why-this-design"><a class="anchor" href="#why-this-design">Why this design</a></h2>
+<p>This provides:</p>
+<ul>
+<li>one source of truth in GitHub;</li>
+<li>automatic deployment after a successful image build;</li>
+<li>per-service updates rather than restarting the complete robot stack;</li>
+<li>rollback by image tag;</li>
+<li>reproducible builds;</li>
+<li>persistent memories and configuration outside the image;</li>
+<li>clear separation between application updates and safety authority.</li>
+</ul>
+<h2 id="release-modes"><a class="anchor" href="#release-modes">Release modes</a></h2>
+<h3 id="development-mode"><a class="anchor" href="#development-mode">Development mode</a></h3>
+<p>Set:</p>
+<pre><code class="language-text">GPTARS_TAG=main
+</code></pre>
+<p>Watchtower follows the latest successful <code>main</code> image. This is suitable while GP-TARS is being developed on a stand or otherwise unable to move freely.</p>
+<h3 id="controlled-robot-mode"><a class="anchor" href="#controlled-robot-mode">Controlled robot mode</a></h3>
+<p>Set <code>GPTARS_TAG</code> to a release tag or commit SHA and disable automatic updates.</p>
+<p>This is preferred once locomotion is enabled. New software is first deployed to a bench/test profile, validated, and then promoted to the robot.</p>
+<h2 id="motion-update-safety"><a class="anchor" href="#motion-update-safety">Motion-update safety</a></h2>
+<p>An automatic update must never automatically arm the motors.</p>
+<p>After any update affecting <code>tars-core</code>, <code>tars-motion</code>, <code>tars-can</code>, <code>tars-ros</code> or the behaviour/safety boundary:</p>
+<ol>
+<li>motion remains disabled;</li>
+<li>containers pass health checks;</li>
+<li>ROS state is valid;</li>
+<li>the host establishes a valid MCU heartbeat;</li>
+<li>actuator state and limits are read successfully;</li>
+<li>an explicit safety-ready state is achieved;</li>
+<li>only then may the operator or approved startup state machine allow motor enable.</li>
+</ol>
+<p>The dedicated MCU remains authoritative regardless of container state.</p>
+<h2 id="ghcr-authentication"><a class="anchor" href="#ghcr-authentication">GHCR authentication</a></h2>
+<p>If GP-TARS packages are private, log the Ubuntu host into GHCR using a GitHub token with the minimum package-read permission required. Docker stores the registry credential in the host Docker configuration used by Compose/Watchtower.</p>
+<p>Do not embed GitHub personal access tokens in images or commit them to the repository.</p>
+<h2 id="persistent-directories"><a class="anchor" href="#persistent-directories">Persistent directories</a></h2>
+<p>Recommended host layout:</p>
+<pre><code class="language-text">/opt/gptars/
+├── config/
+│   ├── ros/
+│   ├── personality/
+│   ├── devices/
+│   └── secrets/
+└── data/
+    ├── postgres/
+    ├── models/
+    ├── memory/
+    ├── audio/
+    ├── recordings/
+    ├── telemetry/
+    └── nats/
+</code></pre>
+<p>Back up persistent state independently of Docker images.</p>
+<h2 id="initial-deployment"><a class="anchor" href="#initial-deployment">Initial deployment</a></h2>
+<pre><code class="language-bash">sudo mkdir -p /opt/gptars/{config,data}
+sudo chown -R $USER:$USER /opt/gptars
+
+git clone https://github.com/scottmeddings/GPTars_v2.git
+cd GPTars_v2/software/compose
+cp .env.example .env
+# edit secrets/settings in .env
+
+docker compose pull
+docker compose up -d
+</code></pre>
+<h2 id="validation"><a class="anchor" href="#validation">Validation</a></h2>
+<p>Initial deployment is not complete until these pass:</p>
+<pre><code class="language-bash">docker compose ps
+docker compose logs --tail=100 tars-core
+nvidia-smi
+docker run --rm --gpus all nvidia/cuda:13.0.0-base-ubuntu24.04 nvidia-smi
+</code></pre>
+<p>Then validate:</p>
+<ul>
+<li>NATS health;</li>
+<li>PostgreSQL/pgvector health;</li>
+<li>local LLM health endpoint;</li>
+<li>API health endpoint;</li>
+<li>display health endpoint;</li>
+<li>STT/TTS audio path;</li>
+<li>camera path;</li>
+<li>ROS 2 discovery;</li>
+<li>CAN adapter visibility;</li>
+<li>MCU heartbeat with motors disabled.</li>
+</ul>
+<h2 id="rollback"><a class="anchor" href="#rollback">Rollback</a></h2>
+<p>Every GitHub build publishes a commit-SHA image tag. To roll back, set <code>GPTARS_TAG</code> to a previously known-good SHA and run:</p>
+<pre><code class="language-bash">docker compose pull
+docker compose up -d
+</code></pre>
+<p>Persistent user memory and configuration are not rolled back with the image unless a database/schema migration explicitly requires it.</p>
+<h2 id="future-hardening"><a class="anchor" href="#future-hardening">Future hardening</a></h2>
+<p>Before autonomous locomotion, add:</p>
+<ul>
+<li>CI unit/integration tests before GHCR publication;</li>
+<li>staging deployment profile;</li>
+<li>signed release images / provenance verification;</li>
+<li>database migration tooling and backups;</li>
+<li>health-gated update scripts for motion services;</li>
+<li>operator notification after deployment;</li>
+<li>immutable release tags;</li>
+<li>documented disaster-recovery procedure.</li>
+</ul>
+</div></div></div><nav class="doc-pager" aria-label="Adjacent documents"><a href="/GPTars_v2/docs/interference-report"><small>← PREVIOUS</small><b>Preliminary interference and reservation report</b></a><a class="doc-pager-next" href="/GPTars_v2/docs/tars-ai-v3-reuse"><small>NEXT →</small><b>TARS-AI V3 reuse strategy</b></a></nav></section><footer><span>GP‑TARS V2 · GP-TARS V2 DEPLOYMENT AND UPDATE ARCHITECTURE</span><span>RENDERED FROM docs/software_deployment.md</span><a href="/GPTars_v2/docs">ALL DOCUMENTS →</a></footer></article></main><script src="/GPTars_v2/theme.js" defer></script></body></html>
