@@ -16,21 +16,16 @@
       const link = document.createElement('a');
       link.href = href;
       link.textContent = label;
-      if (window.location.pathname.replace(/\/$/, '') === href) {
-        link.setAttribute('aria-current', 'page');
-      }
+      if (window.location.pathname.replace(/\/$/, '') === href) link.setAttribute('aria-current', 'page');
       nav.insertBefore(link, button || null);
     };
-
     ensureLink('/GPTars_v2/software', 'Software');
     ensureLink('/GPTars_v2/personality', 'Personality');
     ensureLink('/GPTars_v2/lessons', 'Lessons');
     ensureLink('/GPTars_v2/power', 'Power Management');
+    ensureLink('/GPTars_v2/self-learning', 'Self Learning');
   }
 
-  // Add the full architecture drawing to the Software page. Keeping this in the
-  // shared script means the diagram appears even when the generated HTML page
-  // has not yet been rebuilt from its source template.
   if (window.location.pathname.replace(/\/$/, '') === '/GPTars_v2/software') {
     const article = document.querySelector('.drawing-sheet');
     const firstSection = article?.querySelector('section');
@@ -42,7 +37,7 @@
         <p class="software-lede">Phase 1 keeps the robot local-first: OAK-D vision and the microphone array feed modular services on the HX370, while ROS 2 and the independent safety MCU remain below the AI layer. The RTX 2000 Ada is a later expansion rather than a Phase 1 dependency.</p>
         <figure class="drawing drawing-main">
           <a href="/GPTars_v2/images/gptars-software-architecture.svg" target="_blank" rel="noreferrer" aria-label="Open the GP-TARS software architecture diagram full size">
-            <img src="/GPTars_v2/images/gptars-software-architecture.svg" alt="GP-TARS V2 Phase 1 software architecture diagram showing OAK-D Pro W, ReSpeaker microphone array, Ubuntu Server Docker services, local LLM and memory, ROS 2 motion control, safety MCU, CAN actuators, GitHub deployment and future RTX expansion"/>
+            <img src="/GPTars_v2/images/gptars-software-architecture.svg" alt="GP-TARS V2 Phase 1 software architecture diagram"/>
           </a>
           <figcaption><b>Phase 1 architecture.</b> Click the drawing to open the full-size vector version. AI requests intent; deterministic robot control and the safety MCU retain authority over movement.</figcaption>
         </figure>`;
@@ -55,6 +50,5 @@
     window.localStorage.setItem("gptars-theme", dark ? "dark" : "light");
     apply();
   });
-
   apply();
 })();
