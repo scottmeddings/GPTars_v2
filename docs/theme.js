@@ -25,6 +25,7 @@
     ensureLink('/GPTars_v2/software', 'Software');
     ensureLink('/GPTars_v2/personality', 'Personality');
     ensureLink('/GPTars_v2/lessons', 'Lessons');
+    ensureLink('/GPTars_v2/power', 'Power Management');
   }
 
   // Add the full architecture drawing to the Software page. Keeping this in the
