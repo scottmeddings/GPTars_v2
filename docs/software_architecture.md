@@ -1,6 +1,6 @@
 # GP-TARS V2 software architecture
 
-Status: software baseline, revision Software V2.
+Status: software baseline, revision Software V3.
 
 ## Core decision
 
@@ -37,13 +37,19 @@ Operating system baseline:
 
 The RTX 2000 Ada is the primary CUDA accelerator for local LLM inference and other heavy AI workloads. The HX370 CPU, Radeon 890M and XDNA 2 NPU remain available for secondary, low-power or fallback workloads where supported.
 
+## Build-readiness rule
+
+This architecture document defines **what GP-TARS is and how the software components fit together**. It is intentionally paired with `docs/ubuntu_server_build.md`, which defines **how to reproduce the server from a blank Ubuntu installation**.
+
+A production-ready build must not depend on undocumented manual knowledge. The Ubuntu build document must eventually contain exact package versions or supported version ranges, repository keys, NVIDIA/CUDA validation, Docker configuration, filesystem layout, service accounts, Compose files, environment variables, persistent volumes, network ports, firewall rules, boot ordering, health checks, backup/restore, update procedure and acceptance tests.
+
 ## Layered system
 
 1. **Independent safety:** hardwired E-stop loop, motor contactor, power isolation and hard limits.
 2. **Real-time motion:** dedicated MCU connected by CAN/CAN-FD; encoder monitoring, actuator commands, brakes, joint limits, watchdog and safe stop.
 3. **Robot control:** ROS 2 Jazzy on Ubuntu 24.04 LTS; URDF/Xacro model, ros2_control hardware interface, trajectories, state estimation and diagnostics.
 4. **Behaviour supervisor:** validates high-level intent against mode, robot state, balance, limits, active faults and operator permission.
-5. **TARS experience layer:** personality, wake word, STT, TTS, memory/RAG, vision, display, dashboard and skills.
+5. **TARS experience layer:** personality, teaching mode, wake word, STT, TTS, memory/RAG, vision, display, dashboard and skills.
 
 The MINISFORUM AI X1 Pro runs the non-real-time layers. It must not perform motor commutation or be the only path to a safe shutdown.
 
@@ -55,6 +61,7 @@ GP-TARS software should be split into small services rather than one monolithic 
 |---|---|
 | `tars-core` | Main orchestrator, state machine and behaviour coordination |
 | `tars-llm` | Local LLM inference |
+| `tars-personality` | TARS persona, user-specific tone, teaching adaptation and response policy |
 | `tars-memory` | User profiles, semantic memory, episodic memory and RAG |
 | `tars-stt` | Wake word, voice activity detection and speech-to-text |
 | `tars-tts` | Local text-to-speech |
@@ -69,11 +76,147 @@ GP-TARS software should be split into small services rather than one monolithic 
 
 Only containers that require CUDA should receive access to the RTX 2000 Ada. GPU access is not granted to every container by default.
 
+## Personality architecture
+
+GP-TARS should feel recognisably inspired by **TARS from Interstellar** without relying on copied film dialogue. The personality is a behavioural profile rather than a collection of quotes.
+
+Core traits:
+
+- highly competent and mission-focused
+- calm under pressure
+- concise and direct
+- dry, deadpan humour
+- occasional sarcasm without becoming insulting
+- loyal and protective toward known users
+- willing to state uncertainty plainly
+- practical rather than sentimental
+- confident without pretending to know things it does not know
+- capable of switching instantly from humour to serious safety behaviour
+
+The film character's well-known configurable-personality concept should be retained as explicit settings. GP-TARS should expose at least:
+
+- **Humour** — 0 to 100
+- **Honesty/directness** — 0 to 100
+- **Verbosity** — low / medium / high
+- **Teaching mode** — off / opportunistic / active
+- **Age adaptation** — automatic from authorised profile, or manually selected
+- **Formality** — casual / neutral / formal
+
+These values influence phrasing and interaction style only. They never weaken mechanical safety, privacy, content controls or permissions.
+
+### Default TARS-style profile
+
+Initial baseline:
+
+```text
+Humour: 75%
+Honesty/directness: 90%
+Verbosity: concise
+Formality: neutral-casual
+Teaching mode: opportunistic
+```
+
+Humour should normally be short, dry and situational. It must not interfere with warnings, emergencies, instructions or teaching clarity.
+
+## Person-aware interaction
+
+When identity recognition is enabled and the person is authorised, `tars-personality` retrieves that person's interaction profile from `tars-memory`.
+
+The profile may include:
+
+- preferred name
+- age or age band
+- relationship/role
+- preferred communication style
+- learning level and known competencies
+- subjects being learned
+- interests
+- accessibility requirements
+- permissions
+- teaching preferences
+- humour tolerance
+
+Identity changes **interaction**, not physical safety rules.
+
+If identity confidence is low, GP-TARS must fall back to a neutral general-audience profile rather than guessing a person's age or permissions.
+
+## Teaching and learning mode
+
+Teaching is a first-class GP-TARS capability rather than a generic LLM side effect.
+
+The goal is for TARS to notice reasonable learning opportunities and teach at the right level without becoming intrusive.
+
+Examples:
+
+- a child struggles with multiplication, so TARS offers a short guided times-table exercise
+- a learner misspells a word repeatedly, so TARS explains the spelling pattern and checks understanding
+- a teenager asks a science question, so TARS answers at an appropriate conceptual level and can offer a quick challenge question
+- an adult asks about electronics, CAD or programming, so TARS can move directly into a more technical explanation
+
+### Age-aware teaching bands
+
+These are pedagogical defaults, not assumptions about intelligence.
+
+| Profile | Teaching behaviour |
+|---|---|
+| Young child | Short sentences, concrete examples, one concept at a time, encouragement, frequent comprehension checks |
+| Older child | Step-by-step explanation, simple analogies, guided practice, gradually reduced hints |
+| Teen | More technical vocabulary, reasoning and problem solving, challenge questions, explain why rather than only how |
+| Adult | Concise by default, full technical depth on request, fewer unnecessary comprehension checks |
+| Unknown user | Neutral general-audience style until identity/profile is resolved |
+
+### Teaching loop
+
+```text
+Observe question or difficulty
+        |
+        v
+Check user profile + age band + learning history
+        |
+        v
+Estimate current level
+        |
+        v
+Explain one useful concept
+        |
+        v
+Ask / observe a small check for understanding
+        |
+        +-- understood --> continue or return to normal interaction
+        |
+        +-- not understood --> re-explain using another method
+        |
+        v
+Store useful learning progress with appropriate privacy controls
+```
+
+Teaching should favour guided reasoning over simply giving answers when the user is clearly trying to learn. However, TARS should still answer direct factual questions normally unless a lesson is useful and appropriate.
+
+### Opportunistic teaching
+
+When `Teaching mode = opportunistic`, TARS may occasionally offer help when it detects repeated difficulty, but it should not constantly quiz people. Offers should be brief and easy to decline.
+
+When `Teaching mode = active`, an authorised parent, guardian, teacher or adult user may configure learning goals, subjects, practice frequency and progress tracking.
+
+## Child interaction safeguards
+
+Age-aware personality must be paired with stricter privacy and permission handling for children.
+
+- child profiles must not inherit adult permissions
+- private memories belonging to other users must not be disclosed
+- purchasing, account changes, external communications and other consequential actions require appropriate authorisation
+- location sharing and personal data exposure must be restricted
+- teaching history should store only what is useful and permitted
+- recognised-child behaviour must never modify robot motion safety thresholds
+- uncertain identity falls back to a safe neutral profile
+
+Parental/family override and configuration should be supported through the management interface.
+
 ## Community software reuse
 
 | Subsystem | Decision | Treatment |
 |---|---|---|
-| Character/persona system | Reuse/adapt | Preserve TARS character and response behaviour |
+| Character/persona system | Reuse/adapt | Preserve recognisable TARS character and configurable humour/directness |
 | Wake word, STT and barge-in | Reuse/adapt | Retain a modular local speech pipeline |
 | TTS | Reuse/adapt | Local, low-latency speech |
 | Memory/RAG and message routing | Reuse/adapt | Place behind stable service boundaries |
@@ -102,42 +245,12 @@ stop_motion()
 return_to_neutral()
 approach_person(person_id="known-user")
 display_expression("thinking")
+start_lesson(subject="multiplication", learner_id="known-user")
 ```
 
 The LLM must never receive an interface for raw PWM, motor current, direct torque, unchecked joint angles, disabled limits or safety bypass.
 
 The behaviour supervisor approves every motion request. ROS actions provide execution feedback and cancellation. The real-time MCU independently rejects stale, malformed or out-of-limit commands.
-
-Example flow:
-
-```text
-User: "TARS, come over here"
-        |
-        v
-Speech-to-text
-        |
-        v
-TARS agent / local LLM
-        |
-        +-- intent: approach_person
-        +-- target: recognised person
-        |
-        v
-Behaviour supervisor
-        |
-        +-- identity/permission check
-        +-- safety/state check
-        +-- vision target lookup
-        |
-        v
-ROS 2 navigation / motion action
-        |
-        v
-Real-time safety MCU
-        |
-        v
-CAN actuator commands
-```
 
 ## ROS communication model
 
@@ -161,6 +274,9 @@ battery.low
 robot.wake
 robot.sleep
 user.profile.changed
+lesson.started
+lesson.completed
+learning.progress.updated
 fault.reported
 ```
 
@@ -168,14 +284,9 @@ The exact choice between NATS and MQTT remains open.
 
 ## Management interfaces
 
-Use REST and WebSocket APIs for:
+Use REST and WebSocket APIs for browser management UI, configuration, health and diagnostics, telemetry dashboards, local development tools and safe operator commands.
 
-- browser management UI
-- configuration
-- health and diagnostics
-- telemetry dashboards
-- local development tools
-- safe operator commands
+The management UI should also provide authorised controls for personality values, user profiles, teaching goals, child permissions and learning-history review.
 
 ## Memory architecture
 
@@ -186,6 +297,7 @@ GP-TARS memory should be divided into distinct scopes:
 - **Personal memory** — known people, preferences and relationships
 - **Semantic memory** — manuals, project documents and general facts
 - **Episodic memory** — notable previous interactions and experiences
+- **Learning memory** — learner level, recent exercises, recurring difficulties and progress
 - **Robot memory** — faults, battery history, actuator temperatures, maintenance and calibration history
 
 Current database baseline:
@@ -197,16 +309,9 @@ Memory retrieval must be identity- and policy-aware so the robot does not disclo
 
 ## Vision and identity
 
-The vision service is responsible for:
+The vision service is responsible for camera capture, person detection, face/person recognition where enabled, object detection, tracking and spatial context.
 
-- camera capture
-- person detection
-- face/person recognition where enabled
-- object detection
-- tracking
-- spatial context
-
-Recognised users may receive different interaction styles or profiles, but **mechanical safety rules never change based on identity**.
+Recognised users may receive different interaction styles, teaching levels or profiles, but **mechanical safety rules never change based on identity**.
 
 The primary interaction camera should be physically co-located with the top display/face module.
 
@@ -222,7 +327,7 @@ wake word / VAD
 speech-to-text
       |
       v
-TARS agent
+TARS agent + personality profile
       |
       v
 text-to-speech
@@ -237,14 +342,7 @@ Speech recognition and synthesis should operate locally where practical.
 
 The top-mounted display is controlled by `tars-display`.
 
-Responsibilities:
-
-- TARS face / expression rendering
-- listening / thinking / speaking states
-- warnings and fault status
-- boot and self-test state
-- battery / connectivity indicators when appropriate
-- local setup/status UI where useful
+Responsibilities include TARS face/expression rendering, listening/thinking/speaking states, teaching visuals, warnings and fault status, boot/self-test state, battery/connectivity indicators and local setup/status UI.
 
 The display service should auto-start into kiosk/full-screen mode without requiring a full Ubuntu desktop environment.
 
@@ -252,25 +350,9 @@ The display service should auto-start into kiosk/full-screen mode without requir
 
 Initial mechanical/software development starts with **two actuators** and expands only after the first pair is validated.
 
-Motion services are responsible for:
+Motion services are responsible for requested pose, forward/inverse kinematics, gait generation, joint trajectory planning, synchronisation and balance logic.
 
-- requested pose
-- forward/inverse kinematics
-- gait generation
-- joint trajectory planning
-- synchronisation
-- balance logic
-
-The safety MCU remains authoritative for:
-
-- motor enable
-- hard joint limits
-- current/torque limits
-- temperature limits
-- watchdog timeout
-- E-stop handling
-- communications loss
-- safe shutdown
+The safety MCU remains authoritative for motor enable, hard joint limits, current/torque limits, temperature limits, watchdog timeout, E-stop handling, communications loss and safe shutdown.
 
 ## Safety MCU
 
@@ -297,7 +379,9 @@ software/
 │   └── motion_controller/
 ├── ai/
 │   ├── llm/
+│   ├── personality/
 │   ├── memory/
+│   ├── teaching/
 │   ├── speech/
 │   └── vision/
 ├── display/
@@ -316,15 +400,17 @@ software/
 5. Core health services initialise.
 6. Cameras, microphones and display initialise.
 7. Local LLM loads.
-8. ROS 2 and robot-state services start.
-9. Computer-to-MCU heartbeat is established.
-10. GP-TARS performs a self-test.
-11. Display shows ready state.
-12. Motor enable becomes available only if safety checks pass.
+8. Personality, memory and teaching services initialise.
+9. ROS 2 and robot-state services start.
+10. Computer-to-MCU heartbeat is established.
+11. GP-TARS performs a self-test.
+12. Display shows ready state.
+13. Motor enable becomes available only if safety checks pass.
 
 ## Failure behaviour
 
 - **LLM crash:** robot remains mechanically safe; AI service may restart independently.
+- **Personality/teaching crash:** interaction falls back to neutral general-audience mode.
 - **GPU failure:** robot can fall back to CPU/iGPU/NPU-supported functions where practical.
 - **Container failure:** supervisor restarts the failed service; MCU safety remains independent.
 - **Wi-Fi/Internet loss:** local robot operation continues.
@@ -333,16 +419,7 @@ software/
 
 ## Storage use
 
-The 4 TB primary NVMe stores:
-
-- Ubuntu Server
-- Docker images and volumes
-- local AI models
-- speech models
-- vision models
-- PostgreSQL/pgvector data
-- application code
-- telemetry and active logs
+The 4 TB primary NVMe stores Ubuntu Server, Docker images and volumes, local AI models, speech models, vision models, PostgreSQL/pgvector data, application code, learning profiles, telemetry and active logs.
 
 Additional M.2 slots remain available for model libraries, recordings, long-term telemetry or backup data.
 
@@ -352,30 +429,20 @@ Additional M.2 slots remain available for model libraries, recordings, long-term
 2. Local LLM container.
 3. Wake word, speech-to-text and text-to-speech.
 4. TARS personality/orchestration layer.
-5. Memory and user profiles.
-6. Top display/face service.
-7. Vision and person recognition.
-8. ROS 2 integration and URDF/Xacro simulation.
-9. Safety MCU and CAN protocol.
-10. First two actuator bench tests.
-11. Supported two-actuator body-motion tests.
-12. Additional joints and gait development.
-13. Autonomous navigation and higher-level behaviours.
+5. Memory, identity and user profiles.
+6. Age-aware teaching service.
+7. Top display/face service.
+8. Vision and person recognition.
+9. ROS 2 integration and URDF/Xacro simulation.
+10. Safety MCU and CAN protocol.
+11. First two actuator bench tests.
+12. Supported two-actuator body-motion tests.
+13. Additional joints and gait development.
+14. Autonomous navigation and higher-level behaviours.
 
 ## Initial acceptance milestone
 
-Before locomotion work, GP-TARS should be able to:
-
-- boot autonomously
-- show its face/status on the top display
-- listen for a wake word
-- transcribe speech locally
-- run the local LLM through CUDA on the RTX 2000 Ada
-- retrieve relevant memory
-- generate a spoken response
-- animate the display while speaking
-- operate without Internet access
-- expose health and diagnostics through the local web interface
+Before locomotion work, GP-TARS should be able to boot autonomously, show its face/status on the top display, listen for a wake word, transcribe speech locally, run the local LLM through CUDA on the RTX 2000 Ada, recognise an authorised user, load the correct personality/age profile, retrieve relevant memory, teach a short age-appropriate lesson, generate a spoken response, animate the display while speaking, operate without Internet access and expose health/diagnostics through the local web interface.
 
 ## Safety release gate
 
