@@ -38,6 +38,128 @@ The 4 TB NVMe is preferred over a smaller PCIe 5.0 drive because the X1 Pro's pr
 
 The system should also be benchmarked without the discrete GPU because the Ryzen AI 9 HX370 includes Radeon 890M graphics and an XDNA 2 NPU. The RTX 2000 Ada remains the performance baseline for local LLM inference, but CAD and wiring keep it modular and removable.
 
+## Selected vision and audio sensors
+
+The current GP-TARS V2 perception baseline is:
+
+- **Vision / depth camera: Luxonis OAK-D Pro W**
+- **Microphone: ReSpeaker USB 4 Mic Array**
+- **Location: upper display / face cassette**
+- **Host connection: USB to the MINISFORUM AI X1 Pro**
+- **Software ownership: `tars-vision` and `tars-stt` containers**
+
+These devices remain modular so they can be replaced without redesigning the main compute or robot-control architecture.
+
+### Luxonis OAK-D Pro W
+
+The OAK-D Pro W is the preferred primary perception camera because it combines RGB vision, stereo depth and onboard vision processing in a compact package suitable for the upper face module.
+
+Target uses include:
+
+- person detection and tracking
+- face/person recognition where explicitly configured
+- distance estimation and stereo depth
+- obstacle and free-space perception
+- gesture and pose detection
+- locating the person currently speaking
+- navigation support
+- environment mapping support
+- age-aware interaction context only where permitted and appropriately configured
+
+The camera should be mounted above or immediately adjacent to the display so the apparent gaze direction matches the person TARS is interacting with. A fixed-focus configuration is preferred for a walking robot because it avoids an autofocus mechanism becoming a vibration-sensitive component.
+
+Preliminary mechanical envelope for CAD should use the manufacturer's selected camera dimensions plus at least **10 mm cable/assembly clearance** around service faces. Final mounting holes and connector cut-outs must be taken from the purchased camera or an authoritative mechanical drawing before fabrication.
+
+### ReSpeaker USB 4 Mic Array
+
+The ReSpeaker USB 4 Mic Array is the preferred initial far-field microphone system.
+
+Required capabilities for GP-TARS include:
+
+- four-microphone capture
+- far-field voice pickup
+- beamforming
+- direction-of-arrival information where available
+- voice activity detection
+- noise suppression
+- acoustic echo cancellation where supported by the deployed audio pipeline
+- standard USB audio operation under Ubuntu Linux
+
+The microphone array feeds the `tars-stt` service for wake-word detection, speech capture and local speech-to-text. Direction-of-arrival data can also be published to the behaviour/vision system so TARS can orient attention toward a speaker.
+
+### Sensor mounting rules
+
+The upper cassette should be arranged approximately as:
+
+```text
+TOP OF TARS
+
++-----------------------------+
+|      OAK-D PRO W            |  camera + stereo depth
+|                             |
+|         DISPLAY             |  TARS face / status UI
+|                             |
+|   RESPEAKER 4-MIC ARRAY     |  far-field audio
++-----------------------------+
+```
+
+Mechanical requirements:
+
+- camera has a clear forward field of view
+- depth sensors must not be obscured by the display bezel or decorative body panels
+- microphones should face the interaction area and not be enclosed behind an acoustically solid panel
+- microphone mounting should be mechanically isolated from the aluminium chassis using compliant/rubber isolation where practical
+- keep the microphone array away from cooling fan exhaust, GPU airflow and high-vibration actuator mounts
+- prevent speaker output from coupling mechanically into the microphone mount
+- route camera and microphone USB independently where practical for serviceability
+- make the complete camera/display/microphone cassette removable
+
+The audio system must be validated while actuators, fans and speakers are operating. A microphone that works perfectly on a bench may perform poorly once TARS starts walking.
+
+### Vision processing architecture
+
+The OAK-D can perform useful preprocessing/on-device vision work while the RTX 2000 Ada remains available for heavier CUDA inference.
+
+```text
+OAK-D PRO W
+     |
+     +--> RGB / stereo depth / onboard processing
+     |
+     +--> tars-vision container
+              |
+              +--> person/object tracking
+              +--> pose / gesture models
+              +--> recognition models
+              +--> spatial observations
+              |
+              +--> NATS / ROS 2 events
+                       |
+                       +--> TARS CORE / behaviour supervisor
+```
+
+The architecture should avoid streaming every camera operation through the LLM. Vision produces structured observations; the agent reasons over those observations when needed.
+
+### Audio processing architecture
+
+```text
+RESPEAKER USB 4 MIC ARRAY
+          |
+          +--> audio / VAD / direction information
+          |
+          +--> tars-stt
+                   |
+                   +--> wake word
+                   +--> speech segmentation
+                   +--> local speech-to-text
+                   |
+                   +--> tars-core
+                            |
+                            +--> local LLM
+                            +--> tars-tts
+```
+
+Acoustic echo cancellation is important because TARS will often need to listen while operating its own speakers. The final pipeline should support barge-in so a person can interrupt TARS naturally while it is speaking.
+
 ## Storage allocation
 
 Initial storage plan:
@@ -75,8 +197,8 @@ Design intent:
 - display mounted in the upper body/head area, not the centre or lower chassis
 - target display/camera zone approximately 850–950 mm above ground on the 1,000 mm standing robot
 - display face may be tilted rearward approximately 5–10 degrees for adult viewing while remaining visible to children
-- camera located immediately above, beside, or closely integrated with the display so gaze direction and visual interaction appear natural
-- microphone array located in the same upper module where practical
+- **Luxonis OAK-D Pro W** located immediately above, beside, or closely integrated with the display
+- **ReSpeaker USB 4 Mic Array** integrated into the same upper cassette with vibration isolation
 - speakers may be integrated into the upper module or immediately below it
 - the complete screen/camera/microphone assembly should be removable as a service cassette
 - existing documented display selection remains authoritative; CAD should use its actual dimensions when finalising the upper cassette
@@ -88,8 +210,9 @@ The display module must not become a primary structural load path. Walking and i
 ```text
 TOP OF ROBOT
 
+OAK-D PRO W
 DISPLAY / FACE
-CAMERA + MICROPHONES
+RESPEAKER MICROPHONE ARRAY
 
 MINI PC
 RTX 2000 ADA + OCuLink DOCK
