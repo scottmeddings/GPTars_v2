@@ -24,6 +24,7 @@ services:
     <<: *common
     command: ["-js", "-m", "8222"]
     ports:
+      - "127.0.0.1:4222:4222"
       - "127.0.0.1:8222:8222"
     volumes:
       - ${GPTARS_DATA}/nats:/data
@@ -60,7 +61,6 @@ services:
       TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
       TARS_LLM_URL: http://tars-llm:8080
       TARS_API_URL: http://tars-api:8080
-      TARS_ROS_URL: http://tars-ros:8080
       TARS_PERSONALITY_PROFILE: TARS
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
@@ -71,6 +71,10 @@ services:
   tars-api:
     <<: *python-service
     image: ${GHCR_NAMESPACE}/tars-api:${GPTARS_TAG}
+    environment:
+      PORT: "8080"
+      TARS_EVENT_BUS: nats://nats:4222
+      TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
     ports:
       - "${TARS_API_PORT}:8080"
     healthcheck:
@@ -82,6 +86,10 @@ services:
   tars-display:
     <<: *python-service
     image: ${GHCR_NAMESPACE}/tars-display:${GPTARS_TAG}
+    environment:
+      PORT: "8080"
+      TARS_EVENT_BUS: nats://nats:4222
+      TARS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tars-memory:5432/${POSTGRES_DB}
     ports:
       - "127.0.0.1:${TARS_DISPLAY_PORT}:8080"
     healthcheck:
@@ -150,17 +158,12 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 20
     labels:
       - com.centurylinklabs.watchtower.enable=false
 
   tars-ros:
-    <<: *common
     image: ${GHCR_NAMESPACE}/tars-ros:${GPTARS_TAG}
+    restart: unless-stopped
     network_mode: host
     environment:
       ROS_DOMAIN_ID: 42
@@ -169,6 +172,8 @@ services:
       - ${GPTARS_CONFIG}/ros:/config:ro
       - /dev:/dev
     privileged: true
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   tars-motion:
     <<: *python-service
@@ -179,15 +184,18 @@ services:
       TARS_MOTION_ENABLED: "false"
 
   tars-can:
-    <<: *python-service
     image: ${GHCR_NAMESPACE}/tars-can:${GPTARS_TAG}
+    restart: unless-stopped
     network_mode: host
     privileged: true
     volumes:
       - /dev:/dev
     environment:
+      TARS_EVENT_BUS: nats://127.0.0.1:4222
       TARS_CAN_INTERFACE: can0
       TARS_MOTION_ENABLED: "false"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   tars-telemetry:
     <<: *python-service
