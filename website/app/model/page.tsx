@@ -53,7 +53,7 @@ export default function ModelPage() {
           <div className="revision-stamp" aria-label="Model status">
             <span>HEIGHT <b>{value("ROBOT_HEIGHT")} mm</b></span>
             <span>SHELL <b>{value("SHELL_WALL")} mm</b></span>
-            <span>SOURCE <b>R10</b></span>
+            <span>SOURCE <b>GPTars_v4 · R10</b></span>
             <span>STATUS <b>CONCEPT</b></span>
           </div>
         </header>

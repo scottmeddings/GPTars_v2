@@ -10,6 +10,10 @@ lives or dies with an editing session.
     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
     result = m.build(app)
 
+The live document is `GPTars_v4` (90 bodies, 480 x 1000 x 259.9 mm), exported to
+`cad/output/GP_TARS_V2_R10.f3d`. Verify the name, body count and extent before
+editing or exporting: the archive export takes the ACTIVE document.
+
 Geometry is form and packaging only. No fastener patterns, formed returns,
 beads, bearings or joint hardware, and nothing here is releasable.
 """

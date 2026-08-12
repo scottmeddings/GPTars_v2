@@ -39,7 +39,8 @@ Joint sweeps, cable bends, GPU dock and supply, connector protrusion, airflow, p
 
 ---
 
-Latest concept model checked: `cad/output/GP_TARS_V2_R10.f3d`, 90 bodies.
+Latest concept model checked: Fusion document `GPTars_v4`, 90 bodies, exported to
+`cad/output/GP_TARS_V2_R10.f3d`.
 
 ## R10 interference run
 

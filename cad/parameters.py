@@ -6,6 +6,13 @@ Values marked as placeholders must not be used to release production hardware.
 
 PROJECT_NAME = "GP-TARS V2 1000"
 
+# The live Fusion document. Check this name, the body count and the extent
+# before editing or exporting: an F3D archive exports the ACTIVE document, and
+# assuming the right one was active is how a previous model was lost.
+FUSION_DOCUMENT = "GPTars_v4"
+FUSION_DOCUMENT_BODIES = 90
+FUSION_DOCUMENT_REVISION = "R10"
+
 # External reference
 ROBOT_HEIGHT = 1000.0
 SOURCE_HEIGHT_MEASURED = 250.3969610849432
