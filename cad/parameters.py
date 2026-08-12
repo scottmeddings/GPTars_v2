@@ -116,6 +116,10 @@ CAN_HUB_ROLE = "Bench bring-up only; flight CAN runs from the deterministic MCU"
 
 # Power and clearance
 BATTERY_VOLTAGE = 12.8   # 12.8 V LiFePO4 main bus, per docs/design_assumptions.md
+# The body hangs from the hips and must not touch the floor. At 20 degrees of
+# splay the hip drops 12.7 mm, so the chassis underside has to sit clear of that.
+CHASSIS_GROUND_CLEARANCE = 25.0
+BODY_DROP_AT_WORKING_SPLAY = 12.7
 GROUND_CLEARANCE_MIN = 10.0
 GROUND_CLEARANCE_MAX = 25.0
 

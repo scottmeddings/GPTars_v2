@@ -120,6 +120,7 @@ def build(app, document=None):
     PANEL_IN = HD - T
     RAIL_X, RAIL_W = p.FRAME_RAIL_OUTBOARD_X - 20.0, 20.0   # 98.8
     BH_Y0, BH_Y1 = 570.0, 652.0
+    CGC = p.CHASSIS_GROUND_CLEARANCE          # body underside clears the floor
     ARM_IN = CHW + p.ARM_CLEARANCE
     ARM_W = HW - ARM_IN
 
@@ -190,21 +191,21 @@ def build(app, document=None):
     b.add("10_SENSORS", b.box(-60.0, 290.0, 55.0, 40.0, 25.0, 40.0), "IMU_KEEP_OUT")
 
     # ---- 11 bodywork: two front panels either side of the hip break -----
-    b.add("11_BODY_PANELS", b.box(-CHW, GAP / 2, PANEL_IN, CHW * 2, LOW_TOP - GAP, T), "PANEL_FRONT_LOWER")
+    b.add("11_BODY_PANELS", b.box(-CHW, CGC + GAP / 2, PANEL_IN, CHW * 2, LOW_TOP - CGC - GAP, T), "PANEL_FRONT_LOWER")
     front_upper = b.box(-CHW, UPP_BOT + GAP / 2, PANEL_IN, CHW * 2, (H - UPP_BOT) - GAP, T)
     front_upper = b.cut(front_upper, b.box(-p.DISPLAY_ACTIVE_WIDTH / 2, p.DISPLAY_ORIGIN_Y, PANEL_IN - 1.0,
                                            p.DISPLAY_ACTIVE_WIDTH, p.DISPLAY_ACTIVE_HEIGHT, T + 2))
     b.add("11_BODY_PANELS", front_upper, "PANEL_FRONT_DISPLAY")
-    for name, y0, y1 in (("PANEL_REAR_BATTERY_ACCESS", 0.0, 160.0),
+    for name, y0, y1 in (("PANEL_REAR_BATTERY_ACCESS", CGC, 160.0),
                          ("PANEL_REAR_COMPUTE_ACCESS", 160.0, 410.0),
                          ("PANEL_REAR_GPU_ACCESS", 410.0, LOW_TOP),
                          ("PANEL_REAR_UPPER", UPP_BOT, H)):
         b.add("11_BODY_PANELS", b.box(-CHW, y0 + GAP / 2, -HD, CHW * 2, (y1 - y0) - GAP, T), name)
     for side, x in (("PORT", -CHW), ("STARBOARD", CHW - T)):
-        b.add("11_BODY_PANELS", b.box(x, 0, -HD, T, LOW_TOP, HD * 2), f"PANEL_SIDE_{side}_LOWER")
+        b.add("11_BODY_PANELS", b.box(x, CGC, -HD, T, LOW_TOP - CGC, HD * 2), f"PANEL_SIDE_{side}_LOWER")
         b.add("11_BODY_PANELS", b.box(x, UPP_BOT, -HD, T, H - UPP_BOT, HD * 2), f"PANEL_SIDE_{side}_UPPER")
     b.add("11_BODY_PANELS", b.box(-CHW + T, H - T, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_TOP_LID")
-    b.add("11_BODY_PANELS", b.box(-CHW + T, 0, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_BOTTOM_LID")
+    b.add("11_BODY_PANELS", b.box(-CHW + T, CGC, -HD + T, CHW * 2 - 2 * T, T, HD * 2 - 2 * T), "PANEL_BOTTOM_LID")
 
     # ---- 13 wiring ------------------------------------------------------
     b.add("13_WIRING", b.box(-95.0, 210.0, -110.0, 20.0, 740.0, 20.0), "HARNESS_PORT_POWER_CAN")
