@@ -103,10 +103,52 @@ That resolved, the rest follows arithmetically. The camera occupies
 | Secondary actuator | Ø70 × 70 placeholder | Linkage zones | Not yet placed |
 | Main battery disconnect / fuse / contactor | TBD | Low service-access side | Reserved conceptually only |
 
+## Continuity audit against every earlier model
+
+Every archive in the repository's history was reopened and its bodies compared
+by name against the current model. This is the check that matters most here,
+because a previous model was lost once already.
+
+| Archive | Bodies | Extent (mm) | Missing from the current model |
+|---|---:|---|---|
+| CONCEPT_V0 | 29 | 793.5 × 920 × 224.9 | Old frame naming; upper and secondary actuator reservations |
+| ALUMINIUM_CONCEPT_V1 | 29 | 793.5 × 920 × 224.9 | As above |
+| ALUMINIUM_COMPUTE_V2 | 30 | 793.5 × 920 × 224.9 | As above |
+| NARROW480_CAGE_V1 | 18 | 958.7 × 1000 × 259.9 | Old frame naming only |
+| R03 | 67 | 480 × 1000 × 259.9 | 24:1 reduction bodies |
+| R04 | 67 | 480 × 1000 × 259.9 | 24:1 reduction bodies |
+| R05 | 80 | 480 × 1000 × 259.9 | 24:1 reduction bodies |
+| **R06** | 80 | 480 × 1000 × 259.9 | **nothing** |
+| **R07** | 82 | 480 × 1000 × 259.9 | **nothing** |
+| **R08** | 82 | 480 × 1000 × 259.9 | **nothing** |
+| **R09** | 82 | 480 × 1000 × 259.9 | **nothing** |
+
+The current model is a strict superset of R06 through R09: every body name in
+those archives exists in it, plus the eight new sensor bodies.
+
+Everything the earlier archives appear to be missing is a rename or a recorded
+decision, not a loss:
+
+- **24:1 reductions** became `REDUCTION_HIP_*_32TO1`. The ratio was raised
+  deliberately to clear the hip torque requirement.
+- **`FRAME_VERTICAL_*`, `FRAME_CROSS_*`, `FRAME_DEPTH_*`** and the
+  `Frame_Vert_*` set became `RAIL_*`, `CROSS_*` and `DEPTH_*`. The current frame
+  carries 28 members against the old 22, and models them as hollow section
+  rather than solid bar.
+- **`MINI_PC_KEEP_OUT`** became `MINISFORUM_AI_X1_PRO_SERVICE_KEEP_OUT` once the
+  machine was selected.
+- **`ACTUATOR_MAIN_LOWER_*_KEEP_OUT`** became `ACTUATOR_HIP_*_AK45_10`.
+- **`ACTUATOR_MAIN_UPPER_*` and `ACTUATOR_SECONDARY_*`** have no equivalent, by
+  design. See risk 2 above.
+
+The three 793.5 × 920 × 224.9 concepts predate both the 480 mm narrowing and the
+1,000 mm envelope being applied to the bodies themselves, so their geometry is
+superseded wholesale rather than carried forward.
+
 ## Early risks
 
 1. **Actuator-depth risk:** two 100 mm-long actuator modules plus dual-bearing support, brackets, wiring bends, and shell clearance consume much of the approximately 259.9 mm depth.
-2. **Upper-joint/GPU conflict:** the upper reference axes occupy approximately Y=786–890 mm; the vertical GPU must terminate below or route around this mechanism.
+2. **Upper reference axes are not articulated in this build.** The source geometry carries axes at Y=786.1, 838.0 and 889.9 mm and they remain in `cad/parameters.py` as reference. This build does not articulate them: `UPPER_CHASSIS_ASSUMED_RIGID = True`, the gait is a compass walker with rigid limbs and no knees, and the display module now occupies Y=616–944, straight through that band. The earlier concept models reserved actuator volume at those axes; this one deliberately does not. The GPU conflict this risk originally described no longer exists.
 3. **Lower-joint/battery conflict:** the lower main axis is near Y=611 mm, leaving useful low volume, but rotating links may sweep into a tall battery compartment.
 4. **Frame/shell clearance:** the concept extrusion frame was created from a simple chassis box, not the actual scaled shell surfaces. Clearance is unverified.
 5. **Wiring bend radius:** CAN/power cables crossing rotating X-axis joints require loops, guides, or rotary routing. No sweep reservation exists yet.
