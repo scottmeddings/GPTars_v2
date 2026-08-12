@@ -196,7 +196,7 @@ export default function Home() {
             </p>
             <div className="hero-actions">
               <a className="button primary" href="/downloads/GP_TARS_V2_1000_ALUMINIUM_COMPUTE_V2.f3d">Download current Fusion model</a>
-              <a className="button" href="https://github.com/scottmeddings/GPTars_v2">Private project repository</a>
+              <a className="button" href="https://github.com/scottmeddings/GPTars_v2">Project repository ↗</a>
             </div>
           </div>
           <figure className="hero-figure">
