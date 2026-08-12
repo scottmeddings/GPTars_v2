@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GP-TARS V2 | Self Learning</title><link rel="stylesheet" href="../theme.css"></head><body><main class="drawing-sheet"><header><p class="eyebrow">GP-TARS V2 / Intelligence Architecture</p><h1>Self Learning & Continuous Improvement</h1><p>TARS learns from conversations, teaching sessions, corrections and physical experience while keeping important software and safety changes controlled, testable and reversible.</p><nav class="section-nav"><a href="../">Overview</a><a href="../software/">Software</a><a href="../personality/">Personality</a><a href="../lessons/">Lessons</a><a href="../power/">Power Management</a><a href="./" aria-current="page">Self Learning</a><button aria-label="Toggle colour theme">Light sheet</button></nav></header><section><div class="section-heading"><span>01</span><div><p>Design principle</p><h2>Learn continuously; change deliberately</h2></div></div><p>TARS should become more useful through shared experience without blindly rewriting its own production software. Most improvement occurs through inspectable memory, user models, learner models, behavioural policies and robot-experience data. Code changes move through a separate test-and-approval pipeline.</p></section><section><div class="section-heading"><span>02</span><div><p>Learning loop</p><h2>Conversation to improvement</h2></div></div><pre>CONVERSATION / EXPERIENCE
+          |
+          v
+      TARS CORE
+          |
+   +------+------+------+
+   |             |      |
+   v             v      v
+ MEMORY      USER MODEL  ROBOT EXPERIENCE
+   |             |      |
+   +------+------+------+
+          |
+          v
+   REFLECTION ENGINE
+          |
+   +------+------+------+
+   |             |      |
+ REMEMBER       ADAPT   PROPOSE CHANGE
+                         |
+                         v
+                    TEST / EVALUATE
+                         |
+                         v
+                    ACCEPT / REJECT</pre></section><section><div class="section-heading"><span>03</span><div><p>Layer 1</p><h2>Personal memory</h2></div></div><p>TARS can remember useful facts, relationships, preferences, projects and prior interactions for each person. Every durable memory should carry owner, confidence, source, timestamp, privacy classification, importance and expiry/retention metadata. Casual conversation must not automatically become permanent truth.</p><p>Corrections are first-class events. When a person says TARS is wrong, the old memory is retained as superseded/auditable rather than silently overwritten.</p></section><section><div class="section-heading"><span>04</span><div><p>Layer 2</p><h2>Adaptive teaching</h2></div></div><p>TARS maintains learner-specific skill models. It records concepts attempted, confidence, mistakes, successful teaching approaches and retention over time. A child or adult can therefore resume approximately where they left off rather than beginning every session from zero.</p><pre>learner.skill
+  concept: multiplication.eight_times_table
+  confidence: 0.32
+  strengths: [multiples_of_5, multiples_of_10]
+  preferred_methods: [visual_groups, repeated_addition]
+  next_review: spaced_repetition</pre><p>Periodic low-pressure retrieval checks can update confidence and trigger a short lesson when useful. Teaching behaviour remains age-appropriate and subject to the identity/personality rules documented elsewhere.</p></section><section><div class="section-heading"><span>05</span><div><p>Layer 3</p><h2>Behaviour learning</h2></div></div><p>TARS can measure which interaction patterns work for each person: answer length, technical depth, guided questions, teaching format, interruption frequency and successful explanations. These observations update an inspectable behaviour policy rather than modifying the foundation model itself.</p></section><section><div class="section-heading"><span>06</span><div><p>Layer 4</p><h2>Robot experience</h2></div></div><p>TARS learns about its physical system from telemetry and outcomes: floor type versus slip, gait versus energy consumption, actuator temperature, calibration drift, microphone performance by environment, vision performance, navigation failures and successful routes. Experience can tune bounded operating parameters but cannot override safety limits.</p></section><section><div class="section-heading"><span>07</span><div><p>Layer 5</p><h2>Software improvement pipeline</h2></div></div><pre>OBSERVE PROBLEM
+      |
+      v
+CREATE HYPOTHESIS
+      |
+      v
+PROPOSE CHANGE
+      |
+      v
+SANDBOX + AUTOMATED TESTS
+      |
+      v
+MEASURE AGAINST BASELINE
+      |
+      v
+GITHUB PULL REQUEST
+      |
+      v
+HUMAN APPROVAL
+      |
+      v
+GITHUB ACTIONS -> GHCR -> DEPLOY
+      |
+      v
+MONITOR + ROLLBACK IF REQUIRED</pre><p>Significant code, model, motion, safety, permission and infrastructure changes require human approval. TARS may generate a patch or pull request and supporting evidence, but production deployment remains governed.</p></section><section><div class="section-heading"><span>08</span><div><p>Reflection</p><h2>Idle / nightly learning cycle</h2></div></div><p>When idle, <code>tars-reflection</code> reviews recent interactions and telemetry to identify durable memories, uncertain facts, learner progress, repeated failures and improvement opportunities. Reflection should summarise evidence rather than hallucinate lessons from sparse data.</p><pre>TARS DAILY REFLECTION
+Conversations reviewed: 37
+Useful memories proposed: 3
+Learner skills updated: 1
+Memories requiring confirmation: 2
+Robot anomalies: 1
+Experiments proposed: 1
+Software changes deployed automatically: 0</pre></section><section><div class="section-heading"><span>09</span><div><p>Forgetting</p><h2>Memory decay and consolidation</h2></div></div><p>Long-term memory is curated using importance, confidence, recency, frequency of use and ownership. Low-value episodic details decay or are summarised. High-value relationships, explicit preferences and repeatedly confirmed knowledge persist. Users must be able to inspect, correct and delete their personal memories.</p></section><section><div class="section-heading"><span>10</span><div><p>People teaching TARS</p><h2>Shared experience</h2></div></div><p>A person can explicitly enter a teaching session. TARS can combine speech, OAK-D vision and contextual events to create a draft procedure or knowledge entry from a demonstrated task. The result is reviewed before becoming a trusted skill. This allows TARS to recall how its own household or workshop performs a task rather than relying only on generic model knowledge.</p></section><section><div class="section-heading"><span>11</span><div><p>Services</p><h2>Software components</h2></div></div><p><b>tars-learning</b> owns learner/user adaptation and experience updates. <b>tars-reflection</b> performs consolidation, anomaly review and improvement proposals. <b>tars-memory</b> stores episodic, semantic and user-owned memories with pgvector/PostgreSQL. <b>tars-core</b> consumes the resulting context and policies. GitHub/GHCR remains the governed route for production software changes.</p></section><section><div class="section-heading"><span>12</span><div><p>Non-negotiable boundaries</p><h2>Safety and governance</h2></div></div><p>The LLM and learning services never gain direct authority to bypass the safety MCU, E-stop, actuator limits or deterministic motion controller. Learned motion parameters remain bounded. Production self-modification is prohibited outside the test, review and deployment pipeline. Sensitive personal information is isolated by user and access policy rather than becoming shared global memory.</p></section></main><script src="../theme.js"></script></body></html>
