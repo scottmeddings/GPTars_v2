@@ -32,10 +32,6 @@ FRAME_MATERIAL = "6061-T6 aluminium"
 FRAME_JOINING = "TIG welded"
 FRAME_SECTION_RAIL = "20 x 40 x 2.5 wall"
 FRAME_SECTION_MEMBER = "20 x 20 x 2.0 wall"
-# Welding anneals 6061-T6 locally. Design to the welded allowable, not the
-# parent T6 figure: yield falls from about 276 to 145 MPa in the heat-affected
-# zone, roughly 47 per cent. The HAZ reaches about 25 mm each side of a weld,
-# which on 20 mm members means most of a joint region is affected.
 FRAME_PARENT_YIELD_MPA = 276.0
 FRAME_WELDED_YIELD_MPA = 145.0
 FRAME_HAZ_EXTENT = 25.0
@@ -54,34 +50,29 @@ ELECTRONICS_TRAY_THICKNESS = 2.0
 MAIN_SHAFT_DIAMETER = 20.0
 SECONDARY_SHAFT_DIAMETER = 12.0
 
-# Selected drive: CubeMars AK45-10 V3.0, two off, at the hips.
+# Selected drive
 ACTUATOR_MODEL = "CubeMars AK45-10 V3.0"
 ACTUATOR_COUNT_SELECTED = 2
 ACTUATOR_NOMINAL_V = 24.0
-
-# Actuators run at 24 V from a boost stage off the 12.8 V bus. Duty cycle is
-# low, so the conversion loss costs little energy, and it recovers the walking
-# speed the 12.8 V bus had halved.
 ACTUATOR_SUPPLY_VIA_BOOST = True
 BOOST_INPUT_V = 12.8
 BOOST_OUTPUT_V = 24.0
-BOOST_COUNT = 2                  # one per actuator, so a fault takes one leg
+BOOST_COUNT = 2
 BOOST_MODULE_RATING_W = 480.0
 BOOST_MODULE_OUTPUT_A = 20.0
-BOOST_MODULE_INPUT_A = 41.7      # at full rating, 90% efficiency
-BOOST_TOTAL_INPUT_A = 83.3       # both at full rating
+BOOST_MODULE_INPUT_A = 41.7
+BOOST_TOTAL_INPUT_A = 83.3
 BOOST_INGRESS = "IP68"
 BOOST_CONTINUOUS_W = 400.0
 BOOST_PEAK_W = 800.0
-# Dimensions estimated from the module class. Measure before the bay is frozen.
 BOOST_MODULE_LENGTH = 128.0
 BOOST_MODULE_WIDTH = 98.0
 BOOST_MODULE_HEIGHT = 40.0
 BOOST_MODULE_MASS_KG = 0.6
-BOOST_RAILS_INDEPENDENT = True   # do not parallel outputs without current sharing
+BOOST_RAILS_INDEPENDENT = True
 BOOST_BULK_CAPACITANCE_REQUIRED = True
 BRAKE_CHOPPER_REQUIRED = True
-BRAKE_CHOPPER_COUNT = 2          # one per independent 24 V rail
+BRAKE_CHOPPER_COUNT = 2
 BRAKE_CHOPPER_NOTE = "Gait is a controlled fall; a unidirectional boost gives regeneration no path back"
 ACTUATOR_RATED_TORQUE = 2.5
 ACTUATOR_PEAK_TORQUE = 7.0
@@ -89,41 +80,27 @@ ACTUATOR_INTERNAL_RATIO = 10.0
 ACTUATOR_DIAMETER = 53.0
 ACTUATOR_LENGTH = 43.0
 ACTUATOR_MASS_KG = 0.26
-
-# The actuator alone is far short of the hip requirement, so a second stage
-# sits between it and the joint. 32:1 gives 68 N*m after efficiency against
-# the 53.3 N*m needed to hold a 20 degree splay at 33 kg, a 28% margin.
-# A cycloidal drive changes ratio by lobe and pin count rather than size, so
-# this is the same envelope as the 24:1 it replaces.
 REDUCTION_STAGE2_RATIO = 32.0
 REDUCTION_TOTAL_RATIO = ACTUATOR_INTERNAL_RATIO * REDUCTION_STAGE2_RATIO
 REDUCTION_STAGE2_TYPE = "Cycloidal or two-stage planetary; partially backdrivable"
 REDUCTION_STAGE2_EFFICIENCY = 0.85
 REDUCTION_STAGE2_DIAMETER = 90.0
 REDUCTION_STAGE2_LENGTH = 50.0
-
 JOINT_CONTINUOUS_TORQUE = ACTUATOR_RATED_TORQUE * REDUCTION_STAGE2_RATIO
 JOINT_PEAK_TORQUE = ACTUATOR_PEAK_TORQUE * REDUCTION_STAGE2_RATIO
-
-# Retained as requirements, not selections.
 MAIN_ACTUATOR_CONTINUOUS_TORQUE_MIN = 60.0
 MAIN_ACTUATOR_PEAK_TORQUE_INITIAL_MIN = 100.0
-
-# CAN hub for the two actuators. Bench tool: see docs for why it must not
-# become the flight motion path.
 CAN_HUB_MODEL = "CubeMars Rubik Link V3.0"
 CAN_HUB_ROLE = "Bench bring-up only; flight CAN runs from the deterministic MCU"
 
 # Power and clearance
-BATTERY_VOLTAGE = 12.8   # 12.8 V LiFePO4 main bus, per docs/design_assumptions.md
-# The body hangs from the hips and must not touch the floor. At 20 degrees of
-# splay the hip drops 12.7 mm, so the chassis underside has to sit clear of that.
+BATTERY_VOLTAGE = 12.8
 CHASSIS_GROUND_CLEARANCE = 25.0
 BODY_DROP_AT_WORKING_SPLAY = 12.7
 GROUND_CLEARANCE_MIN = 10.0
 GROUND_CLEARANCE_MAX = 25.0
 
-# Installed compute: MINISFORUM AI X1 Pro-370, mounted vertically.
+# Installed compute
 MINI_PC_MODEL = "MINISFORUM AI X1 Pro-370"
 MINI_PC_WIDTH = 195.0
 MINI_PC_HEIGHT = 195.0
@@ -137,10 +114,10 @@ MINI_PC_POWER_INTERNAL_W = 134.9
 MINI_PC_USB4_PD_INPUT_W = 100.0
 MINI_PC_USB4_PD_INPUT_V = 20.0
 
-# Required external LLM accelerator. Dimensions remain placeholders until the
-# exact GPU, cooler and power supply are selected.
-GPU_REQUIRED = True
-GPU_ROLE = "Local LLM inference"
+# Future external accelerator
+GPU_REQUIRED = False
+GPU_PHASE = "Phase 2 optional accelerator"
+GPU_ROLE = "Heavier CUDA LLM / vision inference"
 GPU_VENDOR_TARGET = "NVIDIA"
 GPU_MODEL = "NVIDIA RTX 2000 Ada Generation"
 GPU_VRAM_GB = 16
@@ -158,68 +135,69 @@ GPU_PSU_ENVELOPE = None
 BATTERY_WIDTH = 200.0
 BATTERY_HEIGHT = 150.0
 BATTERY_DEPTH = 180.0
-
-# Actuator placeholders, one hip and one knee module per side.
 ACTUATOR_HIP_PLACEHOLDER_DIAMETER = 120.0
 ACTUATOR_HIP_PLACEHOLDER_LENGTH = 100.0
 ACTUATOR_KNEE_PLACEHOLDER_DIAMETER = 70.0
 ACTUATOR_KNEE_PLACEHOLDER_LENGTH = 70.0
-
-# Cooling reservation options
 FAN_SIZES = (80.0, 92.0, 120.0)
 
-# Reconstructed articulation axes.
-# Source axis heights are measured in the imported STEP, whose base sits at
-# SOURCE_Y_MIN. Height above ground is (Y_source - SOURCE_Y_MIN), then scaled.
-# These agree with the axis positions recorded in docs/interference_report.md.
+# Reconstructed articulation axes
 SOURCE_Y_MIN = -10.366961
 AXLE_LOWER_MAIN_HEIGHT_SOURCE = 152.951961
 AXLE_LOWER_SECONDARY_HEIGHT_SOURCE = 196.826961
 AXLE_UPPER_MAIN_HEIGHT_SOURCE = 209.826961
 AXLE_UPPER_SECONDARY_HEIGHT_SOURCE = 222.826961
-
 AXLE_LOWER_MAIN_Y = AXLE_LOWER_MAIN_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 AXLE_LOWER_SECONDARY_Y = AXLE_LOWER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 AXLE_UPPER_MAIN_Y = AXLE_UPPER_MAIN_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 AXLE_UPPER_SECONDARY_Y = AXLE_UPPER_SECONDARY_HEIGHT_SOURCE * REFERENCE_SCALE_MEASURED
 
-# Body width. The scaled source gives 958.718 mm, but that is a faithful copy of
-# the hobby model rather than the screen silhouette, which reads at roughly
-# 0.45 x height. The build width is a deliberate departure, set as four equal
-# slabs and floored by the 195 mm mini PC. Depth is unchanged.
 ROBOT_WIDTH_SOURCE_SCALED = 958.718
 ROBOT_WIDTH = 480.0
 SLAB_COUNT = 4
 SLAB_WIDTH = 120.0
 CENTRAL_CHASSIS_WIDTH = 240.0
-
-# Superseded, retained as the source reference only.
 CENTRAL_CHASSIS_WIDTH_SOURCE = 133.232
 CENTRAL_CHASSIS_WIDTH_SCALED = CENTRAL_CHASSIS_WIDTH_SOURCE * REFERENCE_SCALE_MEASURED
-
-# Upper Lid front face, the only rigid section above the top articulation axis.
 UPPER_LID_FRONT_WIDTH = CENTRAL_CHASSIS_WIDTH
 UPPER_LID_FRONT_HEIGHT = ROBOT_HEIGHT - AXLE_UPPER_SECONDARY_Y
-
-# Limb articulation. The reference gait shows two rotational degrees of freedom
-# per outer slab: a hip at the lower main axis and a knee roughly mid-limb.
-# The knee ratio is a design choice and is not taken from the source geometry.
 ARM_KNEE_RATIO = 0.5
 AXLE_KNEE_Y = AXLE_LOWER_MAIN_Y * ARM_KNEE_RATIO
 ARM_CLEARANCE = 4.0
 ARM_JOINT_GAP = 2.0
 ARM_SLAB_WIDTH = 116.0
 
-# Onboard display, on the main front face of the lower chassis rather than the
-# Upper Lid. The lid offers only 110 mm of height; the front face below the hip
-# axis offers roughly 600 mm, which admits a full portrait panel.
 DECAL_WORDMARK_COLOUR = "#d97b19 orange"
 DECAL_WORDMARK_ORIENTATION = "Rotated 90 degrees, reading up the panel"
 DECAL_WORDMARK_SIZE = "52 x 250"
 DECAL_WORDMARK_ORIGIN_Y = 350.0
 
+# Upper face cassette: camera above display, microphone below display.
+# Camera/microphone mechanical envelopes are reservations only until purchased
+# hardware is measured or authoritative mechanical drawings are locked.
+SENSOR_CASSETTE_PRESENT = True
+SENSOR_CASSETTE_ORDER_TOP_TO_BOTTOM = ("OAK-D Pro W USB", "Display", "ReSpeaker XVF3800")
+CAMERA_MODEL = "Luxonis OAK-D Pro W USB"
+CAMERA_LOCATION = "Upper front face, centred above display"
+CAMERA_INTERFACE = "USB 3"
+CAMERA_WIDTH_RESERVATION = 160.0
+CAMERA_HEIGHT_RESERVATION = 45.0
+CAMERA_DEPTH_RESERVATION = 45.0
+CAMERA_TOP_MARGIN = 10.0
+CAMERA_SERVICE_CLEARANCE = 10.0
+CAMERA_DIMENSIONS_STATUS = "RESERVATION - verify exact purchased SKU before cutting panel"
+MIC_MODEL = "Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array"
+MIC_LOCATION = "Upper front face, centred below display"
+MIC_INTERFACE = "USB"
+MIC_WIDTH_RESERVATION = 90.0
+MIC_HEIGHT_RESERVATION = 35.0
+MIC_DEPTH_RESERVATION = 20.0
+MIC_SERVICE_CLEARANCE = 10.0
+MIC_VIBRATION_ISOLATION_REQUIRED = True
+MIC_DIMENSIONS_STATUS = "RESERVATION - verify purchased hardware before cutting panel"
+
 DISPLAY_PRESENT = True
-DISPLAY_LOCATION = "Chassis / upper front face, above the hip axis"
+DISPLAY_LOCATION = "Upper front face, between camera and microphone"
 DISPLAY_CLASS = "14 inch portrait TFT-LED, 12 V"
 DISPLAY_ACTIVE_WIDTH = 174.0
 DISPLAY_ACTIVE_HEIGHT = 310.0
@@ -228,10 +206,6 @@ DISPLAY_MARGIN_PER_SIDE = 33.0
 DISPLAY_CENTRE_Y = 810.0
 UPPER_CHASSIS_ASSUMED_RIGID = True
 DISPLAY_DEPTH_RESERVATION = 35.0
-# Candidate unit: unbranded 15.4 inch 12 V portable TV, HDMI in, 18 W.
-# 360 mm and 28 mm are the listed figures; the 220 mm bezel height is inferred
-# and the seller quotes a 10-30 mm measurement tolerance, so all three must be
-# measured on the physical unit before the aperture is cut.
 DISPLAY_MODULE_WIDTH = 215.0
 DISPLAY_MODULE_HEIGHT = 328.0
 DISPLAY_MODULE_THICKNESS = 28.0
@@ -250,19 +224,19 @@ DISPLAY_MASS_ESTIMATE_KG = 0.8
 DISPLAY_LINK = "Direct HDMI from the mini PC; nothing crosses a moving joint"
 PANEL_HIP_BREAK_GAP = 6.0
 
-# Compute stack. Units here are GB and counts, not millimetres.
+# Compute stack
 HOST_OS = "Ubuntu 24.04 LTS"
 ROS_DISTRO = "Jazzy"
-CONTAINER_COUNT = 11
-SYSTEM_RAM_GB = 32   # upgradeable to 64 or 128
-SYSTEM_RAM_CONFIG = "2 x 16 GB DDR5-5600 SO-DIMM; upgradeable"
+CONTAINER_COUNT = 13
+SYSTEM_RAM_GB = 64
+SYSTEM_RAM_CONFIG = "2 x 32 GB DDR5-5600 SO-DIMM"
 GPU_VRAM_MIN_GB = 16
 GPU_VRAM_PREFERRED_GB = 24
 NVME_SLOTS_AVAILABLE = 3
-NVME_SYSTEM_GB = 1000
-NVME_DATA_GB = 2000
+NVME_SYSTEM_GB = 4000
+NVME_DATA_GB = 0
 
-# Power budget. See docs/power_budget.md for the mode breakdown.
+# Power budget
 POWER_MODE_SLEEP_W = 8.0
 POWER_MODE_ATTENTIVE_W = 39.0
 POWER_MODE_CONVERSATION_W = 160.0
@@ -278,14 +252,10 @@ BATTERY_ENERGY_WH = 1280.0
 BATTERY_CAPACITY_AH = 100.0
 ACTUATOR_BRAKES_REQUIRED = True
 
-# Frame rails sit against the side panels so the clear span between them can
-# take the GPU and mini PC side by side.
 FRAME_RAIL_OUTBOARD_X = 118.8
 FRAME_CLEAR_SPAN = 197.6
 
-# Gait: compass walker, two rigid limbs on a shared hip axis. No knees.
-# See docs/gait.md. Speed is set by joint angular velocity alone, not by
-# splay angle, because step length and swing time both scale with it.
+# Gait
 GAIT_TYPE = "Compass walker, sagittal plane"
 GAIT_DOF = 2
 LIMB_RIGID = True
@@ -295,11 +265,6 @@ GAIT_STEP_LENGTH = 418.0
 GAIT_SWING_TIME_S = 1.16
 GAIT_SPEED_MS = 0.36
 JOINT_ANGULAR_VELOCITY_RAD_S = 0.6
-# Rocker radius must exceed the centre-of-mass height or the robot is a rocking
-# chair: mass above the centre of curvature tips rather than self-rights.
-# Clearance is (LEG_LENGTH - R)(1 - cos theta), so a larger radius buys
-# stability at the cost of swing clearance. 400 sits just above the estimated
-# 381 mm centre of mass.
 FOOT_ROCKER_RADIUS = 400.0
 CENTRE_OF_MASS_HEIGHT_EST = 381.0
 FOOT_HEIGHT = 80.0
@@ -310,9 +275,7 @@ FOOT_PAD_MATERIAL = "Elastomer contact pad, replaceable"
 FOOT_SWING_CLEARANCE = 12.7
 FOOT_ROCKER_SAGITTA = 21.7
 
-# Charge and support dock. Two hip joints give forward walking only, so the
-# robot cannot turn, reverse or align itself: this is a cradle it is placed
-# into, not a station it returns to. See docs/power_budget.md.
+# Charge and support dock
 DOCK_PRESENT = True
 DOCK_AUTONOMOUS_DOCKING = False
 DOCK_CHARGE_CURRENT_A = 30.0
