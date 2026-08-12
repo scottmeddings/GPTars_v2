@@ -28,6 +28,7 @@
 
     ensureLink('/GPTars_v2/software', 'Software');
     ensureLink('/GPTars_v2/personality', 'Personality');
+    ensureLink('/GPTars_v2/lessons', 'Lessons');
   }
 
   button?.addEventListener("click", () => {
