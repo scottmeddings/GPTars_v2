@@ -24,6 +24,7 @@
     ensureLink('/GPTars_v2/lessons', 'Lessons');
     ensureLink('/GPTars_v2/power', 'Power Management');
     ensureLink('/GPTars_v2/self-learning', 'Self Learning');
+    ensureLink('/GPTars_v2/safety', 'Safety');
   }
 
   if (window.location.pathname.replace(/\/$/, '') === '/GPTars_v2/software') {
